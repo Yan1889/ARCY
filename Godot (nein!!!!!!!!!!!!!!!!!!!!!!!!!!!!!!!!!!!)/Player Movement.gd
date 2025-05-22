@@ -1,6 +1,6 @@
 extends CharacterBody2D
 
-var speed = 200.0
+var speed = 500.0
 
 func _physics_process(delta):
 	var _velocity = Vector2.ZERO
@@ -14,7 +14,7 @@ func _physics_process(delta):
 	if Input.is_action_pressed("up"):
 		_velocity.y -= 1
 
-	_velocity = velocity.normalized()
+	_velocity = _velocity.normalized()
 	
 	velocity = _velocity * speed
 
