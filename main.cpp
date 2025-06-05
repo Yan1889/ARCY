@@ -28,7 +28,7 @@ void proceedMap(Image *image, const std::vector<struct Gradient> &array) {
 }
 
 int main() {
-    srand(time(NULL));
+    srand(time(nullptr));
 
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "raylib [core] example - basic window");
 
@@ -36,7 +36,7 @@ int main() {
 
     Image perlin = GenImagePerlinNoise(SCREEN_WIDTH/2, SCREEN_HEIGHT/2, static_cast<int>(rand() * 10000.0f / RAND_MAX)*(SCREEN_WIDTH/2), static_cast<int>(rand() * 10000.0f / RAND_MAX)*(SCREEN_HEIGHT/2), 1);
 
-    std::vector<struct Gradient> map = {
+    const std::vector<Gradient> map = {
 {32 * 1, Color{90, 90, 255, 255}},
 {32 * 2, Color{125, 125, 255, 255}},
 {32*2+10, Color{247, 252, 204, 255}},
@@ -52,10 +52,10 @@ int main() {
 
     ImageResizeNN(&perlin, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-    Texture2D perlinTexture = LoadTextureFromImage(perlin);
+    const Texture2D perlinTexture = LoadTextureFromImage(perlin);
 
-    Image ant = LoadImage("images/ant.png");
-    Texture2D antTexture = LoadTextureFromImage(ant);
+    const Image ant = LoadImage("images/ant.png");
+    const Texture2D antTexture = LoadTextureFromImage(ant);
 
     Vector2 mousePos = GetMousePosition();
     Vector2 antPos = mousePos;
