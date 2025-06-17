@@ -127,23 +127,7 @@ int main() {
 
     ApplyFalloffToImage(&perlin, falloff); // finally use falloff
 
-    /*
-    const std::vector<Gradient> map = {
-{32 * 1+10, Color{90, 90, 255, 255}}, // Deep Water (Ocean, Lake etc.)
-{32 * 2+10, Color{125, 125, 255, 255}}, // Low Water
-{32 * 2+20, Color{247, 252, 204, 255}}, // Beach
-{32 * 3+20, Color{129, 245, 109, 255}}, // Grass
-{32 * 4+10, Color{117, 219, 99, 255}},
-{32 * 5+20, Color{97, 184, 81, 255}},
-{32 * 6, Color{191, 191, 191, 255}},
-{32 * 7-20, Color{153, 153, 153, 255}},
-{32 * 8, Color{255, 255, 255, 255}},
-    };
-    */
-
     proceedMap(&perlin, map);
-
-    // ImageResizeNN(&perlin, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     const Texture2D perlinTexture = LoadTextureFromImage(perlin);
 
