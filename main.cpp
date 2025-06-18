@@ -7,6 +7,9 @@
 #define SCREEN_WIDTH 980
 #define SCREEN_HEIGHT 650
 
+#define MAP_HEIGHT 5000
+#define MAP_WIDTH 5000
+
 struct Gradient {
     int level;
     Color color;
@@ -17,15 +20,15 @@ Color grayScale(const unsigned char gray) {
 }
 
 const std::vector<Gradient> map = {
-    {32 * 1+10, Color{90, 90, 255, 255}}, // Deep Water (Ocean, Lake etc.)
+    {32 * 1+10, Color{90, 90, 255, 255}}, // Deep Water
     {32 * 2+10, Color{125, 125, 255, 255}}, // Low Water
     {32 * 2+20, Color{247, 252, 204, 255}}, // Beach
-    {32 * 3+20, Color{129, 245, 109, 255}}, // Grass
-    {32 * 4+10, Color{117, 219, 99, 255}},
-    {32 * 5+20, Color{97, 184, 81, 255}},
-    {32 * 6, Color{191, 191, 191, 255}},
-    {32 * 7-20, Color{153, 153, 153, 255}},
-    {32 * 8, Color{255, 255, 255, 255}},
+    {32 * 3+20, Color{129, 245, 109, 255}}, // Open Field
+    {32 * 4+10, Color{117, 219, 99, 255}}, // Hills
+    {32 * 5+20, Color{97, 184, 81, 255}}, // Forest
+    {32 * 6, Color{191, 191, 191, 255}}, // Stone
+    {32 * 7-20, Color{153, 153, 153, 255}}, // Mountain
+    {32 * 8, Color{255, 255, 255, 255}}, // Snow
         };
 
 void proceedMap(Image *image, const std::vector<struct Gradient> &array)
@@ -114,16 +117,25 @@ void ApplyFalloffToImage(Image *image, const std::vector<std::vector<float>> &fa
     }
 }
 
-int main() {
+int main()
+{
     srand(time(nullptr));
 
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "ARCY - An epic game");
 
-    SetTargetFPS(60);
+    Vector2 playerPos = { MAP_WIDTH / 2, MAP_HEIGHT / 2 };
 
-    Image perlin = GenImagePerlinNoise(SCREEN_WIDTH, SCREEN_HEIGHT, static_cast<int>(rand() * 10000.0f / RAND_MAX)*(SCREEN_WIDTH/2), static_cast<int>(rand() * 10000.0f / RAND_MAX)*(SCREEN_HEIGHT/2), 6);
+    // Camera
+    Camera2D camera = {0};
+    camera.target = playerPos;
+    camera.offset = (Vector2){ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };
+    camera.rotation = 0.0f;
+    camera.zoom = 1.0f;
+    //
 
-    std::vector<std::vector<float>> falloff = GenerateFalloffMap(SCREEN_WIDTH, SCREEN_HEIGHT);
+    Image perlin = GenImagePerlinNoise(MAP_WIDTH, MAP_HEIGHT, static_cast<int>(rand() * 10000.0f / RAND_MAX)*(SCREEN_WIDTH/2), static_cast<int>(rand() * 10000.0f / RAND_MAX)*(SCREEN_HEIGHT/2), 6);
+
+    std::vector<std::vector<float>> falloff = GenerateFalloffMap(MAP_WIDTH, MAP_HEIGHT);
 
     ApplyFalloffToImage(&perlin, falloff); // finally use falloff
 
@@ -136,25 +148,63 @@ int main() {
 
     Vector2 mousePos = GetMousePosition();
     Vector2 antPos = mousePos;
-    float lerpAmount = 0.22f;
+    const float lerpAmount = 0.88f;
 
-    while (!WindowShouldClose()) {
+    const int moveSpeed = 100;
+    const int zoomSpeed = 5;
+
+    const float zoomMin = 0.1f;
+    const float zoomMax = 10.0f;
+
+    const Vector2 centerPos = playerPos;
+
+    while (!WindowShouldClose())
+    {
+        // Camera Movement
+        if (IsKeyDown(KEY_W)) playerPos.y -= moveSpeed * GetFrameTime() * 1 / camera.zoom;
+        if (IsKeyDown(KEY_S)) playerPos.y += moveSpeed * GetFrameTime() * 1 /camera.zoom;
+        if (IsKeyDown(KEY_A)) playerPos.x -= moveSpeed * GetFrameTime() * 1 /camera.zoom;
+        if (IsKeyDown(KEY_D)) playerPos.x += moveSpeed * GetFrameTime() * 1 / camera.zoom;
+
+        camera.target = playerPos;
+
+        if (IsKeyDown(KEY_UP)) camera.zoom += zoomSpeed * GetFrameTime();
+        if (IsKeyDown(KEY_DOWN)) camera.zoom -= zoomSpeed * GetFrameTime();
+
+        if (camera.zoom < zoomMin) camera.zoom = zoomMin;
+        if (camera.zoom > zoomMax) camera.zoom = zoomMax;
+        //
+
         BeginDrawing();
 
-        ClearBackground(RAYWHITE);
+        ClearBackground(Color{90, 90, 255, 255});
+
+        BeginMode2D(camera);
 
         DrawTextureV(perlinTexture, Vector2{0, 0}, WHITE);
 
-        mousePos = GetMousePosition();
-        antPos = Vector2Lerp(antPos, mousePos, lerpAmount);
+        mousePos = GetScreenToWorld2D(GetMousePosition(), camera);
+        antPos = Vector2Lerp(antPos, mousePos, lerpAmount  * GetFrameTime());
 
         DrawTextureV(antTexture, antPos, WHITE);
 
-        DrawFPS(GetScreenWidth() - 100, GetScreenHeight() - 25);
+        DrawCircleV(centerPos, 10, RED);
+
+        EndMode2D();
+
+        const int fps = GetFPS();
+        const char* fpsText = TextFormat("FPS: %d", fps);
+
+        int textWidth = MeasureText(fpsText, 20);
+        int textX = GetScreenWidth() - textWidth - 25;
+        int textY = GetScreenHeight() - 25;
+
+        DrawText(fpsText, textX, textY, 20, DARKGREEN);
 
         EndDrawing();
     }
 
     CloseWindow();
+
     return 0;
 }
