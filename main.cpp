@@ -7,8 +7,10 @@
 #define SCREEN_WIDTH 980
 #define SCREEN_HEIGHT 650
 
-#define MAP_HEIGHT 5000
-#define MAP_WIDTH 5000
+#define MAP_HEIGHT 2500
+#define MAP_WIDTH 2500
+
+#define MAX_CIRCLES 50
 
 struct Gradient {
     int level;
@@ -158,6 +160,9 @@ int main()
 
     const Vector2 centerPos = playerPos;
 
+    Vector2 circles[MAX_CIRCLES];
+    int circleCount = 0;
+
     while (!WindowShouldClose())
     {
         // Camera Movement
@@ -175,6 +180,14 @@ int main()
         if (camera.zoom > zoomMax) camera.zoom = zoomMax;
         //
 
+        mousePos = GetScreenToWorld2D(GetMousePosition(), camera);
+
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && circleCount < MAX_CIRCLES) // Create "cities" when left clicking
+        {
+            circles[circleCount] = mousePos;
+            circleCount++;
+        }
+
         BeginDrawing();
 
         ClearBackground(Color{90, 90, 255, 255});
@@ -183,12 +196,16 @@ int main()
 
         DrawTextureV(perlinTexture, Vector2{0, 0}, WHITE);
 
-        mousePos = GetScreenToWorld2D(GetMousePosition(), camera);
         antPos = Vector2Lerp(antPos, mousePos, lerpAmount  * GetFrameTime());
 
         DrawTextureV(antTexture, antPos, WHITE);
 
         DrawCircleV(centerPos, 10, RED);
+
+        for (int i = 0; i < circleCount; i++) // Display "cities"
+        {
+            DrawCircleV(circles[i], 20, BLUE);
+        }
 
         EndMode2D();
 
@@ -200,6 +217,18 @@ int main()
         int textY = GetScreenHeight() - 25;
 
         DrawText(fpsText, textX, textY, 20, DARKGREEN);
+
+        const char* controlsText = TextFormat("Move with WASD");
+
+        DrawText(controlsText, GetScreenWidth() / 20, GetScreenHeight() / 20, 20, DARKGREEN);
+
+        const char* controlsText1 = TextFormat("Left or Right Arrow to zoom");
+
+        DrawText(controlsText1, GetScreenWidth() / 20, GetScreenHeight() / 20 + 40, 20, DARKGREEN);
+
+        const char* controlsText2 = TextFormat("Leftclick to build a 'city'");
+
+        DrawText(controlsText2, GetScreenWidth() / 20, GetScreenHeight() / 20 + 80, 20, DARKGREEN);
 
         EndDrawing();
     }
