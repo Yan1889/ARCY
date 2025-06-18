@@ -19,7 +19,9 @@ if (NOT raylib_FOUND) # If there's none, fetch and build raylib
     endif()
 endif()
 
-add_executable(ARCY main.cpp)
+add_executable(ARCY main.cpp
+        PerlinNoise/PerlinNoise.cpp
+        PerlinNoise/PerlinNoise.h)
 
 file(COPY ${CMAKE_SOURCE_DIR}/src/images DESTINATION ${CMAKE_BINARY_DIR})
 
