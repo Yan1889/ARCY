@@ -3,7 +3,8 @@
 
 #include "raylib.h"
 #include "raymath.h"
-#include "PerlinNoise/PerlinNoise.h"
+#include "World/PerlinNoise.h"
+#include "World/TextureCollection.h"
 
 #define SCREEN_WIDTH 980
 #define SCREEN_HEIGHT 650
@@ -11,7 +12,6 @@
 #define MAP_HEIGHT 2500
 #define MAP_WIDTH 2500
 
-#define MAX_CIRCLES 50
 
 
 Color grayScale(const unsigned char gray) {
@@ -31,7 +31,6 @@ const std::vector<Gradient> map = {
 };
 
 
-const float lerpAmount = 0.88f;
 
 const int moveSpeed = 100;
 const int zoomSpeed = 5;
@@ -53,6 +52,7 @@ int main() {
     srand(time(nullptr));
 
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "ARCY - An epic game");
+    TextureCollection::LoadAll();
 
     // we dont need 4000 fps
     SetTargetFPS(60);
@@ -79,26 +79,17 @@ int main() {
 
     const Texture2D perlinTexture = LoadTextureFromImage(perlin);
 
-    const Image ant = LoadImage("images/ant.png");
-    const Texture2D antTexture = LoadTextureFromImage(ant);
-
-    Vector2 mousePos = GetMousePosition();
-    Vector2 antPos = mousePos;
 
     const Vector2 centerPos = playerPos;
 
-    Vector2 circles[MAX_CIRCLES];
-    int circleCount = 0;
+    std::vector<Vector2> circlePositions{};
 
     while (!WindowShouldClose()) {
         handleCamera();
 
-        mousePos = GetScreenToWorld2D(GetMousePosition(), camera);
-
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && circleCount < MAX_CIRCLES) // Create "cities" when left clicking
-        {
-            circles[circleCount] = mousePos;
-            circleCount++;
+        // Create "cities" when left-clicking
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            circlePositions.emplace_back(GetScreenToWorld2D(GetMousePosition(), camera));
         }
 
         BeginDrawing();
@@ -109,15 +100,12 @@ int main() {
 
         DrawTextureV(perlinTexture, Vector2{0, 0}, WHITE);
 
-        antPos = Vector2Lerp(antPos, mousePos, lerpAmount * GetFrameTime());
-
-        DrawTextureV(antTexture, antPos, WHITE);
 
         DrawCircleV(centerPos, 10, RED);
 
-        for (int i = 0; i < circleCount; i++) // Display "cities"
-        {
-            DrawCircleV(circles[i], 20, BLUE);
+        // display each city (now fr)
+        for (const Vector2 &circle : circlePositions) {
+            DrawTextureV(TextureCollection::city, circle, WHITE);
         }
 
         EndMode2D();
@@ -128,6 +116,7 @@ int main() {
         EndDrawing();
     }
 
+    TextureCollection::UnloadAll();
     CloseWindow();
 
     return 0;
@@ -149,11 +138,11 @@ void displayUserInstructions() {
 
     DrawText(controlsText, GetScreenWidth() / 20, GetScreenHeight() / 20, 20, DARKGREEN);
 
-    const char *controlsText1 = TextFormat("Left or Right Arrow to zoom");
+    const char *controlsText1 = TextFormat("Up or Down Arrow to zoom");
 
     DrawText(controlsText1, GetScreenWidth() / 20, GetScreenHeight() / 20 + 40, 20, DARKGREEN);
 
-    const char *controlsText2 = TextFormat("Leftclick to build a 'city'");
+    const char *controlsText2 = TextFormat("Left-click to build a 'city'");
 
     DrawText(controlsText2, GetScreenWidth() / 20, GetScreenHeight() / 20 + 80, 20, DARKGREEN);
 }
