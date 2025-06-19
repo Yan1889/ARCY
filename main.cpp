@@ -5,6 +5,7 @@
 #include "raymath.h"
 #include "World/PerlinNoise.h"
 #include "World/TextureCollection.h"
+#include "World/Population.h"
 
 #define SCREEN_WIDTH 980
 #define SCREEN_HEIGHT 650
@@ -54,7 +55,7 @@ int main() {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "ARCY - An epic game");
     TextureCollection::LoadAll();
 
-    // we dont need 4000 fps
+    // we dont need 4000 fps - Yes we need 4000+ fps to ditch Python! Sincerely Colin
     SetTargetFPS(60);
 
 
@@ -79,17 +80,22 @@ int main() {
 
     const Texture2D perlinTexture = LoadTextureFromImage(perlin);
 
-
     const Vector2 centerPos = playerPos;
 
     std::vector<Vector2> circlePositions{};
 
+    // Prepare Population
+    Population::Start();
+
+    std::cout << Population::population << std::endl;
+
     while (!WindowShouldClose()) {
         handleCamera();
 
-        // Create "cities" when left-clicking
+        // Create cities when left-clicking
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             circlePositions.emplace_back(GetScreenToWorld2D(GetMousePosition(), camera));
+            Population::cities++;
         }
 
         BeginDrawing();
@@ -100,7 +106,6 @@ int main() {
 
         DrawTextureV(perlinTexture, Vector2{0, 0}, WHITE);
 
-
         DrawCircleV(centerPos, 10, RED);
 
         // display each city (now fr)
@@ -108,9 +113,16 @@ int main() {
             DrawTextureV(TextureCollection::city, circle, WHITE);
         }
 
+        // Population
+        Population::Update();
+
         EndMode2D();
 
         displayFps();
+
+        const char *populationText = TextFormat("Population: %d", Population::population);
+        DrawText(populationText, 0 + 25, GetScreenHeight() - 75, 20, DARKGREEN);
+
         displayUserInstructions();
 
         EndDrawing();
