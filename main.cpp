@@ -93,6 +93,10 @@ int main() {
         handleCamera();
         checkExplosion();
 
+        if (IsKeyPressed(KEY_F11)) {
+            ToggleFullscreen();
+        }
+
         // Create cities when left-clicking
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             circlePositions.emplace_back(GetScreenToWorld2D(GetMousePosition(), camera));
@@ -163,6 +167,10 @@ void displayUserInstructions() {
     const char *controlsText3 = TextFormat("Esc to exit the game");
 
     DrawText(controlsText3, GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 120, 20, DARKGREEN);
+
+    DrawText("Right-click to drop a bomb", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 160, 20, DARKGREEN);
+
+    DrawText("F11 to toggle fullscreen", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 200, 20, DARKGREEN);
 }
 
 void handleCamera() {
