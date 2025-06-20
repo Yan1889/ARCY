@@ -122,7 +122,7 @@ int main() {
 
         displayFps();
 
-        const char *populationText = TextFormat("Population: %d", Population::population);
+        const char *populationText = TextFormat("Population: %d / %d", Population::population, Population::maxPopulation);
         DrawText(populationText, 0 + 25, GetScreenHeight() - 25, 20, DARKGREEN);
 
         displayUserInstructions();
