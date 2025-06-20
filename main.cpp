@@ -152,21 +152,13 @@ void displayFps() {
 }
 
 void displayUserInstructions() {
-    const char *controlsText = TextFormat("Move with WASD");
+    DrawText("Move with WASD", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20, 20, DARKGREEN);
 
-    DrawText(controlsText, GetScreenWidth() / 20 - 25, GetScreenHeight() / 20, 20, DARKGREEN);
+    DrawText("Up or Down Arrow to zoom", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 40, 20, DARKGREEN);
 
-    const char *controlsText1 = TextFormat("Up or Down Arrow to zoom");
+    DrawText("Left-click to build a city", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 80, 20, DARKGREEN);
 
-    DrawText(controlsText1, GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 40, 20, DARKGREEN);
-
-    const char *controlsText2 = TextFormat("Left-click to build a 'city'");
-
-    DrawText(controlsText2, GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 80, 20, DARKGREEN);
-
-    const char *controlsText3 = TextFormat("Esc to exit the game");
-
-    DrawText(controlsText3, GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 120, 20, DARKGREEN);
+    DrawText("Esc to exit the game", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 120, 20, DARKGREEN);
 
     DrawText("Right-click to drop a bomb", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 160, 20, DARKGREEN);
 
