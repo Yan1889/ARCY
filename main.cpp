@@ -7,8 +7,8 @@
 #include "World/TextureCollection.h"
 #include "World/Population.h"
 
-#define SCREEN_WIDTH 980
-#define SCREEN_HEIGHT 650
+#define SCREEN_WIDTH 1366 // Default 980
+#define SCREEN_HEIGHT 768 // Default 650
 
 #define MAP_HEIGHT 2500
 #define MAP_WIDTH 2500
@@ -43,10 +43,13 @@ const float zoomMax = 10.0f;
 Vector2 playerPos(MAP_WIDTH / 2, MAP_HEIGHT / 2);
 Camera2D camera{};
 
+Image perlin;
+Texture2D perlinTexture {0};
 
 void handleCamera();
 void displayFps();
 void displayUserInstructions();
+void checkExplosion();
 
 
 int main() {
@@ -65,7 +68,7 @@ int main() {
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
 
-    Image perlin = GenImagePerlinNoise(
+    perlin = GenImagePerlinNoise(
         MAP_WIDTH, MAP_HEIGHT,
         static_cast<int>(rand() * 10000.0f / RAND_MAX) * (SCREEN_WIDTH / 2),
         static_cast<int>(rand() * 10000.0f / RAND_MAX) * (SCREEN_HEIGHT / 2),
@@ -78,19 +81,17 @@ int main() {
 
     PerlinNoise::proceedMap(&perlin, map);
 
-    const Texture2D perlinTexture = LoadTextureFromImage(perlin);
+    perlinTexture = LoadTextureFromImage(perlin);
 
     const Vector2 centerPos = playerPos;
 
     std::vector<Vector2> circlePositions{};
 
-    // Prepare Population
-    Population::Start();
-
     std::cout << Population::population << std::endl;
 
     while (!WindowShouldClose()) {
         handleCamera();
+        checkExplosion();
 
         // Create cities when left-clicking
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
@@ -106,7 +107,8 @@ int main() {
 
         DrawTextureV(perlinTexture, Vector2{0, 0}, WHITE);
 
-        DrawCircleV(centerPos, 10, RED);
+        DrawCircleV(centerPos, 6 * 1/camera.zoom, RED);
+
 
         // display each city (now fr)
         for (const Vector2 &circle : circlePositions) {
@@ -121,7 +123,7 @@ int main() {
         displayFps();
 
         const char *populationText = TextFormat("Population: %d", Population::population);
-        DrawText(populationText, 0 + 25, GetScreenHeight() - 75, 20, DARKGREEN);
+        DrawText(populationText, 0 + 25, GetScreenHeight() - 25, 20, DARKGREEN);
 
         displayUserInstructions();
 
@@ -148,15 +150,19 @@ void displayFps() {
 void displayUserInstructions() {
     const char *controlsText = TextFormat("Move with WASD");
 
-    DrawText(controlsText, GetScreenWidth() / 20, GetScreenHeight() / 20, 20, DARKGREEN);
+    DrawText(controlsText, GetScreenWidth() / 20 - 25, GetScreenHeight() / 20, 20, DARKGREEN);
 
     const char *controlsText1 = TextFormat("Up or Down Arrow to zoom");
 
-    DrawText(controlsText1, GetScreenWidth() / 20, GetScreenHeight() / 20 + 40, 20, DARKGREEN);
+    DrawText(controlsText1, GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 40, 20, DARKGREEN);
 
     const char *controlsText2 = TextFormat("Left-click to build a 'city'");
 
-    DrawText(controlsText2, GetScreenWidth() / 20, GetScreenHeight() / 20 + 80, 20, DARKGREEN);
+    DrawText(controlsText2, GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 80, 20, DARKGREEN);
+
+    const char *controlsText3 = TextFormat("Esc to exit the game");
+
+    DrawText(controlsText3, GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 120, 20, DARKGREEN);
 }
 
 void handleCamera() {
@@ -165,6 +171,14 @@ void handleCamera() {
     if (IsKeyDown(KEY_A)) playerPos.x -= moveSpeed * GetFrameTime() * 1 / camera.zoom;
     if (IsKeyDown(KEY_D)) playerPos.x += moveSpeed * GetFrameTime() * 1 / camera.zoom;
 
+    if (IsKeyDown(KEY_ESCAPE)) WindowShouldClose();
+
+    if (playerPos.x > 3000) playerPos.x = 3000;
+    else if (playerPos.x < -1000) playerPos.x = -1000;
+
+    if (playerPos.y > 3000) playerPos.y = 3000;
+    else if (playerPos.y < -1000) playerPos.y = -1000;
+
     camera.target = playerPos;
 
     if (IsKeyDown(KEY_UP)) camera.zoom += zoomSpeed * GetFrameTime();
@@ -172,4 +186,30 @@ void handleCamera() {
 
     if (camera.zoom < zoomMin) camera.zoom = zoomMin;
     if (camera.zoom > zoomMax) camera.zoom = zoomMax;
+}
+
+void checkExplosion()
+{
+    if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) {
+        Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), camera);
+        int radius = 50;
+
+        for (int y = -radius; y <= radius; y++) {
+            for (int x = -radius; x <= radius; x++) {
+                int px = (int)mousePos.x + x;
+                int py = (int)mousePos.y + y;
+
+                if (x * x + y * y <= radius * radius) {
+                    if (px >= 0 && py >= 0 && px < MAP_WIDTH && py < MAP_HEIGHT) {
+                        Color explosionColor = Color(0, 255, 0, 255);
+
+                        ImageDrawPixel(&perlin, px, py, explosionColor);
+                    }
+                }
+            }
+        }
+
+        UnloadTexture(perlinTexture);
+        perlinTexture = LoadTextureFromImage(perlin);
+    }
 }

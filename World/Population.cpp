@@ -1,7 +1,3 @@
-//
-// Created by minhp on 19.06.2025.
-//
-
 #include "Population.h"
 
 #include <iostream>
@@ -12,20 +8,12 @@
 #include "raylib.h"
 
 int Population::maxPopulation;
-int Population::population;
+int Population::population = 100;
 float Population::growth;
-float Population::growthFactor;
-float Population::growthRate;
-float Population::growthCooldown ;
+float Population::growthFactor = 0.0085f;
+float Population::growthRate = 100.0f;
+float Population::growthCooldown = growthRate;
 int Population::cities;
-
-void Population::Start()
-{
-    population = 100;
-    growthFactor = 0.0085f;
-    growthRate = 100.0f;
-    growthCooldown = growthRate;
-}
 
 void Population::Update()
 {

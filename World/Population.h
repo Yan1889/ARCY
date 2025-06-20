@@ -10,7 +10,6 @@
 class Population {
 public:
     static void Update();
-    static void Start();
     static void GrowPopulation();
 
     static int population;
