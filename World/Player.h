@@ -5,6 +5,7 @@
 #ifndef POPULATION_H
 #define POPULATION_H
 #include <set>
+#include <unordered_set>
 #include <vector>
 
 #include "raylib.h"
@@ -27,6 +28,15 @@ struct Pixel {
     bool operator<(const Pixel& other) const {
         return std::tie(x, y) < std::tie(other.x, other.y);
     }
+    bool operator==(const Pixel& other) const {
+        return x == other.x && y == other.y;
+    }
+
+    struct Hasher {
+        std::size_t operator()(const Pixel& p) const {
+            return std::hash<int>()(p.x) ^ (std::hash<int>()(p.y) << 1);
+        }
+    };
 };
 
 
@@ -44,7 +54,7 @@ public:
     float _growthFactor = 0.0085f;
 
     // territory
-    std::set<Pixel> _allPixels;
+    std::unordered_set<Pixel, Pixel::Hasher> _allPixels;
     std::vector<Pixel> _frontierPixels;
 
     explicit Player(Pixel startPos, int startRadius);

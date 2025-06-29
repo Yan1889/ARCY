@@ -25,13 +25,11 @@ Player::Player(const Pixel startPos, const int startRadius) {
         const int yMin = startPos.y - dh;
         const int yMax = startPos.y + dh;
 
-        _frontierPixels.emplace_back(x, yMin);
-        _frontierPixels.emplace_back(x, yMax);
-
         for (int y = yMin; y <= yMax; y++) {
             _allPixels.insert({x, y});
         }
     }
+    UpdateFrontier();
 }
 
 
