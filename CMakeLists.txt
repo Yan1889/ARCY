@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.31)
 project(ARCY)
 
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 20)
 
 set(RAYLIB_VERSION 5.5)
 find_package(raylib ${RAYLIB_VERSION} QUIET) # QUIET or REQUIRED
@@ -24,8 +24,8 @@ add_executable(ARCY main.cpp
         World/PerlinNoise.h
         World/TextureCollection.cpp
         World/TextureCollection.h
-        World/Population.cpp
-        World/Population.h
+        World/Player.cpp
+        World/Player.h
 )
 
 file(COPY ${CMAKE_SOURCE_DIR}/src/images DESTINATION ${CMAKE_BINARY_DIR})
