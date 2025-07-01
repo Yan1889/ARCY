@@ -68,9 +68,11 @@ void Player::GrowPopulation() {
 void Player::Expand(const float percentage) {
     const int peopleSend_limit = static_cast<int>(_population * percentage);
     int peopleSend = 0;
+
     while (peopleSend < peopleSend_limit) {
         ExpandOnceOnAllFrontierPixels(peopleSend, peopleSend_limit);
     }
+
     _population -= peopleSend;
 }
 

@@ -49,7 +49,7 @@ Player *player;
 
 void initCamAndMap();
 
-void handleCamera();
+void handleControls();
 
 void displayInfoTexts();
 
@@ -78,7 +78,7 @@ int main() {
     std::cout << player->_population << std::endl;
 
     while (!WindowShouldClose()) {
-        handleCamera();
+        handleControls();
         checkExplosion();
 
         if (IsKeyPressed(KEY_F11)) {
@@ -88,13 +88,6 @@ int main() {
         // Create cities when left-clicking
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             player->AddCity(GetScreenToWorld2D(GetMousePosition(), camera));
-        }
-
-        // expand with space is clicked
-        if (IsKeyPressed(KEY_SPACE)) {
-            std::thread([]() {
-                player->Expand(0.5);
-            }).detach();
         }
 
         BeginDrawing();
@@ -146,6 +139,7 @@ void displayInfoTexts() {
     DrawText("Esc to exit the game", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 160, 20, DARKGREEN);
     DrawText("Right-click to drop a bomb", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 200, 20, DARKGREEN);
     DrawText("F11 to toggle fullscreen", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 240, 20, DARKGREEN);
+    DrawText("Space to expand your territory", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 280, 20, DARKGREEN);
 
     // fps
     const int fps = GetFPS();
@@ -160,13 +154,21 @@ void displayInfoTexts() {
     DrawText(populationText, 0 + 25, GetScreenHeight() - 25, 20, DARKGREEN);
 }
 
-void handleCamera() {
+void handleControls() {
     if (IsKeyDown(KEY_W)) playerPos.y -= moveSpeed * GetFrameTime() * 1 / camera.zoom;
     if (IsKeyDown(KEY_S)) playerPos.y += moveSpeed * GetFrameTime() * 1 / camera.zoom;
     if (IsKeyDown(KEY_A)) playerPos.x -= moveSpeed * GetFrameTime() * 1 / camera.zoom;
     if (IsKeyDown(KEY_D)) playerPos.x += moveSpeed * GetFrameTime() * 1 / camera.zoom;
+    if (IsKeyPressed(KEY_F11)) ToggleFullscreen();
 
     if (IsKeyDown(KEY_ESCAPE)) WindowShouldClose();
+
+    // expand with space is clicked
+    if (IsKeyPressed(KEY_SPACE) && player->_population / 2 >= 100) {
+        std::thread([]() {
+            player->Expand(0.5);
+        }).detach();
+    }
 
     if (playerPos.x > 3000) playerPos.x = 3000;
     else if (playerPos.x < -1000) playerPos.x = -1000;
