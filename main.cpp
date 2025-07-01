@@ -151,7 +151,7 @@ void displayInfoTexts() {
     // population
     const char *populationText = TextFormat("Population: %d / %d", player->_population, player->_maxPopulation);
     DrawText(populationText, 0 + 25, GetScreenHeight() - 50, 20, DARKGREEN);
-    const char *sendText = TextFormat("People expoloring: %d", player->_peopleCurrentlyExploring);
+    const char *sendText = TextFormat("People exploring: %d", player->_peopleCurrentlyExploring);
     DrawText(sendText, 0 + 25, GetScreenHeight() - 25, 20, DARKGREEN);
 }
 

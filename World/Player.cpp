@@ -26,6 +26,12 @@ Player::Player(const Pixel startPos, const int startRadius) {
 
 
 void Player::Update() {
+    // expand
+    if (_peopleCurrentlyExploring > 0) {
+        ExpandOnceOnAllFrontierPixels();
+    }
+
+
     _growthCooldown -= GetTime();
     _maxPopulation = 1000 + 1000 * _cityCount;
 
@@ -54,11 +60,6 @@ void Player::GrowPopulation() {
         }
 
         _growthCooldown = _growthRate;
-    }
-
-    // expand
-    if (_peopleCurrentlyExploring > 0) {
-        ExpandOnceOnAllFrontierPixels();
     }
 }
 
