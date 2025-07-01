@@ -38,9 +38,6 @@ void Player::Update() {
     }
 
     GrowPopulation();
-
-
-
 }
 
 
