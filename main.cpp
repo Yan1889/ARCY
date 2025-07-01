@@ -92,9 +92,7 @@ int main() {
 
         // expand with space is clicked
         if (IsKeyPressed(KEY_SPACE)) {
-            std::thread([]() {
-                player->Expand(0.5);
-            }).detach();
+            player->Expand(0.5);
         }
 
         BeginDrawing();
@@ -157,7 +155,9 @@ void displayInfoTexts() {
 
     // population
     const char *populationText = TextFormat("Population: %d / %d", player->_population, player->_maxPopulation);
-    DrawText(populationText, 0 + 25, GetScreenHeight() - 25, 20, DARKGREEN);
+    DrawText(populationText, 0 + 25, GetScreenHeight() - 50, 20, DARKGREEN);
+    const char *sendText = TextFormat("People expoloring: %d", player->_peopleCurrentlyExploring);
+    DrawText(sendText, 0 + 25, GetScreenHeight() - 25, 20, DARKGREEN);
 }
 
 void handleCamera() {

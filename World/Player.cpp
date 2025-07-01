@@ -4,18 +4,10 @@
 #include <iostream>
 #include <cmath>
 #include <variant>
+#include <algorithm>
 
 #include "raylib.h"
 
-/*
-int Population::maxPopulation;
-int Population::population = 100;
-float Population::growth;
-float Population::growthFactor = 0.0085f;
-float Population::growthRate = 100.0f;
-float Population::growthCooldown = growthRate;
-int Population::cities;
-*/
 
 Player::Player(const Pixel startPos, const int startRadius) {
     for (int x = startPos.x - startRadius; x < startPos.x + startRadius; x++) {
@@ -37,7 +29,7 @@ void Player::Update() {
     _growthCooldown -= GetTime();
     _maxPopulation = 1000 + 1000 * _cityCount;
 
-    _growth = _growthFactor * (1.0f - exp(-_population / 10));
+    _growth = _growthFactor * (1.0f - exp(-_population / 10.f));
 
     if (_population < 50000) {
         _growthFactor = 0.0085f;
@@ -46,6 +38,9 @@ void Player::Update() {
     }
 
     GrowPopulation();
+
+
+
 }
 
 
@@ -63,51 +58,71 @@ void Player::GrowPopulation() {
 
         _growthCooldown = _growthRate;
     }
+
+    // expand
+    if (_peopleCurrentlyExploring > 0) {
+        ExpandOnceOnAllFrontierPixels();
+    }
 }
 
 void Player::Expand(const float percentage) {
-    const int peopleSend_limit = static_cast<int>(_population * percentage);
-    int peopleSend = 0;
-    while (peopleSend < peopleSend_limit) {
-        ExpandOnceOnAllFrontierPixels(peopleSend, peopleSend_limit);
-    }
-    _population -= peopleSend;
+    _peopleCurrentlyExploring += static_cast<int>(_population * percentage);
+    _population -= _peopleCurrentlyExploring;
 }
 
-void Player::ExpandOnceOnAllFrontierPixels(int& totalSend, const int maxPeople) {
+void Player::ExpandOnceOnAllFrontierPixels() {
     std::vector<Pixel> expansionFrontier = _frontierPixels; // snapshot
-    std::set<Pixel> newPixels;
+    std::unordered_set<Pixel, Pixel::Hasher> newPixels;
 
-    while (totalSend < maxPeople && !expansionFrontier.empty()) {
+    while (_peopleCurrentlyExploring > 0 && !expansionFrontier.empty()) {
         const int randIdx = rand() % expansionFrontier.size();
-        auto iter = expansionFrontier.begin();
-        std::advance(iter, randIdx);
-        const Pixel& randomFrontierPixel = *iter;
+        const Pixel& randomFrontierPixel = expansionFrontier[randIdx];
 
-        for (const Pixel& n : randomFrontierPixel.GetNeighborPixels()) {
-            if (!_allPixels.contains(n) && !newPixels.contains(n)) {
-                newPixels.insert(n);
-                totalSend++;
-                if (totalSend == maxPeople) break;
+        for (const Pixel& newP : randomFrontierPixel.GetNeighborPixels()) {
+            if (!_allPixels.contains(newP) && !newPixels.contains(newP)) {
+                newPixels.insert(newP);
+                _allPixels.insert(newP);
+                _frontierPixels.push_back(newP);
+                _frontierSet.insert(newP);
+                _peopleCurrentlyExploring--;
+
+                for (const Pixel& potentialInvalidFrontierP : newP.GetNeighborPixels()) {
+                    if (_frontierSet.contains(potentialInvalidFrontierP)) {
+                        if (!IsFrontierPixel(potentialInvalidFrontierP)) {
+                            std::erase(_frontierPixels, potentialInvalidFrontierP);
+                            _frontierSet.erase(potentialInvalidFrontierP);
+                        }
+                    }
+                }
+
+                if (_peopleCurrentlyExploring == 0) break;
             }
         }
-
-        expansionFrontier.erase(iter);
+        expansionFrontier.erase(expansionFrontier.begin() + randIdx);
     }
+}
 
-    _allPixels.insert(newPixels.begin(), newPixels.end());
-    UpdateFrontier();
+bool Player::IsFrontierPixel(const Pixel& p) const {
+    for (const Pixel& n : p.GetNeighborPixels()) {
+        if (!_allPixels.contains(n)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void Player::UpdateFrontier() {
+    std::cout << "bad" << std::endl;
     _frontierPixels.clear();
+    _frontierSet.clear();
 
     for (const Pixel p: _allPixels) {
-        const std::set<Pixel> neighbors = p.GetNeighborPixels();
+        const std::vector<Pixel> neighbors = p.GetNeighborPixels();
 
         for (const Pixel &n: neighbors) {
             if (!_allPixels.contains(n)) {
                 _frontierPixels.push_back(p);
+                _frontierSet.insert(p);
                 break;
             }
         }

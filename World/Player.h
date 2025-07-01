@@ -13,13 +13,13 @@
 struct Pixel {
     int x, y;
 
-    std::set<Pixel> GetNeighborPixels() const {
-        std::set<Pixel> result;
+    [[nodiscard]] std::vector<Pixel> GetNeighborPixels() const {
+        std::vector<Pixel> result;
         for (int dx = -1; dx <= 1; dx++) {
             for (int dy = -1; dy <= 1; dy++) {
                 if (dx == 0 && dy == 0) continue;
 
-                result.insert({x + dx, y + dy});
+                result.push_back({x + dx, y + dy});
             }
         }
         return result;
@@ -53,18 +53,22 @@ public:
     float _growth{};
     float _growthFactor = 0.0085f;
 
+    int _peopleCurrentlyExploring{};
+
     // territory
     std::unordered_set<Pixel, Pixel::Hasher> _allPixels;
     std::vector<Pixel> _frontierPixels;
+    std::unordered_set<Pixel, Pixel::Hasher> _frontierSet;
 
     explicit Player(Pixel startPos, int startRadius);
 
     void Expand(float percentage);
 
-    void ExpandOnceOnAllFrontierPixels(int& totalSend, int maxPeople);
+    void ExpandOnceOnAllFrontierPixels();
 
     void UpdateFrontier();
 
+    bool IsFrontierPixel(const Pixel& p) const;
 
     void Update();
     void GrowPopulation();
