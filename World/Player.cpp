@@ -88,12 +88,9 @@ void Player::ExpandOnceOnAllFrontierPixels() {
 
         Color terrainOnPixel = static_cast<const Color *>(_bgImage.data)[_bgImage.width * newP.y + newP.x];
 
-        int difficulty = GetDifficulty(terrainOnPixel);
-        float difficultyNorm = difficulty / G::maxDifficulty;
+        const float difficulty = GetDifficulty(terrainOnPixel);
 
-
-        float roll = static_cast<float>(rand()) / RAND_MAX;
-        if (difficulty == -1 || difficultyNorm > roll) {
+        if (difficulty == -1 || difficulty / G::maxDifficulty > static_cast<float>(rand()) / RAND_MAX) {
             expansionFrontier.erase(expansionFrontier.begin() + randIdx);
             continue;
         }
@@ -116,6 +113,15 @@ void Player::ExpandOnceOnAllFrontierPixels() {
             if (_peopleCurrentlyExploring == 0) break;
         }
         expansionFrontier.erase(expansionFrontier.begin() + randIdx);
+    }
+
+    for (auto iter = _frontierPixels.begin(); iter != _frontierPixels.end();) {
+        if (!IsFrontierPixel(*iter)) {
+            _frontierSet.erase(*iter);
+            iter = _frontierPixels.erase(iter);
+        } else {
+            ++iter;
+        }
     }
 }
 
