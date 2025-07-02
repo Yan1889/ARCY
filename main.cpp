@@ -7,6 +7,7 @@
 #include "World/PerlinNoise.h"
 #include "World/TextureCollection.h"
 #include "World/Player.h"
+#include "World/Globals.h"
 
 #define SCREEN_WIDTH 1366 // Default 980
 #define SCREEN_HEIGHT 768 // Default 650
@@ -22,17 +23,6 @@ Color grayScale(const unsigned char gray) {
 // ----- perlin settings -----
 Image perlin;
 Texture2D perlinTexture{0};
-const std::vector<Gradient> map = {
-    {32 * 1 + 10, Color{90, 90, 255, 255}}, // Deep Water
-    {32 * 2 + 10, Color{125, 125, 255, 255}}, // Low Water
-    {32 * 2 + 20, Color{247, 252, 204, 255}}, // Beach
-    {32 * 3 + 20, Color{129, 245, 109, 255}}, // Open Field
-    {32 * 4 + 10, Color{117, 219, 99, 255}}, // Hills
-    {32 * 5 + 20, Color{97, 184, 81, 255}}, // Forest
-    {32 * 6, Color{191, 191, 191, 255}}, // Stone
-    {32 * 7 - 20, Color{153, 153, 153, 255}}, // Mountain
-    {32 * 8, Color{255, 255, 255, 255}}, // Snow
-};
 
 
 // ----- camera setting -----
@@ -72,7 +62,8 @@ int main() {
             static_cast<int>(playerPos.x),
             static_cast<int>(playerPos.y)
         },
-        10
+        10,
+        perlin
     );
 
     std::cout << player->_population << std::endl;
@@ -226,6 +217,6 @@ void initCamAndMap() {
     );
     std::vector<std::vector<float> > falloff = PerlinNoise::GenerateFalloffMap(MAP_WIDTH, MAP_HEIGHT);
     PerlinNoise::ApplyFalloffToImage(&perlin, falloff); // finally use falloff
-    PerlinNoise::proceedMap(&perlin, map);
+    PerlinNoise::proceedMap(&perlin, G::map);
     perlinTexture = LoadTextureFromImage(perlin);
 }

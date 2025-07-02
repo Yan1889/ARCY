@@ -8,7 +8,9 @@
 #include <unordered_set>
 #include <vector>
 
+#include "PerlinNoise.h"
 #include "raylib.h"
+
 
 struct Pixel {
     int x, y;
@@ -54,13 +56,16 @@ public:
     float _growthFactor = 0.0085f;
 
     int _peopleCurrentlyExploring{};
+    int _maxPeopleExploring = 10000;
 
     // territory
     std::unordered_set<Pixel, Pixel::Hasher> _allPixels;
     std::vector<Pixel> _frontierPixels;
     std::unordered_set<Pixel, Pixel::Hasher> _frontierSet;
 
-    explicit Player(Pixel startPos, int startRadius);
+    Image _bgImage;
+
+    Player(Pixel startPos, int startRadius, Image& perlin);
 
     void Expand(float percentage);
 
@@ -69,6 +74,8 @@ public:
     void UpdateFrontier();
 
     bool IsFrontierPixel(const Pixel& p) const;
+
+    static float GetDifficulty(const Color& terrainColor);
 
     void Update();
     void GrowPopulation();

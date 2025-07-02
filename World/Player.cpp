@@ -1,4 +1,5 @@
 #include "Player.h"
+#include "Globals.h"
 
 #include <cassert>
 #include <iostream>
@@ -9,7 +10,7 @@
 #include "raylib.h"
 
 
-Player::Player(const Pixel startPos, const int startRadius) {
+Player::Player(Pixel startPos, int startRadius, Image &perlin): _bgImage(perlin) {
     for (int x = startPos.x - startRadius; x < startPos.x + startRadius; x++) {
         const int dx = x - startPos.x;
         const int dh = std::sqrt(startRadius * startRadius - dx * dx);
@@ -64,9 +65,13 @@ void Player::GrowPopulation() {
 }
 
 void Player::Expand(const float percentage) {
-    _peopleCurrentlyExploring += static_cast<int>(_population * percentage);
-    _population -= _peopleCurrentlyExploring;
+    const int peopleAllowedToLeave = _maxPeopleExploring - _peopleCurrentlyExploring;
+    const int newPeopleLeaving = std::min(peopleAllowedToLeave, static_cast<int>(_population * percentage));
+
+    _peopleCurrentlyExploring += newPeopleLeaving;
+    _population -= newPeopleLeaving;
 }
+
 
 void Player::ExpandOnceOnAllFrontierPixels() {
     std::vector<Pixel> expansionFrontier = _frontierPixels; // snapshot
@@ -74,34 +79,49 @@ void Player::ExpandOnceOnAllFrontierPixels() {
 
     while (_peopleCurrentlyExploring > 0 && !expansionFrontier.empty()) {
         const int randIdx = rand() % expansionFrontier.size();
-        const Pixel& randomFrontierPixel = expansionFrontier[randIdx];
+        const Pixel &randomFrontierPixel = expansionFrontier[randIdx];
 
-        for (const Pixel& newP : randomFrontierPixel.GetNeighborPixels()) {
-            if (!_allPixels.contains(newP) && !newPixels.contains(newP)) {
-                newPixels.insert(newP);
-                _allPixels.insert(newP);
-                _frontierPixels.push_back(newP);
-                _frontierSet.insert(newP);
-                _peopleCurrentlyExploring--;
+        const std::vector<Pixel> neighborPixels = randomFrontierPixel.GetNeighborPixels();
+        int randNeighborIdx = rand() % neighborPixels.size();
 
-                for (const Pixel& potentialInvalidFrontierP : newP.GetNeighborPixels()) {
-                    if (_frontierSet.contains(potentialInvalidFrontierP)) {
-                        if (!IsFrontierPixel(potentialInvalidFrontierP)) {
-                            std::erase(_frontierPixels, potentialInvalidFrontierP);
-                            _frontierSet.erase(potentialInvalidFrontierP);
-                        }
+        const Pixel &newP = neighborPixels[randNeighborIdx];
+
+        Color terrainOnPixel = static_cast<const Color *>(_bgImage.data)[_bgImage.width * newP.y + newP.x];
+
+        int difficulty = GetDifficulty(terrainOnPixel);
+        float difficultyNorm = difficulty / G::maxDifficulty;
+
+
+        float roll = static_cast<float>(rand()) / RAND_MAX;
+        if (difficulty == -1 || difficultyNorm > roll) {
+            expansionFrontier.erase(expansionFrontier.begin() + randIdx);
+            continue;
+        }
+        if (!_allPixels.contains(newP) && !newPixels.contains(newP)) {
+            newPixels.insert(newP);
+            _allPixels.insert(newP);
+            _frontierPixels.push_back(newP);
+            _frontierSet.insert(newP);
+            _peopleCurrentlyExploring--;
+
+            for (const Pixel &potentialInvalidFrontierP: newP.GetNeighborPixels()) {
+                if (_frontierSet.contains(potentialInvalidFrontierP)) {
+                    if (!IsFrontierPixel(potentialInvalidFrontierP)) {
+                        std::erase(_frontierPixels, potentialInvalidFrontierP);
+                        _frontierSet.erase(potentialInvalidFrontierP);
                     }
                 }
-
-                if (_peopleCurrentlyExploring == 0) break;
             }
+
+            if (_peopleCurrentlyExploring == 0) break;
         }
         expansionFrontier.erase(expansionFrontier.begin() + randIdx);
     }
 }
 
-bool Player::IsFrontierPixel(const Pixel& p) const {
-    for (const Pixel& n : p.GetNeighborPixels()) {
+
+bool Player::IsFrontierPixel(const Pixel &p) const {
+    for (const Pixel &n: p.GetNeighborPixels()) {
         if (!_allPixels.contains(n)) {
             return true;
         }
@@ -125,6 +145,16 @@ void Player::UpdateFrontier() {
             }
         }
     }
+}
+
+float Player::GetDifficulty(const Color &terrainColor) {
+    for (int i = 0; i < G::map.size(); ++i) {
+        if (terrainColor.r == G::map[i].color.r) {
+            return G::map[i].difficulty;
+        }
+    }
+    std::cerr << "error" << std::endl;
+    return 0;
 }
 
 void Player::AddCity(const Vector2 pos) {

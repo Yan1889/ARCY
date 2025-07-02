@@ -26,6 +26,7 @@ add_executable(ARCY main.cpp
         World/TextureCollection.h
         World/Player.cpp
         World/Player.h
+        World/Globals.h
 )
 
 file(COPY ${CMAKE_SOURCE_DIR}/src/images DESTINATION ${CMAKE_BINARY_DIR})
