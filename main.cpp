@@ -94,9 +94,14 @@ int main() {
             DrawPixel(pixel.x, pixel.y, RED);
         }
 
+        /* Test
         for (const Pixel &pixel: player->_allPixels) {
             DrawPixel(pixel.x, pixel.y, Fade(ORANGE, 0.5));
         }
+        */
+
+        player->SortFrontierPixels();
+        player->DrawTerritory();
 
         // display each city (now fr)
         for (const Vector2 &circle: player->_cityPositions) {
