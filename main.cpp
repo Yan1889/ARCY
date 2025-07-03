@@ -91,11 +91,11 @@ int main() {
 
         // Create cities when left-clicking
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-            int cost = 10000;
+            int cost = 10000 * (player->_cityPositions.size() + 1);
 
             if (money ->moneyBalance - cost >= 0)
             {
-                money->spendMoney(10000);
+                money->spendMoney(cost);
                 player->AddCity(GetScreenToWorld2D(GetMousePosition(), camera));
             }
         }
@@ -145,9 +145,9 @@ void displayInfoTexts() {
     // instructions
     DrawText("Move with WASD", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20, 20, DARKGREEN);
     DrawText("Up or Down Arrow to zoom", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 40, 20, DARKGREEN);
-    DrawText("Left-click to build a city", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 80, 20, DARKGREEN);
+    DrawText("Left-click to build a city ($10K * city count)", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 80, 20, DARKGREEN);
     DrawText("Esc to exit the game", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 120, 20, DARKGREEN);
-    DrawText("1 to drop a atom bomb, 2 a hydrogen bomb", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 160, 20, DARKGREEN);
+    DrawText("1 to drop a atom bomb ($10K), 2 a hydrogen bomb ($100K)", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 160, 20, DARKGREEN);
     DrawText("F11 to toggle fullscreen", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 200, 20, DARKGREEN);
     DrawText("Space to expand your territory", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 240, 20, DARKGREEN);
 
@@ -160,13 +160,46 @@ void displayInfoTexts() {
     DrawText(fpsText, textX, textY, 20, DARKGREEN);
 
     // population
-    const char *populationText = TextFormat("Population: %d / %d", player->_population, player->_maxPopulation);
+    float populationDisplay = static_cast<float>(player->_population);
+    float maxPopulationDisplay = static_cast<float>(player->_maxPopulation);
+    const char *populationText;
+
+    if (maxPopulationDisplay >= 1000)
+    {
+        maxPopulationDisplay /= 1000;
+
+        if (populationDisplay >= 1000)
+        {
+            populationDisplay /= 1000;
+
+            populationText = TextFormat("Population: %.2fK / %.2fK", populationDisplay, maxPopulationDisplay);
+        }
+        else
+        {
+            populationText = TextFormat("Population: %.0f / %.2fK", populationDisplay, maxPopulationDisplay);
+        }
+    }
+
     DrawText(populationText, 0 + 25, GetScreenHeight() - 50, 20, DARKGREEN);
     const char *sendText = TextFormat("People exploring: %d", player->_peopleCurrentlyExploring);
     DrawText(sendText, 0 + 25, GetScreenHeight() - 25, 20, DARKGREEN);
 
     // money
-    DrawText(TextFormat("Money Balance: %i", money->moneyBalance), 25, GetScreenHeight() - 75, 20, DARKGREEN);
+    float moneyBalanceDisplay = static_cast<float>(money->moneyBalance);
+    const char *moneyText;
+
+    if (moneyBalanceDisplay >= 1000)
+    {
+        moneyBalanceDisplay /= 1000;
+
+        moneyText = TextFormat("Money Balance: $%.2fK", moneyBalanceDisplay);
+    }
+    else
+    {
+        moneyText = TextFormat("Money Balance: $%.0fK", moneyBalanceDisplay);
+    }
+
+    DrawText(moneyText, 25, GetScreenHeight() - 75, 20, DARKGREEN);
 }
 
 void handleControls() {
@@ -200,6 +233,10 @@ void handleControls() {
 
 void checkExplosion() {
     if (IsKeyPressed(KEY_ONE)) {
+        int cost = 10000;
+        if (money->moneyBalance - cost < 0) return;
+        money->spendMoney(cost);
+
         const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), camera);
         const int radius = 50;
 
@@ -231,6 +268,10 @@ void checkExplosion() {
         perlinTexture = LoadTextureFromImage(perlin);
     }
     else if (IsKeyPressed(KEY_TWO)) {
+        int cost = 100000;
+        if (money->moneyBalance - cost < 0) return;
+        money->spendMoney(cost);
+
         const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), camera);
         const int radius = 300;
 
