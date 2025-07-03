@@ -82,6 +82,7 @@ int main() {
         }
 
         BeginDrawing();
+        ClearBackground(Color{90, 90, 255, 255});
 
         BeginMode2D(camera);
 
@@ -175,18 +176,58 @@ void handleControls() {
 }
 
 void checkExplosion() {
-    if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) {
+    if (IsKeyPressed(KEY_ONE)) {
         const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), camera);
         const int radius = 50;
 
         for (int y = -radius; y <= radius; y++) {
             for (int x = -radius; x <= radius; x++) {
-                const int px = static_cast<int>(mousePos.x) + x;
-                const int py = static_cast<int>(mousePos.y) + y;
+                int px = (int)mousePos.x + x;
+                int py = (int)mousePos.y + y;
 
-                if (x * x + y * y <= radius * radius) {
+                float distance = sqrtf((float)(x * x + y * y)) / radius;
+                float noise = GetRandomValue(50, 100) / 100.0f;
+
+                if (distance <= 1.0f && noise > distance) {
                     if (px >= 0 && py >= 0 && px < MAP_WIDTH && py < MAP_HEIGHT) {
-                        const Color explosionColor(0, 255, 0, 255);
+
+                        Color explosionColor = Color{
+                            (unsigned char)GetRandomValue(0, 200),  // Red
+                            (unsigned char)GetRandomValue(230, 255),   // Green
+                            (unsigned char)GetRandomValue(0, 50),  // Blue                                       // Blue
+                            255  // Alpha
+                        };
+
+                        ImageDrawPixel(&perlin, px, py, explosionColor);
+                    }
+                }
+            }
+        }
+
+        UnloadTexture(perlinTexture);
+        perlinTexture = LoadTextureFromImage(perlin);
+    }
+    else if (IsKeyPressed(KEY_TWO)) {
+        const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), camera);
+        const int radius = 300;
+
+        for (int y = -radius; y <= radius; y++) {
+            for (int x = -radius; x <= radius; x++) {
+                int px = (int)mousePos.x + x;
+                int py = (int)mousePos.y + y;
+
+                float distance = sqrtf((float)(x * x + y * y)) / radius;
+                float noise = GetRandomValue(50, 100) / 100.0f;
+
+                if (distance <= 1.0f && noise > distance) {
+                    if (px >= 0 && py >= 0 && px < MAP_WIDTH && py < MAP_HEIGHT) {
+
+                        Color explosionColor = Color{
+                            (unsigned char)GetRandomValue(0, 200),  // Red
+                            (unsigned char)GetRandomValue(230, 255),   // Green
+                            (unsigned char)GetRandomValue(0, 50),  // Blue                                       // Blue
+                            255  // Alpha
+                        };
 
                         ImageDrawPixel(&perlin, px, py, explosionColor);
                     }

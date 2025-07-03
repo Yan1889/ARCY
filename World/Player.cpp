@@ -161,8 +161,7 @@ float Player::GetDifficulty(const Color &terrainColor) {
             return G::map[i].difficulty;
         }
     }
-    std::cerr << "error" << std::endl;
-    return 0;
+    return -1;
 }
 
 void Player::AddCity(const Vector2 pos) {
