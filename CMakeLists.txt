@@ -27,6 +27,8 @@ add_executable(ARCY main.cpp
         World/Player.cpp
         World/Player.h
         World/Globals.h
+        World/Money.cpp
+        World/Money.h
 )
 
 file(COPY ${CMAKE_SOURCE_DIR}/src/images DESTINATION ${CMAKE_BINARY_DIR})

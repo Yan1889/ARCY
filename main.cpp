@@ -8,6 +8,7 @@
 #include "World/TextureCollection.h"
 #include "World/Player.h"
 #include "World/Globals.h"
+#include "World/Money.h"
 
 #define SCREEN_WIDTH 1366 // Default 980
 #define SCREEN_HEIGHT 768 // Default 650
@@ -36,6 +37,9 @@ const float zoomMax = 10.0f;
 Vector2 playerPos(MAP_WIDTH / 2, MAP_HEIGHT / 2);
 Player *player;
 
+Money *money;
+float cooldownTime;
+float lastActionTime;
 
 void initCamAndMap();
 
@@ -44,6 +48,8 @@ void handleControls();
 void displayInfoTexts();
 
 void checkExplosion();
+
+void increaseMoney();
 
 
 int main() {
@@ -66,11 +72,18 @@ int main() {
         perlin
     );
 
+    money = new Money();
+    cooldownTime = 1.0f;
+    lastActionTime = GetTime();
+
     std::cout << player->_population << std::endl;
 
     while (!WindowShouldClose()) {
         handleControls();
         checkExplosion();
+
+        // Add money depending on population
+        increaseMoney();
 
         if (IsKeyPressed(KEY_F11)) {
             ToggleFullscreen();
@@ -78,7 +91,13 @@ int main() {
 
         // Create cities when left-clicking
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-            player->AddCity(GetScreenToWorld2D(GetMousePosition(), camera));
+            int cost = 10000;
+
+            if (money ->moneyBalance - cost >= 0)
+            {
+                money->spendMoney(10000);
+                player->AddCity(GetScreenToWorld2D(GetMousePosition(), camera));
+            }
         }
 
         BeginDrawing();
@@ -116,6 +135,7 @@ int main() {
     // clean up everything
     TextureCollection::UnloadAll();
     delete player;
+    delete money;
 
     CloseWindow();
     return 0;
@@ -127,7 +147,7 @@ void displayInfoTexts() {
     DrawText("Up or Down Arrow to zoom", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 40, 20, DARKGREEN);
     DrawText("Left-click to build a city", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 80, 20, DARKGREEN);
     DrawText("Esc to exit the game", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 120, 20, DARKGREEN);
-    DrawText("Right-click to drop a bomb", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 160, 20, DARKGREEN);
+    DrawText("1 to drop a atom bomb, 2 a hydrogen bomb", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 160, 20, DARKGREEN);
     DrawText("F11 to toggle fullscreen", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 200, 20, DARKGREEN);
     DrawText("Space to expand your territory", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 240, 20, DARKGREEN);
 
@@ -144,6 +164,9 @@ void displayInfoTexts() {
     DrawText(populationText, 0 + 25, GetScreenHeight() - 50, 20, DARKGREEN);
     const char *sendText = TextFormat("People exploring: %d", player->_peopleCurrentlyExploring);
     DrawText(sendText, 0 + 25, GetScreenHeight() - 25, 20, DARKGREEN);
+
+    // money
+    DrawText(TextFormat("Money Balance: %i", money->moneyBalance), 25, GetScreenHeight() - 75, 20, DARKGREEN);
 }
 
 void handleControls() {
@@ -239,6 +262,21 @@ void checkExplosion() {
         perlinTexture = LoadTextureFromImage(perlin);
     }
 }
+
+void increaseMoney()
+{
+    float currentTime = GetTime();
+
+    if (currentTime - lastActionTime >= cooldownTime)
+    {
+        int peopleAddition = 2;
+        int totalAddition = peopleAddition * player->_population;
+        money->moneyBalance += totalAddition;
+
+        lastActionTime = currentTime;
+    }
+}
+
 
 
 void initCamAndMap() {
