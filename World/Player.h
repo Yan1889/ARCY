@@ -77,15 +77,6 @@ public:
 
     static float GetDifficulty(const Color& terrainColor);
 
-    // Test
-    void DrawTerritory() const;
-    void SortFrontierPixels();
-    void UpdateTerritoryTexture();
-    void DrawTerritoryTexture() const;
-    std::vector<Pixel> GetConvexHull(const std::vector<Pixel>& points);
-    RenderTexture2D _territoryTexture;
-    bool _territoryDirty = true;
-
     void Update();
     void GrowPopulation();
     void AddCity(Vector2 pos);

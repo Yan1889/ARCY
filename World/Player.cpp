@@ -26,10 +26,6 @@ Player::Player(Pixel startPos, int startRadius, Image &perlin): _bgImage(perlin)
         }
     }
     UpdateFrontier();
-
-    // Test
-    _territoryTexture = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
-    _territoryDirty = true;
 }
 
 
@@ -60,7 +56,7 @@ void Player::GrowPopulation() {
         const float totalGrowth = _population * _growth;
 
         if (_population < _maxPopulation) {
-            _population += static_cast<int>(ceil(totalGrowth)); // ich glaube ich spinne @Colin: (int) ts ts ts
+            _population += static_cast<int>(ceil(totalGrowth));
         }
 
         if (_population > _maxPopulation) {
@@ -130,121 +126,6 @@ void Player::ExpandOnceOnAllFrontierPixels() {
             ++iter;
         }
     }
-
-    // Test
-    _territoryDirty = true;
-}
-
-// Test
-float Cross(const Pixel& O, const Pixel& A, const Pixel& B) {
-    return (A.x - O.x) * (B.y - O.y) - (A.y - O.y) * (B.x - O.x);
-}
-
-std::vector<Pixel> Player::GetConvexHull(const std::vector<Pixel>& points) {
-    std::vector<Pixel> sorted = points;
-    std::sort(sorted.begin(), sorted.end(), [](const Pixel& a, const Pixel& b) {
-        return a.x < b.x || (a.x == b.x && a.y < b.y);
-    });
-
-    std::vector<Pixel> hull;
-
-    for (int phase = 0; phase < 2; ++phase) {
-        int start = hull.size();
-        for (const Pixel& p : sorted) {
-            while (hull.size() >= start + 2 &&
-                   Cross(hull[hull.size() - 2], hull[hull.size() - 1], p) <= 0) {
-                hull.pop_back();
-                   }
-            hull.push_back(p);
-        }
-        std::reverse(sorted.begin(), sorted.end());
-    }
-
-    hull.pop_back(); // letzter Punkt == erster
-    return hull;
-}
-
-void Player::DrawTerritory() const {
-    if (_frontierPixels.size() < 3) return;
-
-    std::vector<Vector2> polygon;
-
-    for (const Pixel& p : _frontierPixels) {
-        polygon.push_back({ (float)p.x, (float)p.y });
-    }
-
-    float minX = polygon[0].x, maxX = polygon[0].x;
-    float minY = polygon[0].y, maxY = polygon[0].y;
-
-    for (const Vector2& p : polygon) {
-        if (p.x < minX) minX = p.x;
-        if (p.x > maxX) maxX = p.x;
-        if (p.y < minY) minY = p.y;
-        if (p.y > maxY) maxY = p.y;
-    }
-
-    for (int y = (int)minY; y <= (int)maxY; y++) {
-        for (int x = (int)minX; x <= (int)maxX; x++) {
-            Vector2 pt = { (float)x + 0.5f, (float)y + 0.5f };
-            if (CheckCollisionPointPoly(pt, polygon.data(), polygon.size())) {
-                DrawPixel(x, y, RED);
-            }
-        }
-    }
-}
-
-void Player::SortFrontierPixels() {
-    if (_frontierPixels.size() < 3) return;
-
-    float centerX = 0;
-    float centerY = 0;
-    for (const Pixel& p : _frontierPixels) {
-        centerX += p.x;
-        centerY += p.y;
-    }
-    centerX /= _frontierPixels.size();
-    centerY /= _frontierPixels.size();
-
-    std::sort(_frontierPixels.begin(), _frontierPixels.end(),
-              [centerX, centerY](const Pixel& a, const Pixel& b) {
-                  float angleA = atan2(a.y - centerY, a.x - centerX);
-                  float angleB = atan2(b.y - centerY, b.x - centerX);
-                  return angleA < angleB;
-              });
-}
-
-void Player::UpdateTerritoryTexture() {
-    if (!_territoryDirty) return;
-
-    BeginTextureMode(_territoryTexture);
-    ClearBackground(BLANK); // Vollständig transparent oder weiß
-
-    if (_frontierPixels.size() >= 3) {
-        std::vector<Pixel> hull = GetConvexHull(_frontierPixels);
-
-        // Umwandeln zu Vector2
-        std::vector<Vector2> polygon;
-        for (const Pixel& p : hull) {
-            polygon.push_back(Vector2{static_cast<float>(p.x), static_cast<float>(p.y)});
-        }
-
-        if (polygon.size() >= 3) {
-            DrawTriangleFan(polygon.data(), polygon.size(), RED);
-        }
-    }
-
-    EndTextureMode();
-
-    _territoryDirty = false;
-}
-
-void Player::DrawTerritoryTexture() const {
-    DrawTextureRec(
-        _territoryTexture.texture,
-        {0, 0, (float)_territoryTexture.texture.width, -(float)_territoryTexture.texture.height},
-        {0, 0},
-        WHITE
-    );
 }
 
 bool Player::IsFrontierPixel(const Pixel &p) const {

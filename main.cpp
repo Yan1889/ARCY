@@ -53,7 +53,7 @@ int main() {
     TextureCollection::LoadAll();
 
     // we dont need 4000 fps - Yes we need 4000+ fps to ditch Python! Sincerely Colin
-    SetTargetFPS(60);
+    SetTargetFPS(10000);
 
     initCamAndMap();
 
@@ -83,12 +83,9 @@ int main() {
 
         BeginDrawing();
 
-        ClearBackground(Color{90, 90, 255, 255});
-
         BeginMode2D(camera);
 
         DrawTextureV(perlinTexture, Vector2{0, 0}, WHITE);
-
 
         for (const Pixel &pixel: player->_frontierPixels) {
             DrawPixel(pixel.x, pixel.y, RED);
@@ -99,9 +96,6 @@ int main() {
             DrawPixel(pixel.x, pixel.y, Fade(ORANGE, 0.5));
         }
         */
-
-        player->SortFrontierPixels();
-        player->DrawTerritory();
 
         // display each city (now fr)
         for (const Vector2 &circle: player->_cityPositions) {
