@@ -6,10 +6,19 @@
 #define GLOBALS_H
 #include <vector>
 
+#include "PerlinNoise.h"
+#include "raylib.h"
+
 struct Gradient;
+
+struct Pixel;
+
+class Player;
 
 // G for global
 namespace G {
+    inline Image perlin;
+    inline Texture2D perlinTexture{0};
     inline std::vector<Gradient> mapParts = {
         Gradient{32 * 1 + 10, {90, 90, 255, 255}, 0.f}, // Deep Water
         Gradient{32 * 2 + 10, {125, 125, 255, 255}, 0.f}, // Low Water
@@ -21,9 +30,11 @@ namespace G {
         Gradient{32 * 7 - 20, {153, 153, 153, 255}, 0.f}, // Mountain
         Gradient{32 * 8, {255, 255, 255, 255}, 0.f}, // Snow
     };
+
+
     inline float maxDifficulty = 30;
 
-    inline int playerCount{};
+    inline int playerCount;
 
     inline int WIDTH;
     inline int HEIGHT;
@@ -31,37 +42,11 @@ namespace G {
     inline Texture2D territoryTexture;
     inline Image territoryImage;
 
-    inline void SetPixelOnTerritory(const int x, const int y, const Pixel pixel, const Color color) {
-        territoryMap[y][x] = pixel;
-        static_cast<Color *>(territoryImage.data)[y * WIDTH + x] = color;
-
-        const Color buffer[] {color};
-
-        UpdateTextureRec(
-            territoryTexture,
-            Rectangle{
-                static_cast<float>(x),
-                static_cast<float>(y),
-                1,
-                1
-            },
-            buffer
-        );
-    }
 
     inline void InitMap(const int w, const int h) {
         WIDTH = w;
         HEIGHT = h;
-
-        territoryMap.resize(HEIGHT, std::vector<Pixel>(WIDTH));
-        for (int y = 0; y < HEIGHT; y++) {
-            for (int x = 0; x < WIDTH; x++) {
-                territoryMap[y][x].x = x;
-                territoryMap[y][x].y = y;
-            }
-        }
-        territoryImage = GenImageColor(WIDTH, HEIGHT, BLANK);
-        territoryTexture = LoadTextureFromImage(territoryImage);
     }
 }
+
 #endif //GLOBALS_H

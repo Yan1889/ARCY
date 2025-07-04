@@ -13,8 +13,15 @@
 #include "raylib.h"
 
 
-Player::Player(Pixel startPos, int startRadius, Image &perlin): _bgImage(perlin) {
+Player::Player(Pixel startPos, int startRadius) {
     G::playerCount++;
+    _id = G::playerCount;
+    _color = Color{
+        static_cast<unsigned char>(255 * rand() / RAND_MAX),
+        static_cast<unsigned char>(255 * rand() / RAND_MAX),
+        static_cast<unsigned char>(255 * rand() / RAND_MAX),
+        255
+    };
 
     _money = Money();
 
@@ -27,8 +34,7 @@ Player::Player(Pixel startPos, int startRadius, Image &perlin): _bgImage(perlin)
 
         for (int y = yMin; y <= yMax; y++) {
             Pixel p = G::territoryMap[y][x];
-            p.playerId = G::playerCount; // 0 = not occupied
-            G::SetPixelOnTerritory(x, y, p, ORANGE);
+            GetOwnershipOfPixel(x, y);
             _allPixels.insert(p);
         }
     }
@@ -89,43 +95,35 @@ void Player::ExpandOnceOnAllFrontierPixels() {
     std::vector<Pixel> expansionFrontier = _frontierPixels; // snapshot
     std::unordered_set<Pixel, Pixel::Hasher> newPixels;
 
-    while (_peopleCurrentlyExploring > 0 && !expansionFrontier.empty()) {
-        const int randIdx = rand() % expansionFrontier.size();
-        const Pixel &randomFrontierPixel = expansionFrontier[randIdx];
+    for (const Pixel& borderPixel : expansionFrontier) {
+        if (_peopleCurrentlyExploring <= 0) break;
 
-        const std::vector<Pixel> neighborPixels = randomFrontierPixel.GetNeighborPixels();
+        const std::vector<Pixel> neighborPixels = borderPixel.GetNeighborPixels();
         int randNeighborIdx = rand() % neighborPixels.size();
 
         const Pixel &newP = neighborPixels[randNeighborIdx];
-
-        Color terrainOnPixel = static_cast<const Color *>(_bgImage.data)[_bgImage.width * newP.y + newP.x];
+        if (newP.playerId != 0) {
+            continue;
+        }
+        Color terrainOnPixel = static_cast<const Color *>(G::perlin.data)[G::perlin.width * newP.y + newP.x];
 
         const float invasionAcceptP = GetInvasionAcceptP(terrainOnPixel);
 
         if (invasionAcceptP == 0 || invasionAcceptP < static_cast<float>(rand()) / RAND_MAX) {
-            expansionFrontier.erase(expansionFrontier.begin() + randIdx);
+            // also loose a person
+            _peopleCurrentlyExploring--;
             continue;
         }
         if (!_allPixels.contains(newP) && !newPixels.contains(newP)) {
             newPixels.insert(newP);
             _allPixels.insert(newP);
-            G::SetPixelOnTerritory(newP.x, newP.y, newP, ORANGE);
+            GetOwnershipOfPixel(newP.x, newP.y);
             _frontierPixels.push_back(newP);
             _frontierSet.insert(newP);
             _peopleCurrentlyExploring--;
 
-            for (const Pixel &potentialInvalidFrontierP: newP.GetNeighborPixels()) {
-                if (_frontierSet.contains(potentialInvalidFrontierP)) {
-                    if (!IsFrontierPixel(potentialInvalidFrontierP)) {
-                        std::erase(_frontierPixels, potentialInvalidFrontierP);
-                        _frontierSet.erase(potentialInvalidFrontierP);
-                    }
-                }
-            }
-
             if (_peopleCurrentlyExploring == 0) break;
         }
-        expansionFrontier.erase(expansionFrontier.begin() + randIdx);
     }
 
     for (auto iter = _frontierPixels.begin(); iter != _frontierPixels.end();) {
@@ -164,20 +162,39 @@ void Player::UpdateFrontier() {
         }
     }
 }
+
+void Player::GetOwnershipOfPixel(const int x, const int y) {
+    G::territoryMap[y][x] = {x, y, _id};
+    static_cast<Color *>(G::territoryImage.data)[y * G::WIDTH + x] = _color;
+
+    const Color buffer[]{_color};
+
+    UpdateTextureRec(
+        G::territoryTexture,
+        Rectangle{
+            static_cast<float>(x),
+            static_cast<float>(y),
+            1,
+            1
+        },
+        buffer
+    );
+}
+
 void Player::IncreaseMoney() {
     float currentTime = GetTime();
 
-    if (currentTime - lastActionTime >= cooldownTime) {
+    if (currentTime - _lastActionTime >= _cooldownTime) {
         int peopleAddition = 2;
         int totalAddition = peopleAddition * _population;
         _money.moneyBalance += totalAddition;
 
-        lastActionTime = currentTime;
+        _lastActionTime = currentTime;
     }
 }
 
 float Player::GetInvasionAcceptP(const Color &terrainColor) {
-    for (auto & mapPart : G::mapParts) {
+    for (auto &mapPart: G::mapParts) {
         if (terrainColor.r == mapPart.color.r) {
             return mapPart.difficulty;
         }

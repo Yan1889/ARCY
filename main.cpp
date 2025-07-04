@@ -3,8 +3,6 @@
 #include <vector>
 
 #include "raylib.h"
-#include "raymath.h"
-#include "World/PerlinNoise.h"
 #include "World/TextureCollection.h"
 #include "World/Player.h"
 #include "World/Globals.h"
@@ -21,10 +19,6 @@ Color grayScale(const unsigned char gray) {
     return Color{gray, gray, gray, 255};
 }
 
-// ----- perlin settings -----
-Image perlin;
-Texture2D perlinTexture{0};
-
 
 // ----- camera setting -----
 Camera2D camera{};
@@ -35,7 +29,7 @@ const float zoomMax = 10.0f;
 
 
 Vector2 playerPos(MAP_WIDTH / 2, MAP_HEIGHT / 2);
-Player *player;
+std::vector<Player> players{};
 
 
 void initCamAndMap();
@@ -58,18 +52,31 @@ int main() {
 
     initCamAndMap();
 
-    player = new Player(
+    // main character
+    players.push_back(Player(
         {
             static_cast<int>(playerPos.x),
             static_cast<int>(playerPos.y)
         },
-        10,
-        perlin
-    );
+        10
+    ));
 
-    player->cooldownTime = 1.0f;
-    player->lastActionTime = GetTime();
+    // 10 bots
+    for (int i = 0; i < 10; i++) {
+        const int botSpawnRadius = 100;
+        players.push_back(Player(
+            {
+                static_cast<int>(playerPos.x + std::cos(2 * PI * i / 10) * botSpawnRadius),
+                static_cast<int>(playerPos.y + std::sin(2 * PI * i / 10) * botSpawnRadius)
+            },
+            5
+        ));
+    }
 
+    for (Player &p: players) {
+        p._cooldownTime = 1.0f;
+        p._lastActionTime = GetTime();
+    }
 
     while (!WindowShouldClose()) {
         handleControls();
@@ -81,13 +88,15 @@ int main() {
         BeginMode2D(camera);
 
         // terrain bg texture
-        DrawTextureV(perlinTexture, Vector2{0, 0}, WHITE);
+        DrawTextureV(G::perlinTexture, Vector2{0, 0}, WHITE);
         // territory texture
         DrawTexture(G::territoryTexture, 0, 0, Fade(WHITE, 0.5));
 
         // I think it's okay to draw a few border pixels manually with this loop, what do you think @Colin?
-        for (const Pixel &pixel: player->_frontierPixels) {
-            DrawPixel(pixel.x, pixel.y, ORANGE);
+        for (const Player &p: players) {
+            for (const Pixel &pixel: p._frontierPixels) {
+                DrawPixel(pixel.x, pixel.y, p._color);
+            }
         }
 
         /* Code noch nicht ausprobiert (neue Methode)
@@ -105,14 +114,15 @@ int main() {
 
         */
 
-        // display each city (now fr)
-        for (const Vector2 &circle: player->_cityPositions) {
+        // display each city of main character
+        for (const Vector2 &circle: players[0]._cityPositions) {
             DrawTextureV(TextureCollection::city, circle, WHITE);
         }
 
         // Population
-        player->Update();
-
+        for (Player &p: players) {
+            p.Update();
+        }
         EndMode2D();
 
         displayInfoTexts();
@@ -122,7 +132,6 @@ int main() {
 
     // clean up everything
     TextureCollection::UnloadAll();
-    delete player;
 
     CloseWindow();
     return 0;
@@ -149,8 +158,8 @@ void displayInfoTexts() {
     DrawText(fpsText, textX, textY, 20, DARKGREEN);
 
     // population
-    float populationDisplay = static_cast<float>(player->_population);
-    float maxPopulationDisplay = static_cast<float>(player->_maxPopulation);
+    float populationDisplay = static_cast<float>(players[0]._population);
+    float maxPopulationDisplay = static_cast<float>(players[0]._maxPopulation);
     const char *populationText;
 
     if (maxPopulationDisplay >= 1000) {
@@ -166,11 +175,11 @@ void displayInfoTexts() {
     }
 
     DrawText(populationText, 0 + 25, GetScreenHeight() - 50, 20, DARKGREEN);
-    const char *sendText = TextFormat("People exploring: %d", player->_peopleCurrentlyExploring);
+    const char *sendText = TextFormat("People exploring: %d", players[0]._peopleCurrentlyExploring);
     DrawText(sendText, 0 + 25, GetScreenHeight() - 25, 20, DARKGREEN);
 
     // money
-    float moneyBalanceDisplay = static_cast<float>(player->_money.moneyBalance);
+    float moneyBalanceDisplay = static_cast<float>(players[0]._money.moneyBalance);
     const char *moneyText;
 
     if (moneyBalanceDisplay >= 1000) {
@@ -194,16 +203,19 @@ void handleControls() {
     if (IsKeyDown(KEY_ESCAPE)) WindowShouldClose();
 
     // expand with space is clicked
-    if (IsKeyPressed(KEY_SPACE) && player->_population / 2 >= 100) {
-        player->Expand(0.5);
+    if (IsKeyPressed(KEY_SPACE) && players[0]._population / 2 >= 100) {
+        // players[0].Expand(0.5);
+        for (Player& p : players) {
+           p.Expand(0.5);
+        }
     }
     // Create cities when left-clicking
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        int cost = 10000 * (player->_cityPositions.size() + 1);
+        int cost = 10000 * (players[0]._cityPositions.size() + 1);
 
-        if (player->_money.moneyBalance - cost >= 0) {
-            player->_money.spendMoney(cost);
-            player->AddCity(GetScreenToWorld2D(GetMousePosition(), camera));
+        if (players[0]._money.moneyBalance - cost >= 0) {
+            players[0]._money.spendMoney(cost);
+            players[0].AddCity(GetScreenToWorld2D(GetMousePosition(), camera));
         }
     }
 
@@ -225,8 +237,8 @@ void handleControls() {
 void checkExplosion() {
     if (IsKeyPressed(KEY_ONE)) {
         int cost = 10000;
-        if (player->_money.moneyBalance - cost < 0) return;
-        player->_money.spendMoney(cost);
+        if (players[0]._money.moneyBalance - cost < 0) return;
+        players[0]._money.spendMoney(cost);
 
         const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), camera);
         const int radius = 50;
@@ -248,18 +260,18 @@ void checkExplosion() {
                             255 // Alpha
                         };
 
-                        ImageDrawPixel(&perlin, px, py, explosionColor);
+                        ImageDrawPixel(&G::perlin, px, py, explosionColor);
                     }
                 }
             }
         }
 
-        UnloadTexture(perlinTexture);
-        perlinTexture = LoadTextureFromImage(perlin);
+        UnloadTexture(G::perlinTexture);
+        G::perlinTexture = LoadTextureFromImage(G::perlin);
     } else if (IsKeyPressed(KEY_TWO)) {
         int cost = 100000;
-        if (player->_money.moneyBalance - cost < 0) return;
-        player->_money.spendMoney(cost);
+        if (players[0]._money.moneyBalance - cost < 0) return;
+        players[0]._money.spendMoney(cost);
 
         const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), camera);
         const int radius = 300;
@@ -281,14 +293,14 @@ void checkExplosion() {
                             255 // Alpha
                         };
 
-                        ImageDrawPixel(&perlin, px, py, explosionColor);
+                        ImageDrawPixel(&G::perlin, px, py, explosionColor);
                     }
                 }
             }
         }
 
-        UnloadTexture(perlinTexture);
-        perlinTexture = LoadTextureFromImage(perlin);
+        UnloadTexture(G::perlinTexture);
+        G::perlinTexture = LoadTextureFromImage(G::perlin);
     }
 }
 
@@ -300,16 +312,27 @@ void initCamAndMap() {
     camera.zoom = 1.0f;
 
     // map
-    perlin = GenImagePerlinNoise(
+    G::InitMap(MAP_WIDTH, MAP_HEIGHT);
+
+    // terrain
+    G::perlin = GenImagePerlinNoise(
         MAP_WIDTH, MAP_HEIGHT,
-        static_cast<int>(rand() * 10000.0f / RAND_MAX) * (SCREEN_WIDTH / 2),
-        static_cast<int>(rand() * 10000.0f / RAND_MAX) * (SCREEN_HEIGHT / 2),
+        static_cast<int>(rand() * 10000.0f / RAND_MAX) * (MAP_WIDTH / 2),
+        static_cast<int>(rand() * 10000.0f / RAND_MAX) * (MAP_HEIGHT / 2),
         6
     );
     std::vector<std::vector<float> > falloff = PerlinNoise::GenerateFalloffMap(MAP_WIDTH, MAP_HEIGHT);
-    PerlinNoise::ApplyFalloffToImage(&perlin, falloff); // finally use falloff
-    PerlinNoise::proceedMap(&perlin, G::mapParts);
-    perlinTexture = LoadTextureFromImage(perlin);
+    PerlinNoise::ApplyFalloffToImage(&G::perlin, falloff); // finally use falloff
+    PerlinNoise::proceedMap(&G::perlin, G::mapParts);
+    G::perlinTexture = LoadTextureFromImage(G::perlin);
 
-    G::InitMap(MAP_WIDTH, MAP_HEIGHT);
+
+    G::territoryMap = std::vector<std::vector<Pixel> >(MAP_HEIGHT, std::vector<Pixel>(MAP_WIDTH));
+    for (int y = 0; y < MAP_HEIGHT; y++) {
+        for (int x = 0; x < MAP_WIDTH; x++) {
+            G::territoryMap[y][x] = {x, y, 0};
+        }
+    }
+    G::territoryImage = GenImageColor(G::WIDTH, G::HEIGHT, BLANK);
+    G::territoryTexture = LoadTextureFromImage(G::territoryImage);
 }

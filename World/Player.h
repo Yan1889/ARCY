@@ -4,51 +4,20 @@
 
 #ifndef POPULATION_H
 #define POPULATION_H
-#include <cmath>
-#include <set>
 #include <unordered_set>
 #include <vector>
 
 #include "Money.h"
-#include "PerlinNoise.h"
+#include "Pixel.h"
 #include "raylib.h"
-
-
-struct Pixel {
-    int x, y;
-    int playerId;
-
-    [[nodiscard]] std::vector<Pixel> GetNeighborPixels() const {
-        std::vector<Pixel> result;
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dy = -1; dy <= 1; dy++) {
-                if (dx == 0 && dy == 0) continue;
-                if (std::abs(dx) == std::abs(dy)) continue;
-
-                result.push_back({x + dx, y + dy});
-            }
-        }
-        return result;
-    }
-
-    bool operator<(const Pixel& other) const {
-        return std::tie(x, y) < std::tie(other.x, other.y);
-    }
-    bool operator==(const Pixel& other) const {
-        return x == other.x && y == other.y;
-    }
-
-    struct Hasher {
-        std::size_t operator()(const Pixel& p) const {
-            return std::hash<int>()(p.x) ^ (std::hash<int>()(p.y) << 1);
-        }
-    };
-};
 
 
 
 class Player {
 public:
+    int _id;
+    Color _color;
+
     // population
     int _population = 100;
     int _maxPopulation{};
@@ -63,8 +32,8 @@ public:
     int _maxPeopleExploring = 10000;
 
     // money
-    float cooldownTime;
-    float lastActionTime;
+    float _cooldownTime;
+    float _lastActionTime;
     Money _money;
 
     // territory
@@ -72,9 +41,8 @@ public:
     std::vector<Pixel> _frontierPixels;
     std::unordered_set<Pixel, Pixel::Hasher> _frontierSet;
 
-    Image _bgImage;
 
-    Player(Pixel startPos, int startRadius, Image& perlin);
+    Player(Pixel startPos, int startRadius);
 
     void Expand(float percentage);
 
@@ -85,6 +53,8 @@ public:
     bool IsFrontierPixel(const Pixel& p) const;
 
     static float GetInvasionAcceptP(const Color& terrainColor);
+
+    void GetOwnershipOfPixel(int x, int y);
 
     void Update();
     void GrowPopulation();
