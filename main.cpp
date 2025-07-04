@@ -89,12 +89,30 @@ int main() {
 
         BeginMode2D(camera);
 
+        // terrain bg texture
         DrawTextureV(perlinTexture, Vector2{0, 0}, WHITE);
+        // territory texture
+        DrawTexture(G::territoryTexture, 0, 0, Fade(WHITE, 0.5));
 
-        DrawTexture(G::territoryTexture, 0, 0, WHITE);
+        // I think it's okay to draw a few border pixels manually with this loop, what do you think @Colin?
         for (const Pixel &pixel: player->_frontierPixels) {
-            DrawPixel(pixel.x, pixel.y, RED);
+            DrawPixel(pixel.x, pixel.y, ORANGE);
         }
+
+        /* Code noch nicht ausprobiert (neue Methode)
+
+        for (const Pixel &pixel: player->_frontierPixels) {
+            ImageDrawPixel(&perlin, pixel.x, pixel.y, RED);
+        }
+
+        for (const Pixel &pixel: player->_allPixels) {
+            ImageDrawPixel(&perlin, pixel.x, pixel.y, Fade(ORANGE, 0.5));
+        }
+
+        UnloadTexture(perlinTexture);
+        perlinTexture = LoadTextureFromImage(perlin);
+
+        */
 
         // display each city (now fr)
         for (const Vector2 &circle: player->_cityPositions) {
@@ -124,9 +142,11 @@ void displayInfoTexts() {
     // instructions
     DrawText("Move with WASD", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20, 20, DARKGREEN);
     DrawText("Up or Down Arrow to zoom", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 40, 20, DARKGREEN);
-    DrawText("Left-click to build a city ($10K * city count)", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 80, 20, DARKGREEN);
+    DrawText("Left-click to build a city ($10K * city count)", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 80,
+             20, DARKGREEN);
     DrawText("Esc to exit the game", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 120, 20, DARKGREEN);
-    DrawText("1 to drop a atom bomb ($10K), 2 a hydrogen bomb ($100K)", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 160, 20, DARKGREEN);
+    DrawText("1 to drop a atom bomb ($10K), 2 a hydrogen bomb ($100K)", GetScreenWidth() / 20 - 25,
+             GetScreenHeight() / 20 + 160, 20, DARKGREEN);
     DrawText("F11 to toggle fullscreen", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 200, 20, DARKGREEN);
     DrawText("Space to expand your territory", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 240, 20, DARKGREEN);
 
@@ -143,18 +163,14 @@ void displayInfoTexts() {
     float maxPopulationDisplay = static_cast<float>(player->_maxPopulation);
     const char *populationText;
 
-    if (maxPopulationDisplay >= 1000)
-    {
+    if (maxPopulationDisplay >= 1000) {
         maxPopulationDisplay /= 1000;
 
-        if (populationDisplay >= 1000)
-        {
+        if (populationDisplay >= 1000) {
             populationDisplay /= 1000;
 
             populationText = TextFormat("Population: %.2fK / %.2fK", populationDisplay, maxPopulationDisplay);
-        }
-        else
-        {
+        } else {
             populationText = TextFormat("Population: %.0f / %.2fK", populationDisplay, maxPopulationDisplay);
         }
     }
@@ -167,14 +183,11 @@ void displayInfoTexts() {
     float moneyBalanceDisplay = static_cast<float>(money->moneyBalance);
     const char *moneyText;
 
-    if (moneyBalanceDisplay >= 1000)
-    {
+    if (moneyBalanceDisplay >= 1000) {
         moneyBalanceDisplay /= 1000;
 
         moneyText = TextFormat("Money Balance: $%.2fK", moneyBalanceDisplay);
-    }
-    else
-    {
+    } else {
         moneyText = TextFormat("Money Balance: $%.0fK", moneyBalanceDisplay);
     }
 
@@ -198,8 +211,7 @@ void handleControls() {
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         int cost = 10000 * (player->_cityPositions.size() + 1);
 
-        if (money ->moneyBalance - cost >= 0)
-        {
+        if (money->moneyBalance - cost >= 0) {
             money->spendMoney(cost);
             player->AddCity(GetScreenToWorld2D(GetMousePosition(), camera));
         }
@@ -231,20 +243,19 @@ void checkExplosion() {
 
         for (int y = -radius; y <= radius; y++) {
             for (int x = -radius; x <= radius; x++) {
-                int px = (int)mousePos.x + x;
-                int py = (int)mousePos.y + y;
+                int px = (int) mousePos.x + x;
+                int py = (int) mousePos.y + y;
 
-                float distance = sqrtf((float)(x * x + y * y)) / radius;
+                float distance = sqrtf((float) (x * x + y * y)) / radius;
                 float noise = GetRandomValue(50, 100) / 100.0f;
 
                 if (distance <= 1.0f && noise > distance) {
                     if (px >= 0 && py >= 0 && px < MAP_WIDTH && py < MAP_HEIGHT) {
-
                         Color explosionColor = Color{
-                            (unsigned char)GetRandomValue(0, 200),  // Red
-                            (unsigned char)GetRandomValue(230, 255),   // Green
-                            (unsigned char)GetRandomValue(0, 50),  // Blue                                       // Blue
-                            255  // Alpha
+                            (unsigned char) GetRandomValue(0, 200), // Red
+                            (unsigned char) GetRandomValue(230, 255), // Green
+                            (unsigned char) GetRandomValue(0, 50), // Blue                                       // Blue
+                            255 // Alpha
                         };
 
                         ImageDrawPixel(&perlin, px, py, explosionColor);
@@ -255,8 +266,7 @@ void checkExplosion() {
 
         UnloadTexture(perlinTexture);
         perlinTexture = LoadTextureFromImage(perlin);
-    }
-    else if (IsKeyPressed(KEY_TWO)) {
+    } else if (IsKeyPressed(KEY_TWO)) {
         int cost = 100000;
         if (money->moneyBalance - cost < 0) return;
         money->spendMoney(cost);
@@ -266,20 +276,19 @@ void checkExplosion() {
 
         for (int y = -radius; y <= radius; y++) {
             for (int x = -radius; x <= radius; x++) {
-                int px = (int)mousePos.x + x;
-                int py = (int)mousePos.y + y;
+                int px = (int) mousePos.x + x;
+                int py = (int) mousePos.y + y;
 
-                float distance = sqrtf((float)(x * x + y * y)) / radius;
+                float distance = sqrtf((float) (x * x + y * y)) / radius;
                 float noise = GetRandomValue(50, 100) / 100.0f;
 
                 if (distance <= 1.0f && noise > distance) {
                     if (px >= 0 && py >= 0 && px < MAP_WIDTH && py < MAP_HEIGHT) {
-
                         Color explosionColor = Color{
-                            (unsigned char)GetRandomValue(0, 200),  // Red
-                            (unsigned char)GetRandomValue(230, 255),   // Green
-                            (unsigned char)GetRandomValue(0, 50),  // Blue                                       // Blue
-                            255  // Alpha
+                            (unsigned char) GetRandomValue(0, 200), // Red
+                            (unsigned char) GetRandomValue(230, 255), // Green
+                            (unsigned char) GetRandomValue(0, 50), // Blue                                       // Blue
+                            255 // Alpha
                         };
 
                         ImageDrawPixel(&perlin, px, py, explosionColor);
@@ -293,12 +302,10 @@ void checkExplosion() {
     }
 }
 
-void increaseMoney()
-{
+void increaseMoney() {
     float currentTime = GetTime();
 
-    if (currentTime - lastActionTime >= cooldownTime)
-    {
+    if (currentTime - lastActionTime >= cooldownTime) {
         int peopleAddition = 2;
         int totalAddition = peopleAddition * player->_population;
         money->moneyBalance += totalAddition;
@@ -306,7 +313,6 @@ void increaseMoney()
         lastActionTime = currentTime;
     }
 }
-
 
 
 void initCamAndMap() {

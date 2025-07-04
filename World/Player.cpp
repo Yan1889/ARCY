@@ -26,7 +26,7 @@ Player::Player(Pixel startPos, int startRadius, Image &perlin): _bgImage(perlin)
         for (int y = yMin; y <= yMax; y++) {
             Pixel p = G::territoryMap[y][x];
             p.playerId = G::playerCount; // 0 = not occupied
-            G::SetPixelOnTerritory(x, y, p, Fade(ORANGE, 0.5f));
+            G::SetPixelOnTerritory(x, y, p, ORANGE);
             _allPixels.insert(p);
         }
     }
@@ -105,7 +105,7 @@ void Player::ExpandOnceOnAllFrontierPixels() {
         if (!_allPixels.contains(newP) && !newPixels.contains(newP)) {
             newPixels.insert(newP);
             _allPixels.insert(newP);
-            G::SetPixelOnTerritory(newP.x, newP.y, newP, Fade(ORANGE, 0.5));
+            G::SetPixelOnTerritory(newP.x, newP.y, newP, ORANGE);
             _frontierPixels.push_back(newP);
             _frontierSet.insert(newP);
             _peopleCurrentlyExploring--;
