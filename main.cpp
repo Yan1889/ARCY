@@ -111,10 +111,15 @@ int main() {
             DrawPixel(pixel.x, pixel.y, RED);
         }
 
-        /* Test
+        /* Code noch nicht ausprobiert (neue Methode)
+        
         for (const Pixel &pixel: player->_allPixels) {
-            DrawPixel(pixel.x, pixel.y, Fade(ORANGE, 0.5));
+            ImageDrawPixel(&perlin, pixel.x, pixel.y, Fade(ORANGE, 0.5));
         }
+        
+        UnloadTexture(perlinTexture);
+        perlinTexture = LoadTextureFromImage(perlin);
+        
         */
 
         // display each city (now fr)
