@@ -14,6 +14,8 @@
 
 
 Player::Player(Pixel startPos, int startRadius, Image &perlin): _bgImage(perlin) {
+    G::playerCount++;
+
     for (int x = startPos.x - startRadius; x < startPos.x + startRadius; x++) {
         const int dx = x - startPos.x;
         const int dh = std::sqrt(startRadius * startRadius - dx * dx);
@@ -22,7 +24,10 @@ Player::Player(Pixel startPos, int startRadius, Image &perlin): _bgImage(perlin)
         const int yMax = startPos.y + dh;
 
         for (int y = yMin; y <= yMax; y++) {
-            _allPixels.insert({x, y});
+            Pixel p = G::territoryMap[y][x];
+            p.playerId = G::playerCount; // 0 = not occupied
+            G::SetPixelOnTerritory(x, y, p, Fade(ORANGE, 0.5f));
+            _allPixels.insert(p);
         }
     }
     UpdateFrontier();
@@ -91,15 +96,16 @@ void Player::ExpandOnceOnAllFrontierPixels() {
 
         Color terrainOnPixel = static_cast<const Color *>(_bgImage.data)[_bgImage.width * newP.y + newP.x];
 
-        const float difficulty = GetDifficulty(terrainOnPixel);
+        const float invasionAcceptP = GetInvasionAcceptP(terrainOnPixel);
 
-        if (difficulty == -1 || difficulty / G::maxDifficulty > static_cast<float>(rand()) / RAND_MAX) {
+        if (invasionAcceptP == 0 || invasionAcceptP < static_cast<float>(rand()) / RAND_MAX) {
             expansionFrontier.erase(expansionFrontier.begin() + randIdx);
             continue;
         }
         if (!_allPixels.contains(newP) && !newPixels.contains(newP)) {
             newPixels.insert(newP);
             _allPixels.insert(newP);
+            G::SetPixelOnTerritory(newP.x, newP.y, newP, Fade(ORANGE, 0.5));
             _frontierPixels.push_back(newP);
             _frontierSet.insert(newP);
             _peopleCurrentlyExploring--;
@@ -155,10 +161,10 @@ void Player::UpdateFrontier() {
     }
 }
 
-float Player::GetDifficulty(const Color &terrainColor) {
-    for (int i = 0; i < G::map.size(); ++i) {
-        if (terrainColor.r == G::map[i].color.r) {
-            return G::map[i].difficulty;
+float Player::GetInvasionAcceptP(const Color &terrainColor) {
+    for (int i = 0; i < G::mapParts.size(); ++i) {
+        if (terrainColor.r == G::mapParts[i].color.r) {
+            return G::mapParts[i].difficulty;
         }
     }
     return -1;

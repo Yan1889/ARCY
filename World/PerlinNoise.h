@@ -11,7 +11,7 @@
 struct Gradient {
     int level;
     Color color;
-    int difficulty;
+    float difficulty; // between 0 and 1, 0 = impossible to occupy
 };
 
 class PerlinNoise {

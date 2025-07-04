@@ -76,7 +76,6 @@ int main() {
     cooldownTime = 1.0f;
     lastActionTime = GetTime();
 
-    std::cout << player->_population << std::endl;
 
     while (!WindowShouldClose()) {
         handleControls();
@@ -85,21 +84,6 @@ int main() {
         // Add money depending on population
         increaseMoney();
 
-        if (IsKeyPressed(KEY_F11)) {
-            ToggleFullscreen();
-        }
-
-        // Create cities when left-clicking
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-            int cost = 10000 * (player->_cityPositions.size() + 1);
-
-            if (money ->moneyBalance - cost >= 0)
-            {
-                money->spendMoney(cost);
-                player->AddCity(GetScreenToWorld2D(GetMousePosition(), camera));
-            }
-        }
-
         BeginDrawing();
         ClearBackground(Color{90, 90, 255, 255});
 
@@ -107,15 +91,10 @@ int main() {
 
         DrawTextureV(perlinTexture, Vector2{0, 0}, WHITE);
 
+        DrawTexture(G::territoryTexture, 0, 0, WHITE);
         for (const Pixel &pixel: player->_frontierPixels) {
             DrawPixel(pixel.x, pixel.y, RED);
         }
-
-        /* Test
-        for (const Pixel &pixel: player->_allPixels) {
-            DrawPixel(pixel.x, pixel.y, Fade(ORANGE, 0.5));
-        }
-        */
 
         // display each city (now fr)
         for (const Vector2 &circle: player->_cityPositions) {
@@ -214,6 +193,16 @@ void handleControls() {
     // expand with space is clicked
     if (IsKeyPressed(KEY_SPACE) && player->_population / 2 >= 100) {
         player->Expand(0.5);
+    }
+    // Create cities when left-clicking
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        int cost = 10000 * (player->_cityPositions.size() + 1);
+
+        if (money ->moneyBalance - cost >= 0)
+        {
+            money->spendMoney(cost);
+            player->AddCity(GetScreenToWorld2D(GetMousePosition(), camera));
+        }
     }
 
     if (playerPos.x > 3000) playerPos.x = 3000;
@@ -336,6 +325,8 @@ void initCamAndMap() {
     );
     std::vector<std::vector<float> > falloff = PerlinNoise::GenerateFalloffMap(MAP_WIDTH, MAP_HEIGHT);
     PerlinNoise::ApplyFalloffToImage(&perlin, falloff); // finally use falloff
-    PerlinNoise::proceedMap(&perlin, G::map);
+    PerlinNoise::proceedMap(&perlin, G::mapParts);
     perlinTexture = LoadTextureFromImage(perlin);
+
+    G::InitMap(MAP_WIDTH, MAP_HEIGHT);
 }

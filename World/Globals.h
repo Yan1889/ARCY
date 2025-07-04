@@ -10,17 +10,58 @@ struct Gradient;
 
 // G for global
 namespace G {
-    inline std::vector<Gradient> map = {
-        {32 * 1 + 10, Color{90, 90, 255, 255}, -1}, // Deep Water
-        {32 * 2 + 10, Color{125, 125, 255, 255}, -1}, // Low Water
-        {32 * 2 + 20, Color{247, 252, 204, 255}, 10}, // Beach
-        {32 * 3 + 20, Color{129, 245, 109, 255}, 0}, // Open Field
-        {32 * 4 + 10, Color{117, 219, 99, 255}, 3}, // Hills
-        {32 * 5 + 20, Color{97, 184, 81, 255}, 15}, // Forest
-        {32 * 6, Color{191, 191, 191, 255}, 30}, // Stone
-        {32 * 7 - 20, Color{153, 153, 153, 255}, -1}, // Mountain
-        {32 * 8, Color{255, 255, 255, 255}, -1}, // Snow
+    inline std::vector<Gradient> mapParts = {
+        Gradient{32 * 1 + 10, {90, 90, 255, 255}, 0.f}, // Deep Water
+        Gradient{32 * 2 + 10, {125, 125, 255, 255}, 0.f}, // Low Water
+        Gradient{32 * 2 + 20, {247, 252, 204, 255}, 0.5f}, // Beach
+        Gradient{32 * 3 + 20, {129, 245, 109, 255}, 1.0f}, // Open Field
+        Gradient{32 * 4 + 10, {117, 219, 99, 255}, 0.7f}, // Hills
+        Gradient{32 * 5 + 20, {97, 184, 81, 255}, 0.3f}, // Forest
+        Gradient{32 * 6, {191, 191, 191, 255}, 0.1f}, // Stone
+        Gradient{32 * 7 - 20, {153, 153, 153, 255}, 0.f}, // Mountain
+        Gradient{32 * 8, {255, 255, 255, 255}, 0.f}, // Snow
     };
     inline float maxDifficulty = 30;
+
+    inline int playerCount{};
+
+    inline int WIDTH;
+    inline int HEIGHT;
+    inline std::vector<std::vector<Pixel> > territoryMap{}; // [y][x]
+    inline Texture2D territoryTexture;
+    inline Image territoryImage;
+
+    inline void SetPixelOnTerritory(const int x, const int y, const Pixel pixel, const Color color) {
+        territoryMap[y][x] = pixel;
+        static_cast<Color *>(territoryImage.data)[y * WIDTH + x] = color;
+
+        const Color buffer[] {color};
+
+        UpdateTextureRec(
+            territoryTexture,
+            Rectangle{
+                static_cast<float>(x),
+                static_cast<float>(y),
+                1,
+                1
+            },
+            buffer
+        );
+    }
+
+    inline void InitMap(const int w, const int h) {
+        WIDTH = w;
+        HEIGHT = h;
+
+        territoryMap.resize(HEIGHT, std::vector<Pixel>(WIDTH));
+        for (int y = 0; y < HEIGHT; y++) {
+            for (int x = 0; x < WIDTH; x++) {
+                territoryMap[y][x].x = x;
+                territoryMap[y][x].y = y;
+            }
+        }
+        territoryImage = GenImageColor(WIDTH, HEIGHT, BLANK);
+        territoryTexture = LoadTextureFromImage(territoryImage);
+    }
 }
 #endif //GLOBALS_H

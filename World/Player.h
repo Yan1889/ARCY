@@ -14,6 +14,7 @@
 
 struct Pixel {
     int x, y;
+    int playerId;
 
     [[nodiscard]] std::vector<Pixel> GetNeighborPixels() const {
         std::vector<Pixel> result;
@@ -75,7 +76,7 @@ public:
 
     bool IsFrontierPixel(const Pixel& p) const;
 
-    static float GetDifficulty(const Color& terrainColor);
+    static float GetInvasionAcceptP(const Color& terrainColor);
 
     void Update();
     void GrowPopulation();
