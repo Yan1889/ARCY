@@ -16,6 +16,8 @@
 Player::Player(Pixel startPos, int startRadius, Image &perlin): _bgImage(perlin) {
     G::playerCount++;
 
+    _money = Money();
+
     for (int x = startPos.x - startRadius; x < startPos.x + startRadius; x++) {
         const int dx = x - startPos.x;
         const int dh = std::sqrt(startRadius * startRadius - dx * dx);
@@ -40,6 +42,8 @@ void Player::Update() {
         ExpandOnceOnAllFrontierPixels();
     }
 
+    // Add money depending on population
+    IncreaseMoney();
 
     _growthCooldown -= GetTime();
     _maxPopulation = 1000 + 1000 * _cityCount;
@@ -160,11 +164,22 @@ void Player::UpdateFrontier() {
         }
     }
 }
+void Player::IncreaseMoney() {
+    float currentTime = GetTime();
+
+    if (currentTime - lastActionTime >= cooldownTime) {
+        int peopleAddition = 2;
+        int totalAddition = peopleAddition * _population;
+        _money.moneyBalance += totalAddition;
+
+        lastActionTime = currentTime;
+    }
+}
 
 float Player::GetInvasionAcceptP(const Color &terrainColor) {
-    for (int i = 0; i < G::mapParts.size(); ++i) {
-        if (terrainColor.r == G::mapParts[i].color.r) {
-            return G::mapParts[i].difficulty;
+    for (auto & mapPart : G::mapParts) {
+        if (terrainColor.r == mapPart.color.r) {
+            return mapPart.difficulty;
         }
     }
     return -1;

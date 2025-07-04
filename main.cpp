@@ -37,9 +37,6 @@ const float zoomMax = 10.0f;
 Vector2 playerPos(MAP_WIDTH / 2, MAP_HEIGHT / 2);
 Player *player;
 
-Money *money;
-float cooldownTime;
-float lastActionTime;
 
 void initCamAndMap();
 
@@ -48,8 +45,6 @@ void handleControls();
 void displayInfoTexts();
 
 void checkExplosion();
-
-void increaseMoney();
 
 
 int main() {
@@ -72,17 +67,13 @@ int main() {
         perlin
     );
 
-    money = new Money();
-    cooldownTime = 1.0f;
-    lastActionTime = GetTime();
+    player->cooldownTime = 1.0f;
+    player->lastActionTime = GetTime();
 
 
     while (!WindowShouldClose()) {
         handleControls();
         checkExplosion();
-
-        // Add money depending on population
-        increaseMoney();
 
         BeginDrawing();
         ClearBackground(Color{90, 90, 255, 255});
@@ -132,7 +123,6 @@ int main() {
     // clean up everything
     TextureCollection::UnloadAll();
     delete player;
-    delete money;
 
     CloseWindow();
     return 0;
@@ -180,7 +170,7 @@ void displayInfoTexts() {
     DrawText(sendText, 0 + 25, GetScreenHeight() - 25, 20, DARKGREEN);
 
     // money
-    float moneyBalanceDisplay = static_cast<float>(money->moneyBalance);
+    float moneyBalanceDisplay = static_cast<float>(player->_money.moneyBalance);
     const char *moneyText;
 
     if (moneyBalanceDisplay >= 1000) {
@@ -211,8 +201,8 @@ void handleControls() {
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         int cost = 10000 * (player->_cityPositions.size() + 1);
 
-        if (money->moneyBalance - cost >= 0) {
-            money->spendMoney(cost);
+        if (player->_money.moneyBalance - cost >= 0) {
+            player->_money.spendMoney(cost);
             player->AddCity(GetScreenToWorld2D(GetMousePosition(), camera));
         }
     }
@@ -235,8 +225,8 @@ void handleControls() {
 void checkExplosion() {
     if (IsKeyPressed(KEY_ONE)) {
         int cost = 10000;
-        if (money->moneyBalance - cost < 0) return;
-        money->spendMoney(cost);
+        if (player->_money.moneyBalance - cost < 0) return;
+        player->_money.spendMoney(cost);
 
         const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), camera);
         const int radius = 50;
@@ -268,8 +258,8 @@ void checkExplosion() {
         perlinTexture = LoadTextureFromImage(perlin);
     } else if (IsKeyPressed(KEY_TWO)) {
         int cost = 100000;
-        if (money->moneyBalance - cost < 0) return;
-        money->spendMoney(cost);
+        if (player->_money.moneyBalance - cost < 0) return;
+        player->_money.spendMoney(cost);
 
         const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), camera);
         const int radius = 300;
@@ -301,19 +291,6 @@ void checkExplosion() {
         perlinTexture = LoadTextureFromImage(perlin);
     }
 }
-
-void increaseMoney() {
-    float currentTime = GetTime();
-
-    if (currentTime - lastActionTime >= cooldownTime) {
-        int peopleAddition = 2;
-        int totalAddition = peopleAddition * player->_population;
-        money->moneyBalance += totalAddition;
-
-        lastActionTime = currentTime;
-    }
-}
-
 
 void initCamAndMap() {
     // Camera

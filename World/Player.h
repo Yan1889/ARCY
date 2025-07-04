@@ -4,10 +4,12 @@
 
 #ifndef POPULATION_H
 #define POPULATION_H
+#include <cmath>
 #include <set>
 #include <unordered_set>
 #include <vector>
 
+#include "Money.h"
 #include "PerlinNoise.h"
 #include "raylib.h"
 
@@ -21,6 +23,7 @@ struct Pixel {
         for (int dx = -1; dx <= 1; dx++) {
             for (int dy = -1; dy <= 1; dy++) {
                 if (dx == 0 && dy == 0) continue;
+                if (std::abs(dx) == std::abs(dy)) continue;
 
                 result.push_back({x + dx, y + dy});
             }
@@ -59,6 +62,11 @@ public:
     int _peopleCurrentlyExploring{};
     int _maxPeopleExploring = 10000;
 
+    // money
+    float cooldownTime;
+    float lastActionTime;
+    Money _money;
+
     // territory
     std::unordered_set<Pixel, Pixel::Hasher> _allPixels;
     std::vector<Pixel> _frontierPixels;
@@ -80,6 +88,7 @@ public:
 
     void Update();
     void GrowPopulation();
+    void IncreaseMoney();
     void AddCity(Vector2 pos);
 };
 
