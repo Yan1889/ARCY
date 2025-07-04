@@ -107,11 +107,11 @@ int main() {
 
         DrawTextureV(perlinTexture, Vector2{0, 0}, WHITE);
 
-        for (const Pixel &pixel: player->_frontierPixels) {
-            DrawPixel(pixel.x, pixel.y, RED);
-        }
-
         /* Code noch nicht ausprobiert (neue Methode)
+
+        for (const Pixel &pixel: player->_frontierPixels) {
+            ImageDrawPixel(&perlin, pixel.x, pixel.y, RED);
+        }
         
         for (const Pixel &pixel: player->_allPixels) {
             ImageDrawPixel(&perlin, pixel.x, pixel.y, Fade(ORANGE, 0.5));
