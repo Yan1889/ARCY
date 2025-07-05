@@ -8,6 +8,7 @@
 #include <algorithm>
 
 // Test
+#include <random>
 #include <stack>
 
 #include "raylib.h"
@@ -15,23 +16,13 @@
 Player::Player(Pixel startPos, int startRadius) {
     G::playerCount++;
     _id = G::playerCount;
-    /*
-    _color = Color{
-        static_cast<unsigned char>(255 * rand() / RAND_MAX),
-        static_cast<unsigned char>(255 * rand() / RAND_MAX),
-        static_cast<unsigned char>(255 * rand() / RAND_MAX),
-        255
-    };
-    */
-
     do {
         _color = Color{
-            (unsigned char)GetRandomValue(0, 255), // Red
-            (unsigned char)GetRandomValue(0, 255), // Green
-            (unsigned char)GetRandomValue(0, 255), // Blue
-            255                                   // Alpha
+            static_cast<unsigned char>(GetRandomValue(0, 255)), // Red
+            static_cast<unsigned char>(GetRandomValue(0, 255)), // Green
+            static_cast<unsigned char>(GetRandomValue(0, 255)), // Blue
+            255 // Alpha
         };
-
     } while (_color.g > _color.r + 40 && _color.g > _color.b + 40);
 
     _money = Money();
@@ -103,48 +94,49 @@ void Player::Expand(const float percentage) {
 
 
 void Player::ExpandOnceOnAllFrontierPixels() {
-    int frontierSnapshotSize = _frontierPixels.size(); // snapshot
+    int frontierSnapshotSize = _frontierPixels.size();
     std::unordered_set<Pixel, Pixel::Hasher> newPixels;
 
-    for (int i = 0; i < frontierSnapshotSize; i++) {
-        if (_peopleCurrentlyExploring <= 0) break;
+    static std::mt19937 rng(std::random_device{}());
+    std::uniform_real_distribution<float> dist(0.0f, 1.0f);
 
-        const std::vector<Pixel> neighborPixels = _frontierPixels[i].GetNeighborPixels();
-        const int randNeighborIdx = rand() % neighborPixels.size();
-        const Pixel &newP = neighborPixels[randNeighborIdx];
+    for (int i = 0; i < frontierSnapshotSize && _peopleCurrentlyExploring > 0; i++) {
+        auto neighborPixels = _frontierPixels[i].GetNeighborPixels();
+        std::ranges::shuffle(neighborPixels, rng);
 
-        if (newP.playerId != 0) {
-            continue;
-        }
-        Color terrainOnPixel = static_cast<const Color *>(G::perlin.data)[G::perlin.width * newP.y + newP.x];
+        for (const Pixel& newP : neighborPixels) {
+            if (newP.playerId != 0) continue;
 
-        const float invasionAcceptP = GetInvasionAcceptP(terrainOnPixel);
+            Color terrain = static_cast<const Color *>(G::perlin.data)[G::perlin.width * newP.y + newP.x];
+            float invasionP = GetInvasionAcceptP(terrain);
 
-        if (invasionAcceptP == 0 || invasionAcceptP < static_cast<float>(rand()) / RAND_MAX) {
-            // also loose a person
-            _peopleCurrentlyExploring--;
-            continue;
-        }
-        if (!_allPixels.contains(newP) && !newPixels.contains(newP)) {
-            newPixels.insert(newP);
+            if (invasionP == 0 || invasionP < dist(rng)) {
+                _peopleCurrentlyExploring--;
+                break;
+            }
+
+            if (_allPixels.contains(newP) || !newPixels.insert(newP).second) continue;
+
             _allPixels.insert(newP);
             GetOwnershipOfPixel(newP.x, newP.y);
             _frontierPixels.push_back(newP);
             _frontierSet.insert(newP);
             _peopleCurrentlyExploring--;
-
-            if (_peopleCurrentlyExploring == 0) break;
+            break; // only one pixel per frontier per turn
         }
     }
 
-    for (auto iter = _frontierPixels.begin(); iter != _frontierPixels.end();) {
-        if (!IsFrontierPixel(*iter)) {
-            _frontierSet.erase(*iter);
-            iter = _frontierPixels.erase(iter);
+    std::vector<Pixel> updatedFrontier;
+    updatedFrontier.reserve(_frontierPixels.size());
+
+    for (const Pixel& p : _frontierPixels) {
+        if (IsFrontierPixel(p)) {
+            updatedFrontier.push_back(p);
         } else {
-            ++iter;
+            _frontierSet.erase(p);
         }
     }
+    _frontierPixels = std::move(updatedFrontier);
 }
 
 bool Player::IsFrontierPixel(const Pixel &p) const {
