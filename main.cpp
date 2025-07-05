@@ -22,14 +22,17 @@ Color grayScale(const unsigned char gray) {
 
 // ----- camera setting -----
 Camera2D camera{};
-const int moveSpeed = 100;
-const int zoomSpeed = 5;
-const float zoomMin = 0.1f;
-const float zoomMax = 10.0f;
+constexpr int moveSpeed = 100;
+constexpr int zoomSpeed = 5;
+constexpr float zoomMin = 0.1f;
+constexpr float zoomMax = 10.0f;
 
 
 Vector2 playerPos(MAP_WIDTH / 2, MAP_HEIGHT / 2);
 std::vector<Player> players{};
+
+constexpr int botCount = 10;
+constexpr int botSpawnRadius = 500;
 
 
 void initCamAndMap();
@@ -62,12 +65,12 @@ int main() {
     ));
 
     // 10 bots
-    for (int i = 0; i < 10; i++) {
-        const int botSpawnRadius = 100;
+    for (int i = 0; i < botCount; i++) {
+        float angle = 2 * PI * i / botCount;
         players.push_back(Player(
             {
-                static_cast<int>(playerPos.x + std::cos(2 * PI * i / 10) * botSpawnRadius),
-                static_cast<int>(playerPos.y + std::sin(2 * PI * i / 10) * botSpawnRadius)
+                static_cast<int>(playerPos.x + std::cos(angle) * botSpawnRadius),
+                static_cast<int>(playerPos.y + std::sin(angle) * botSpawnRadius)
             },
             5
         ));
@@ -211,11 +214,13 @@ void handleControls() {
     }
     // Create cities when left-clicking
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        int cost = 10000 * (players[0]._cityPositions.size() + 1);
+        for (Player& p : players) {
+            const int cost = 10000 * (p._cityPositions.size() + 1);
+            if (p._money.moneyBalance - cost >= 0) {
+                p._money.spendMoney(cost);
+                p.AddCity(GetScreenToWorld2D(GetMousePosition(), camera));
+            }
 
-        if (players[0]._money.moneyBalance - cost >= 0) {
-            players[0]._money.spendMoney(cost);
-            players[0].AddCity(GetScreenToWorld2D(GetMousePosition(), camera));
         }
     }
 

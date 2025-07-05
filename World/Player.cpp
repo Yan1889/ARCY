@@ -92,16 +92,16 @@ void Player::Expand(const float percentage) {
 
 
 void Player::ExpandOnceOnAllFrontierPixels() {
-    std::vector<Pixel> expansionFrontier = _frontierPixels; // snapshot
+    int frontierSnapshotSize = _frontierPixels.size(); // snapshot
     std::unordered_set<Pixel, Pixel::Hasher> newPixels;
 
-    for (const Pixel& borderPixel : expansionFrontier) {
+    for (int i = 0; i < frontierSnapshotSize; i++) {
         if (_peopleCurrentlyExploring <= 0) break;
 
-        const std::vector<Pixel> neighborPixels = borderPixel.GetNeighborPixels();
-        int randNeighborIdx = rand() % neighborPixels.size();
-
+        const std::vector<Pixel> neighborPixels = _frontierPixels[i].GetNeighborPixels();
+        const int randNeighborIdx = rand() % neighborPixels.size();
         const Pixel &newP = neighborPixels[randNeighborIdx];
+
         if (newP.playerId != 0) {
             continue;
         }
