@@ -10,6 +10,7 @@
 
 #define SCREEN_WIDTH 1366 // Default 980
 #define SCREEN_HEIGHT 768 // Default 650
+#define MAIN_PLAYER_COLOR players[0]._color
 
 #define MAP_HEIGHT 2500
 #define MAP_WIDTH 2500
@@ -27,7 +28,6 @@ constexpr int zoomSpeed = 5;
 constexpr float zoomMin = 0.1f;
 constexpr float zoomMax = 10.0f;
 
-
 Vector2 playerPos(MAP_WIDTH / 2, MAP_HEIGHT / 2);
 std::vector<Player> players{};
 
@@ -43,6 +43,7 @@ void displayInfoTexts();
 
 void checkExplosion();
 
+void displayUser();
 
 int main() {
     srand(time(nullptr));
@@ -81,7 +82,8 @@ int main() {
         p._lastActionTime = GetTime();
     }
 
-    while (!WindowShouldClose()) {
+    while (!WindowShouldClose())
+    {
         handleControls();
         checkExplosion();
 
@@ -101,21 +103,7 @@ int main() {
                 DrawPixel(pixel.x, pixel.y, p._color);
             }
         }
-
-        /* Code noch nicht ausprobiert (neue Methode)
-
-        for (const Pixel &pixel: player->_frontierPixels) {
-            ImageDrawPixel(&perlin, pixel.x, pixel.y, RED);
-        }
-
-        for (const Pixel &pixel: player->_allPixels) {
-            ImageDrawPixel(&perlin, pixel.x, pixel.y, Fade(ORANGE, 0.5));
-        }
-
-        UnloadTexture(perlinTexture);
-        perlinTexture = LoadTextureFromImage(perlin);
-
-        */
+        // I think I spider @Yan!!!!!!!!!
 
         // display each city of main character
         for (const Vector2 &circle: players[0]._cityPositions) {
@@ -126,6 +114,9 @@ int main() {
         for (Player &p: players) {
             p.Update();
         }
+
+        displayUser();
+
         EndMode2D();
 
         displayInfoTexts();
@@ -142,15 +133,15 @@ int main() {
 
 void displayInfoTexts() {
     // instructions
-    DrawText("Move with WASD", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20, 20, DARKGREEN);
-    DrawText("Up or Down Arrow to zoom", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 40, 20, DARKGREEN);
+    DrawText("Move with WASD", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20, 20, MAIN_PLAYER_COLOR);
+    DrawText("Up or Down Arrow to zoom", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 40, 20, MAIN_PLAYER_COLOR);
     DrawText("Left-click to build a city ($10K * city count)", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 80,
-             20, DARKGREEN);
-    DrawText("Esc to exit the game", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 120, 20, DARKGREEN);
+             20, MAIN_PLAYER_COLOR);
+    DrawText("Esc to exit the game", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 120, 20, MAIN_PLAYER_COLOR);
     DrawText("1 to drop a atom bomb ($10K), 2 a hydrogen bomb ($100K)", GetScreenWidth() / 20 - 25,
-             GetScreenHeight() / 20 + 160, 20, DARKGREEN);
-    DrawText("F11 to toggle fullscreen", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 200, 20, DARKGREEN);
-    DrawText("Space to expand your territory", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 240, 20, DARKGREEN);
+             GetScreenHeight() / 20 + 160, 20, MAIN_PLAYER_COLOR);
+    DrawText("F11 to toggle fullscreen", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 200, 20, MAIN_PLAYER_COLOR);
+    DrawText("Space to expand your territory", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 240, 20, MAIN_PLAYER_COLOR);
 
     // fps
     const int fps = GetFPS();
@@ -158,7 +149,7 @@ void displayInfoTexts() {
     const int textWidth = MeasureText(fpsText, 20);
     const int textX = GetScreenWidth() - textWidth - 25;
     const int textY = GetScreenHeight() - 25;
-    DrawText(fpsText, textX, textY, 20, DARKGREEN);
+    DrawText(fpsText, textX, textY, 20, MAIN_PLAYER_COLOR);
 
     // population
     float populationDisplay = static_cast<float>(players[0]._population);
@@ -177,9 +168,9 @@ void displayInfoTexts() {
         }
     }
 
-    DrawText(populationText, 0 + 25, GetScreenHeight() - 50, 20, DARKGREEN);
+    DrawText(populationText, 0 + 25, GetScreenHeight() - 50, 20, MAIN_PLAYER_COLOR);
     const char *sendText = TextFormat("People exploring: %d", players[0]._peopleCurrentlyExploring);
-    DrawText(sendText, 0 + 25, GetScreenHeight() - 25, 20, DARKGREEN);
+    DrawText(sendText, 0 + 25, GetScreenHeight() - 25, 20, MAIN_PLAYER_COLOR);
 
     // money
     float moneyBalanceDisplay = static_cast<float>(players[0]._money.moneyBalance);
@@ -193,7 +184,26 @@ void displayInfoTexts() {
         moneyText = TextFormat("Money Balance: $%.0fK", moneyBalanceDisplay);
     }
 
-    DrawText(moneyText, 25, GetScreenHeight() - 75, 20, DARKGREEN);
+    DrawText(moneyText, 25, GetScreenHeight() - 75, 20, MAIN_PLAYER_COLOR);
+}
+
+void displayUser()
+{
+    // Shows who you are
+    const char* yourName = "You";
+    int fontSize = 10;
+    int spacing = 1;
+
+    Vector2 userTextPos = {MAP_WIDTH / 2, MAP_HEIGHT / 2};
+
+    Vector2 textSize = MeasureTextEx(GetFontDefault(), yourName, fontSize, 1);
+    Vector2 textPos = {
+        userTextPos.x - textSize.x / 2,
+        userTextPos.y - textSize.y / 2
+
+    };
+
+    DrawTextEx(GetFontDefault(), yourName, textPos, fontSize, spacing, WHITE);
 }
 
 void handleControls() {

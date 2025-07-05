@@ -12,16 +12,27 @@
 
 #include "raylib.h"
 
-
 Player::Player(Pixel startPos, int startRadius) {
     G::playerCount++;
     _id = G::playerCount;
+    /*
     _color = Color{
         static_cast<unsigned char>(255 * rand() / RAND_MAX),
         static_cast<unsigned char>(255 * rand() / RAND_MAX),
         static_cast<unsigned char>(255 * rand() / RAND_MAX),
         255
     };
+    */
+
+    do {
+        _color = Color{
+            (unsigned char)GetRandomValue(0, 255), // Red
+            (unsigned char)GetRandomValue(0, 255), // Green
+            (unsigned char)GetRandomValue(0, 255), // Blue
+            255                                   // Alpha
+        };
+
+    } while (_color.g > _color.r + 40 && _color.g > _color.b + 40);
 
     _money = Money();
 
