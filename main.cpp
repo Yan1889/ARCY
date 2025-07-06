@@ -217,7 +217,6 @@ void handleControls() {
 
     // expand with space is clicked
     if (IsKeyPressed(KEY_SPACE) && players[0]._population / 2 >= 100) {
-        // players[0].Expand(0.5);
         for (Player& p : players) {
            p.Expand(0.5);
         }
