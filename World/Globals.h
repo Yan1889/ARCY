@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "PerlinNoise.h"
+#include "Pixel.h"
 #include "raylib.h"
 
 struct Gradient;
