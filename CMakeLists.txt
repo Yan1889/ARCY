@@ -42,6 +42,10 @@ add_executable(ARCY main.cpp
 
 file(COPY ${CMAKE_SOURCE_DIR}/src/images DESTINATION ${CMAKE_BINARY_DIR})
 
+set(CITY_IMAGE ${CMAKE_CURRENT_SOURCE_DIR}/src/images/city.png)
+
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --preload-file ${CITY_IMAGE}@/city.png")
+
 target_link_libraries(ARCY PRIVATE raylib)
 
 # Web-specific options
