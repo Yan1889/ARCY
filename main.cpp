@@ -176,12 +176,17 @@ void displayInfoTexts() {
     float moneyBalanceDisplay = static_cast<float>(players[0]._money.moneyBalance);
     const char *moneyText;
 
-    if (moneyBalanceDisplay >= 1000) {
+    if (moneyBalanceDisplay >= 1000000) {
+        moneyBalanceDisplay /= 1000000;
+
+        moneyText = TextFormat("Money Balance: $%.2fM", moneyBalanceDisplay);
+    }
+    else if (moneyBalanceDisplay >= 1000) {
         moneyBalanceDisplay /= 1000;
 
         moneyText = TextFormat("Money Balance: $%.2fK", moneyBalanceDisplay);
     } else {
-        moneyText = TextFormat("Money Balance: $%.0fK", moneyBalanceDisplay);
+        moneyText = TextFormat("Money Balance: $%.0f", moneyBalanceDisplay);
     }
 
     DrawText(moneyText, 25, GetScreenHeight() - 75, 20, MAIN_PLAYER_COLOR);
