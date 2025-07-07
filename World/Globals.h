@@ -12,8 +12,6 @@
 
 struct Gradient;
 
-struct Pixel;
-
 class Player;
 
 // G for global

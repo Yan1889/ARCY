@@ -37,6 +37,7 @@ add_executable(ARCY main.cpp
         World/Money.cpp
         World/Money.h
         World/Pixel.h
+        World/Pixel.cpp
 )
 
 file(COPY ${CMAKE_SOURCE_DIR}/src/images DESTINATION ${CMAKE_BINARY_DIR})
@@ -52,6 +53,10 @@ if(PLATFORM STREQUAL "Web")
             "-sASYNCIFY"
             "-sFULL_ES2=1"
             "-sFORCE_FILESYSTEM=1"
+            "-sINITIAL_MEMORY=536870912"      # 512MB in bytes
+            "-sALLOW_MEMORY_GROWTH=1"
+            "-sASSERTIONS=1"
+            "--preload-file src/images"
     )
 endif()
 

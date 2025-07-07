@@ -8,31 +8,17 @@
 #include <vector>
 #include <cmath>
 
-#include "Globals.h"
 
 struct Pixel {
     int x;
     int y;
     int playerId;
 
-    [[nodiscard]] std::vector<Pixel> GetNeighborPixels() const {
-        std::vector<Pixel> result;
+    [[nodiscard]] std::vector<Pixel> GetNeighborPixels() const;
 
-        if (y > 0) result.push_back(G::territoryMap[y - 1][x]);         // Up
-        if (y + 1 < G::HEIGHT) result.push_back(G::territoryMap[y + 1][x]); // Down
-        if (x > 0) result.push_back(G::territoryMap[y][x - 1]);         // Left
-        if (x + 1 < G::WIDTH) result.push_back(G::territoryMap[y][x + 1]); // Right
+    bool operator<(const Pixel &other) const;
 
-        return result;
-    }
-
-    bool operator<(const Pixel &other) const {
-        return std::tie(x, y) < std::tie(other.x, other.y);
-    }
-
-    bool operator==(const Pixel &other) const {
-        return x == other.x && y == other.y;
-    }
+    bool operator==(const Pixel &other) const;
 
     struct Hasher {
         std::size_t operator()(const Pixel &p) const {

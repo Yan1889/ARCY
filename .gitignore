@@ -1,1 +1,5 @@
+# build folders
 cmake-build-debug/
+build_web/
+
+*.sh
