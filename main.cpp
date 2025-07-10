@@ -190,6 +190,10 @@ void displayInfoTexts() {
     }
 
     DrawText(moneyText, 25, GetScreenHeight() - 75, 20, MAIN_PLAYER_COLOR);
+
+    // _pixelsOccupied
+    const char* territorySizeText = ("pixels occupied (your size): " + std::to_string(players[0]._allPixels.size())).c_str();
+    DrawText(territorySizeText, 0 + 25, GetScreenHeight() - 100, 20, MAIN_PLAYER_COLOR);
 }
 
 void displayUser()

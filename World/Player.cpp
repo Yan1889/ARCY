@@ -70,6 +70,8 @@ void Player::Update() {
 
 
 void Player::GrowPopulation() {
+    // Todo: calculate with respect to _allPixels.size() too
+
     if (_growthCooldown <= 0) {
         const float totalGrowth = _population * _growth;
 
@@ -95,7 +97,7 @@ void Player::Expand(const float percentage) {
 
 
 void Player::ExpandOnceOnAllFrontierPixels() {
-    int frontierSnapshotSize = _frontierPixels.size();
+    const int frontierSnapshotSize = _frontierPixels.size();
     std::unordered_set<Pixel, Pixel::Hasher> newPixels;
 
     static std::mt19937 rng(std::random_device{}());
