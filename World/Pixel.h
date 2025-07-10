@@ -20,6 +20,8 @@ struct Pixel {
 
     bool operator==(const Pixel &other) const;
 
+    void operator+=(const Pixel &other);
+
     struct Hasher {
         std::size_t operator()(const Pixel &p) const {
             return std::hash<int>()(p.x) ^ (std::hash<int>()(p.y) << 1);

@@ -16,7 +16,7 @@
 class Player {
 public:
     int _id;
-    Color _color;
+    Color _color{};
 
     // population
     int _population = 100;
@@ -32,14 +32,16 @@ public:
     int _maxPeopleExploring = 10000;
 
     // money
-    float _cooldownTime;
-    float _lastActionTime;
+    float _cooldownTime{};
+    float _lastActionTime{};
     Money _money;
 
     // territory
     std::unordered_set<Pixel, Pixel::Hasher> _allPixels;
     std::vector<Pixel> _frontierPixels;
     std::unordered_set<Pixel, Pixel::Hasher> _frontierSet;
+    Pixel _allPixelsSummed;
+    Pixel _centerPixel;
 
 
     Player(Pixel startPos, int startRadius);

@@ -26,3 +26,8 @@ bool Pixel::operator<(const Pixel &other) const {
 bool Pixel::operator==(const Pixel &other) const {
     return x == other.x && y == other.y;
 }
+
+void Pixel::operator+=(const Pixel& other) {
+    x += other.x;
+    y += other.y;
+}

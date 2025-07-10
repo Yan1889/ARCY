@@ -14,7 +14,7 @@
 
 #include "raylib.h"
 
-Player::Player(Pixel startPos, int startRadius) {
+Player::Player(const Pixel startPos, const int startRadius) {
     G::playerCount++;
     _id = G::playerCount;
     do {
@@ -28,6 +28,14 @@ Player::Player(Pixel startPos, int startRadius) {
 
     _money = Money();
 
+
+    _centerPixel = {
+        startPos.x,
+        startPos.y,
+        _id
+    };
+    _allPixelsSummed = _centerPixel;
+
     for (int x = startPos.x - startRadius; x < startPos.x + startRadius; x++) {
         const int dx = x - startPos.x;
         const int dh = std::sqrt(startRadius * startRadius - dx * dx);
@@ -36,11 +44,10 @@ Player::Player(Pixel startPos, int startRadius) {
         const int yMax = startPos.y + dh;
 
         for (int y = yMin; y <= yMax; y++) {
-            Pixel p = G::territoryMap[y][x];
             GetOwnershipOfPixel(x, y);
-            _allPixels.insert(p);
         }
     }
+
     UpdateFrontier();
 }
 
@@ -107,7 +114,7 @@ void Player::ExpandOnceOnAllFrontierPixels() {
         auto neighborPixels = _frontierPixels[i].GetNeighborPixels();
         std::ranges::shuffle(neighborPixels, rng);
 
-        for (const Pixel& newP : neighborPixels) {
+        for (const Pixel &newP: neighborPixels) {
             if (newP.playerId != 0) continue;
 
             Color terrain = static_cast<const Color *>(G::perlin.data)[G::perlin.width * newP.y + newP.x];
@@ -120,7 +127,6 @@ void Player::ExpandOnceOnAllFrontierPixels() {
 
             if (_allPixels.contains(newP) || !newPixels.insert(newP).second) continue;
 
-            _allPixels.insert(newP);
             GetOwnershipOfPixel(newP.x, newP.y);
             _frontierPixels.push_back(newP);
             _frontierSet.insert(newP);
@@ -132,7 +138,7 @@ void Player::ExpandOnceOnAllFrontierPixels() {
     std::vector<Pixel> updatedFrontier;
     updatedFrontier.reserve(_frontierPixels.size());
 
-    for (const Pixel& p : _frontierPixels) {
+    for (const Pixel &p: _frontierPixels) {
         if (IsFrontierPixel(p)) {
             updatedFrontier.push_back(p);
         } else {
@@ -170,6 +176,8 @@ void Player::UpdateFrontier() {
 }
 
 void Player::GetOwnershipOfPixel(const int x, const int y) {
+    _allPixels.insert(G::territoryMap[y][x]);
+
     G::territoryMap[y][x] = {x, y, _id};
     static_cast<Color *>(G::territoryImage.data)[y * G::WIDTH + x] = _color;
 
@@ -185,6 +193,14 @@ void Player::GetOwnershipOfPixel(const int x, const int y) {
         },
         buffer
     );
+
+    // center
+    _allPixelsSummed += G::territoryMap[y][x];
+    _centerPixel = {
+        _allPixelsSummed.x / static_cast<int>(_allPixels.size()),
+        _allPixelsSummed.y / static_cast<int>(_allPixels.size()),
+        _id
+    };
 }
 
 void Player::IncreaseMoney() {

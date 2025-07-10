@@ -8,7 +8,7 @@ Texture2D TextureCollection::city = {};
 
 void TextureCollection::LoadAll() {
     // Use 2nd option for web, else 1st
-    // city = LoadTexture("src/images/city.png");
+    // city = LoadTexture("assets/images/city.png");
     // city = LoadTexture("city.png");
 
     // was ist hier los haha

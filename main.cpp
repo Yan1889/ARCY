@@ -10,6 +10,7 @@
 
 #define SCREEN_WIDTH 1366 // Default 980
 #define SCREEN_HEIGHT 768 // Default 650
+#define MAIN_PLAYER players[0]
 #define MAIN_PLAYER_COLOR players[0]._color
 
 #define MAP_HEIGHT 2500
@@ -43,7 +44,7 @@ void displayInfoTexts();
 
 void checkExplosion();
 
-void displayUser();
+void displayAllPlayer();
 
 int main() {
     srand(time(nullptr));
@@ -106,7 +107,7 @@ int main() {
         // I think I spider @Yan!!!!!!!!!
 
         // display each city of main character
-        for (const Vector2 &circle: players[0]._cityPositions) {
+        for (const Vector2 &circle: MAIN_PLAYER._cityPositions) {
             DrawTextureV(TextureCollection::city, circle, WHITE);
         }
 
@@ -115,7 +116,7 @@ int main() {
             p.Update();
         }
 
-        displayUser();
+        displayAllPlayer();
 
         EndMode2D();
 
@@ -152,8 +153,8 @@ void displayInfoTexts() {
     DrawText(fpsText, textX, textY, 20, MAIN_PLAYER_COLOR);
 
     // population
-    float populationDisplay = static_cast<float>(players[0]._population);
-    float maxPopulationDisplay = static_cast<float>(players[0]._maxPopulation);
+    float populationDisplay = static_cast<float>(MAIN_PLAYER._population);
+    float maxPopulationDisplay = static_cast<float>(MAIN_PLAYER._maxPopulation);
     const char *populationText;
 
     if (maxPopulationDisplay >= 1000) {
@@ -169,11 +170,11 @@ void displayInfoTexts() {
     }
 
     DrawText(populationText, 0 + 25, GetScreenHeight() - 50, 20, MAIN_PLAYER_COLOR);
-    const char *sendText = TextFormat("People exploring: %d", players[0]._peopleCurrentlyExploring);
+    const char *sendText = TextFormat("People exploring: %d", MAIN_PLAYER._peopleCurrentlyExploring);
     DrawText(sendText, 0 + 25, GetScreenHeight() - 25, 20, MAIN_PLAYER_COLOR);
 
     // money
-    float moneyBalanceDisplay = static_cast<float>(players[0]._money.moneyBalance);
+    float moneyBalanceDisplay = static_cast<float>(MAIN_PLAYER._money.moneyBalance);
     const char *moneyText;
 
     if (moneyBalanceDisplay >= 1000000) {
@@ -192,27 +193,26 @@ void displayInfoTexts() {
     DrawText(moneyText, 25, GetScreenHeight() - 75, 20, MAIN_PLAYER_COLOR);
 
     // _pixelsOccupied
-    const char* territorySizeText = ("pixels occupied (your size): " + std::to_string(players[0]._allPixels.size())).c_str();
+    const char* territorySizeText = ("pixels occupied (your size): " + std::to_string(MAIN_PLAYER._allPixels.size())).c_str();
     DrawText(territorySizeText, 0 + 25, GetScreenHeight() - 100, 20, MAIN_PLAYER_COLOR);
 }
 
-void displayUser()
-{
-    // Shows who you are
-    const char* yourName = "You";
-    int fontSize = 10;
-    int spacing = 1;
+void displayAllPlayer() {
+    for (int i = 0; i < players.size(); i++) {
+        // Shows who you are
+        const char* name = (i == 0) ? "You" : ("NPC " + std::to_string(i)).c_str();
+        int fontSize = 10;
+        int spacing = 1;
 
-    Vector2 userTextPos = {MAP_WIDTH / 2, MAP_HEIGHT / 2};
 
-    Vector2 textSize = MeasureTextEx(GetFontDefault(), yourName, fontSize, 1);
-    Vector2 textPos = {
-        userTextPos.x - textSize.x / 2,
-        userTextPos.y - textSize.y / 2
+        Vector2 textSize = MeasureTextEx(GetFontDefault(), name, fontSize, 1);
+        Vector2 textPos = {
+            players[i]._centerPixel.x - textSize.x / 2,
+            players[i]._centerPixel.y - textSize.y / 2
+        };
 
-    };
-
-    DrawTextEx(GetFontDefault(), yourName, textPos, fontSize, spacing, WHITE);
+        DrawTextEx(GetFontDefault(), name, textPos, fontSize, spacing, WHITE);
+    }
 }
 
 void handleControls() {
@@ -225,7 +225,7 @@ void handleControls() {
     if (IsKeyDown(KEY_ESCAPE)) WindowShouldClose();
 
     // expand with space is clicked
-    if (IsKeyPressed(KEY_SPACE) && players[0]._population / 2 >= 100) {
+    if (IsKeyPressed(KEY_SPACE) && MAIN_PLAYER._population / 2 >= 100) {
         for (Player& p : players) {
            p.Expand(0.5);
         }
@@ -260,8 +260,8 @@ void handleControls() {
 void checkExplosion() {
     if (IsKeyPressed(KEY_ONE)) {
         int cost = 10000;
-        if (players[0]._money.moneyBalance - cost < 0) return;
-        players[0]._money.spendMoney(cost);
+        if (MAIN_PLAYER._money.moneyBalance - cost < 0) return;
+        MAIN_PLAYER._money.spendMoney(cost);
 
         const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), camera);
         const int radius = 50;
@@ -293,8 +293,8 @@ void checkExplosion() {
         G::perlinTexture = LoadTextureFromImage(G::perlin);
     } else if (IsKeyPressed(KEY_TWO)) {
         int cost = 100000;
-        if (players[0]._money.moneyBalance - cost < 0) return;
-        players[0]._money.spendMoney(cost);
+        if (MAIN_PLAYER._money.moneyBalance - cost < 0) return;
+        MAIN_PLAYER._money.spendMoney(cost);
 
         const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), camera);
         const int radius = 300;
