@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstring>
 #include <thread>
 #include <vector>
 
@@ -199,9 +200,13 @@ void displayInfoTexts() {
 
 void displayAllPlayer() {
     for (int i = 0; i < players.size(); i++) {
+        const float diameter = 2 * std::sqrt(players[i]._allPixels.size() / PI); // A = π * r^2 => r = sqrt(A / π)
         // Shows who you are
-        const char* name = (i == 0) ? "You" : ("NPC " + std::to_string(i)).c_str();
-        int fontSize = 10;
+        const char* name = i == 0 ? "You" : ("NPC " + std::to_string(i)).c_str();
+        const int charCount = strlen(name);
+        const float pxWidthPerChar = diameter / charCount;
+
+        int fontSize = pxWidthPerChar;
         int spacing = 1;
 
 
