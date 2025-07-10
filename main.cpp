@@ -38,14 +38,19 @@ constexpr int botSpawnRadius = 500;
 
 
 void initCamAndMap();
+void initPlayers();
+
+void gameLoop();
 
 void handleControls();
 
 void displayInfoTexts();
+void displayAllPlayerTags();
 
 void checkExplosion();
+void checkCity();
+void checkExpansion();
 
-void displayAllPlayer();
 
 int main() {
     srand(time(nullptr));
@@ -57,80 +62,58 @@ int main() {
     SetTargetFPS(10000);
 
     initCamAndMap();
+    initPlayers();
 
-    // main character
-    players.push_back(Player(
-        {
-            static_cast<int>(playerPos.x),
-            static_cast<int>(playerPos.y)
-        },
-        10
-    ));
-
-    // 10 bots
-    for (int i = 0; i < botCount; i++) {
-        float angle = 2 * PI * i / botCount;
-        players.push_back(Player(
-            {
-                static_cast<int>(playerPos.x + std::cos(angle) * botSpawnRadius),
-                static_cast<int>(playerPos.y + std::sin(angle) * botSpawnRadius)
-            },
-            5
-        ));
+    while (!WindowShouldClose()) {
+        gameLoop();
     }
-
-    for (Player &p: players) {
-        p._cooldownTime = 1.0f;
-        p._lastActionTime = GetTime();
-    }
-
-    while (!WindowShouldClose())
-    {
-        handleControls();
-        checkExplosion();
-
-        BeginDrawing();
-        ClearBackground(Color{90, 90, 255, 255});
-
-        BeginMode2D(camera);
-
-        // terrain bg texture
-        DrawTextureV(G::perlinTexture, Vector2{0, 0}, WHITE);
-        // territory texture
-        DrawTexture(G::territoryTexture, 0, 0, Fade(WHITE, 0.5));
-
-        // I think it's okay to draw a few border pixels manually with this loop, what do you think @Colin?
-        for (const Player &p: players) {
-            for (const Pixel &pixel: p._frontierPixels) {
-                DrawPixel(pixel.x, pixel.y, p._color);
-            }
-        }
-        // I think I spider @Yan!!!!!!!!!
-
-        // display each city of main character
-        for (const Vector2 &circle: MAIN_PLAYER._cityPositions) {
-            DrawTextureV(TextureCollection::city, circle, WHITE);
-        }
-
-        // Population
-        for (Player &p: players) {
-            p.Update();
-        }
-
-        displayAllPlayer();
-
-        EndMode2D();
-
-        displayInfoTexts();
-
-        EndDrawing();
-    }
-
     // clean up everything
     TextureCollection::UnloadAll();
 
     CloseWindow();
     return 0;
+}
+
+void gameLoop() {
+    handleControls();
+    checkExplosion();
+    checkCity();
+    checkExpansion();
+
+    BeginDrawing();
+    ClearBackground(Color{90, 90, 255, 255});
+
+    BeginMode2D(camera);
+
+    // terrain bg texture
+    DrawTextureV(G::perlinTexture, Vector2{0, 0}, WHITE);
+    // territory texture
+    DrawTexture(G::territoryTexture, 0, 0, Fade(WHITE, 0.5));
+
+    for (const Player &p: players) {
+        for (const Pixel &pixel: p._frontierPixels) {
+            DrawPixel(pixel.x, pixel.y, p._color);
+        }
+    }
+
+    // display every city for each player
+    for (const Player& p : players) {
+        for (const Vector2 &cityPos: p._cityPositions) {
+            DrawTextureV(TextureCollection::city, cityPos, WHITE);
+        }
+    }
+
+    // Population
+    for (Player &p: players) {
+        p.Update();
+    }
+    displayAllPlayerTags();
+
+    EndMode2D();
+
+    displayInfoTexts();
+
+    EndDrawing();
 }
 
 void displayInfoTexts() {
@@ -198,7 +181,7 @@ void displayInfoTexts() {
     DrawText(territorySizeText, 0 + 25, GetScreenHeight() - 100, 20, MAIN_PLAYER_COLOR);
 }
 
-void displayAllPlayer() {
+void displayAllPlayerTags() {
     for (int i = 0; i < players.size(); i++) {
         const float diameter = 2 * std::sqrt(players[i]._allPixels.size() / PI); // A = π * r^2 => r = sqrt(A / π)
         // Shows who you are
@@ -206,8 +189,8 @@ void displayAllPlayer() {
         const int charCount = strlen(name);
         const float pxWidthPerChar = diameter / charCount;
 
-        int fontSize = pxWidthPerChar;
-        int spacing = 1;
+        const int fontSize = pxWidthPerChar;
+        const int spacing = 1;
 
 
         Vector2 textSize = MeasureTextEx(GetFontDefault(), name, fontSize, 1);
@@ -215,7 +198,6 @@ void displayAllPlayer() {
             players[i]._centerPixel.x - textSize.x / 2,
             players[i]._centerPixel.y - textSize.y / 2
         };
-
         DrawTextEx(GetFontDefault(), name, textPos, fontSize, spacing, WHITE);
     }
 }
@@ -226,26 +208,7 @@ void handleControls() {
     if (IsKeyDown(KEY_A)) playerPos.x -= moveSpeed * GetFrameTime() * 1 / camera.zoom;
     if (IsKeyDown(KEY_D)) playerPos.x += moveSpeed * GetFrameTime() * 1 / camera.zoom;
     if (IsKeyPressed(KEY_F11)) ToggleFullscreen();
-
     if (IsKeyDown(KEY_ESCAPE)) WindowShouldClose();
-
-    // expand with space is clicked
-    if (IsKeyPressed(KEY_SPACE) && MAIN_PLAYER._population / 2 >= 100) {
-        for (Player& p : players) {
-           p.Expand(0.5);
-        }
-    }
-    // Create cities when left-clicking
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        for (Player& p : players) {
-            const int cost = 10000 * (p._cityPositions.size() + 1);
-            if (p._money.moneyBalance - cost >= 0) {
-                p._money.spendMoney(cost);
-                p.AddCity(GetScreenToWorld2D(GetMousePosition(), camera));
-            }
-
-        }
-    }
 
     if (playerPos.x > 3000) playerPos.x = 3000;
     else if (playerPos.x < -1000) playerPos.x = -1000;
@@ -260,6 +223,15 @@ void handleControls() {
 
     if (camera.zoom < zoomMin) camera.zoom = zoomMin;
     if (camera.zoom > zoomMax) camera.zoom = zoomMax;
+}
+
+void checkExpansion() {
+    // expand with space is clicked
+    if (IsKeyPressed(KEY_SPACE) && MAIN_PLAYER._population / 2 >= 100) {
+        for (Player& p : players) {
+            p.Expand(0.5);
+        }
+    }
 }
 
 void checkExplosion() {
@@ -329,6 +301,42 @@ void checkExplosion() {
 
         UnloadTexture(G::perlinTexture);
         G::perlinTexture = LoadTextureFromImage(G::perlin);
+    }
+}
+
+void checkCity() {
+    // Create cities when left-clicking
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        for (Player& p : players) {
+            const int cost = 10000 * (p._cityPositions.size() + 1);
+            if (p._money.moneyBalance - cost >= 0) {
+                p._money.spendMoney(cost);
+                p.AddCity(GetScreenToWorld2D(GetMousePosition(), camera));
+            }
+        }
+    }
+}
+
+void initPlayers() {
+    // main character
+    players.push_back(Player(
+        {
+            static_cast<int>(playerPos.x),
+            static_cast<int>(playerPos.y)
+        },
+        10
+    ));
+
+    // bots
+    for (int i = 0; i < botCount; i++) {
+        const float angle = 2 * PI * i / botCount;
+        players.push_back(Player(
+            {
+                static_cast<int>(playerPos.x + std::cos(angle) * botSpawnRadius),
+                static_cast<int>(playerPos.y + std::sin(angle) * botSpawnRadius)
+            },
+            5
+        ));
     }
 }
 

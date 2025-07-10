@@ -27,7 +27,7 @@ Player::Player(const Pixel startPos, const int startRadius) {
     } while (_color.g > _color.r + 40 && _color.g > _color.b + 40);
 
     _money = Money();
-
+    _lastActionTime = GetTime();
 
     _centerPixel = {
         startPos.x,
@@ -158,7 +158,6 @@ bool Player::IsFrontierPixel(const Pixel &p) const {
 }
 
 void Player::UpdateFrontier() {
-    std::cout << "bad" << std::endl;
     _frontierPixels.clear();
     _frontierSet.clear();
 

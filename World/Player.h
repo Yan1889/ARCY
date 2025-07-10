@@ -32,8 +32,8 @@ public:
     int _maxPeopleExploring = 10000;
 
     // money
-    float _cooldownTime{};
-    float _lastActionTime{};
+    float _cooldownTime = 1.0f;
+    float _lastActionTime;
     Money _money;
 
     // territory
