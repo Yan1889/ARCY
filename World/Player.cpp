@@ -14,9 +14,10 @@
 
 #include "raylib.h"
 
-Player::Player(const Pixel startPos, const int startRadius) {
-    G::playerCount++;
-    _id = G::playerCount;
+Player::Player(const Pixel startPos, const int startRadius): _id(++G::playerCount) {
+    _centerPixel = Pixel(startPos.x, startPos.y, G::playerCount);
+    _allPixelsSummed = _centerPixel;
+
     do {
         _color = Color{
             static_cast<unsigned char>(GetRandomValue(0, 255)), // Red
@@ -29,12 +30,6 @@ Player::Player(const Pixel startPos, const int startRadius) {
     _money = Money();
     _lastActionTime = GetTime();
 
-    _centerPixel = {
-        startPos.x,
-        startPos.y,
-        _id
-    };
-    _allPixelsSummed = _centerPixel;
 
     for (int x = startPos.x - startRadius; x < startPos.x + startRadius; x++) {
         const int dx = x - startPos.x;
@@ -47,7 +42,6 @@ Player::Player(const Pixel startPos, const int startRadius) {
             GetOwnershipOfPixel(x, y);
         }
     }
-
     UpdateFrontier();
 }
 
@@ -223,7 +217,12 @@ float Player::GetInvasionAcceptP(const Color &terrainColor) {
     return -1;
 }
 
-void Player::AddCity(const Vector2 pos) {
+void Player::AddCity(const Vector2 &pos) {
+    _cityCount++;
+    _cityPositions.push_back(Pixel(pos));
+}
+
+void Player::AddCity(const Pixel &pos) {
     _cityCount++;
     _cityPositions.push_back(pos);
 }

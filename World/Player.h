@@ -24,7 +24,7 @@ public:
     float _growthCooldown = 100;
     float _growthRate = 100;
     int _cityCount{};
-    std::vector<Vector2> _cityPositions;
+    std::vector<Pixel> _cityPositions;
     float _growth{};
     float _growthFactor = 0.0085f;
 
@@ -61,7 +61,8 @@ public:
     void Update();
     void GrowPopulation();
     void IncreaseMoney();
-    void AddCity(Vector2 pos);
+    void AddCity(const Vector2& pos);
+    void AddCity(const Pixel& pos);
 };
 
 

@@ -8,6 +8,13 @@
 
 #include "Globals.h"
 
+
+Pixel::Pixel(const int x, const int y, const int id): x(x), y(y), playerId(id) {
+}
+
+Pixel::Pixel(const Vector2 vec): x(static_cast<int>(vec.x)), y(static_cast<int>(vec.y)), playerId(-1) {
+}
+
 std::vector<Pixel> Pixel::GetNeighborPixels() const {
     std::vector<Pixel> result;
 
@@ -27,7 +34,14 @@ bool Pixel::operator==(const Pixel &other) const {
     return x == other.x && y == other.y;
 }
 
-void Pixel::operator+=(const Pixel& other) {
+void Pixel::operator+=(const Pixel &other) {
     x += other.x;
     y += other.y;
+}
+
+Pixel::operator Vector2() const {
+    return Vector2{
+        static_cast<float>(x),
+        static_cast<float>(y)
+    };
 }

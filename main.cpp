@@ -36,8 +36,11 @@ std::vector<Player> players{};
 constexpr int botCount = 10;
 constexpr int botSpawnRadius = 500;
 
+constexpr float cityRadius = 20;
+
 
 void initCamAndMap();
+
 void initPlayers();
 
 void gameLoop();
@@ -45,10 +48,13 @@ void gameLoop();
 void handleControls();
 
 void displayInfoTexts();
+
 void displayAllPlayerTags();
 
 void checkExplosion();
+
 void checkCity();
+
 void checkExpansion();
 
 
@@ -80,6 +86,10 @@ void gameLoop() {
     checkCity();
     checkExpansion();
 
+    for (Player &p: players) {
+        p.Update();
+    }
+
     BeginDrawing();
     ClearBackground(Color{90, 90, 255, 255});
 
@@ -87,8 +97,6 @@ void gameLoop() {
 
     // terrain bg texture
     DrawTextureV(G::perlinTexture, Vector2{0, 0}, WHITE);
-    // territory texture
-    DrawTexture(G::territoryTexture, 0, 0, Fade(WHITE, 0.5));
 
     for (const Player &p: players) {
         for (const Pixel &pixel: p._frontierPixels) {
@@ -97,16 +105,20 @@ void gameLoop() {
     }
 
     // display every city for each player
-    for (const Player& p : players) {
-        for (const Vector2 &cityPos: p._cityPositions) {
-            DrawTextureV(TextureCollection::city, cityPos, WHITE);
+    for (const Player &p: players) {
+        for (const Pixel &cityPos: p._cityPositions) {
+            DrawTextureEx(
+                TextureCollection::city,
+                Vector2(cityPos.x - cityRadius, cityPos.y - cityRadius),
+                0,
+                2 * cityRadius / TextureCollection::city.width,
+                WHITE
+            );
         }
     }
+    // territory texture
+    DrawTexture(G::territoryTexture, 0, 0, Fade(WHITE, 0.5));
 
-    // Population
-    for (Player &p: players) {
-        p.Update();
-    }
     displayAllPlayerTags();
 
     EndMode2D();
@@ -119,14 +131,17 @@ void gameLoop() {
 void displayInfoTexts() {
     // instructions
     DrawText("Move with WASD", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20, 20, MAIN_PLAYER_COLOR);
-    DrawText("Up or Down Arrow to zoom", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 40, 20, MAIN_PLAYER_COLOR);
+    DrawText("Up or Down Arrow to zoom", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 40, 20,
+             MAIN_PLAYER_COLOR);
     DrawText("Left-click to build a city ($10K * city count)", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 80,
              20, MAIN_PLAYER_COLOR);
     DrawText("Esc to exit the game", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 120, 20, MAIN_PLAYER_COLOR);
     DrawText("1 to drop a atom bomb ($10K), 2 a hydrogen bomb ($100K)", GetScreenWidth() / 20 - 25,
              GetScreenHeight() / 20 + 160, 20, MAIN_PLAYER_COLOR);
-    DrawText("F11 to toggle fullscreen", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 200, 20, MAIN_PLAYER_COLOR);
-    DrawText("Space to expand your territory", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 240, 20, MAIN_PLAYER_COLOR);
+    DrawText("F11 to toggle fullscreen", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 200, 20,
+             MAIN_PLAYER_COLOR);
+    DrawText("Space to expand your territory", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 240, 20,
+             MAIN_PLAYER_COLOR);
 
     // fps
     const int fps = GetFPS();
@@ -165,8 +180,7 @@ void displayInfoTexts() {
         moneyBalanceDisplay /= 1000000;
 
         moneyText = TextFormat("Money Balance: $%.2fM", moneyBalanceDisplay);
-    }
-    else if (moneyBalanceDisplay >= 1000) {
+    } else if (moneyBalanceDisplay >= 1000) {
         moneyBalanceDisplay /= 1000;
 
         moneyText = TextFormat("Money Balance: $%.2fK", moneyBalanceDisplay);
@@ -177,7 +191,8 @@ void displayInfoTexts() {
     DrawText(moneyText, 25, GetScreenHeight() - 75, 20, MAIN_PLAYER_COLOR);
 
     // _pixelsOccupied
-    const char* territorySizeText = ("pixels occupied (your size): " + std::to_string(MAIN_PLAYER._allPixels.size())).c_str();
+    const char *territorySizeText = ("pixels occupied (your size): " + std::to_string(MAIN_PLAYER._allPixels.size())).
+            c_str();
     DrawText(territorySizeText, 0 + 25, GetScreenHeight() - 100, 20, MAIN_PLAYER_COLOR);
 }
 
@@ -185,7 +200,7 @@ void displayAllPlayerTags() {
     for (int i = 0; i < players.size(); i++) {
         const float diameter = 2 * std::sqrt(players[i]._allPixels.size() / PI); // A = π * r^2 => r = sqrt(A / π)
         // Shows who you are
-        const char* name = i == 0 ? "You" : ("NPC " + std::to_string(i)).c_str();
+        const char *name = i == 0 ? "You" : ("NPC " + std::to_string(i)).c_str();
         const int charCount = strlen(name);
         const float pxWidthPerChar = diameter / charCount;
 
@@ -228,7 +243,7 @@ void handleControls() {
 void checkExpansion() {
     // expand with space is clicked
     if (IsKeyPressed(KEY_SPACE) && MAIN_PLAYER._population / 2 >= 100) {
-        for (Player& p : players) {
+        for (Player &p: players) {
             p.Expand(0.5);
         }
     }
@@ -307,11 +322,25 @@ void checkExplosion() {
 void checkCity() {
     // Create cities when left-clicking
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        for (Player& p : players) {
-            const int cost = 10000 * (p._cityPositions.size() + 1);
-            if (p._money.moneyBalance - cost >= 0) {
-                p._money.spendMoney(cost);
-                p.AddCity(GetScreenToWorld2D(GetMousePosition(), camera));
+        const Pixel pixelClicked(GetScreenToWorld2D(GetMousePosition(), camera));
+
+        if (MAIN_PLAYER._allPixels.contains(pixelClicked)) {
+            int cost = 10000 * (MAIN_PLAYER._cityPositions.size() + 1);
+
+            if (MAIN_PLAYER._money.moneyBalance - cost >= 0) {
+                MAIN_PLAYER._money.spendMoney(cost);
+                MAIN_PLAYER.AddCity(GetScreenToWorld2D(GetMousePosition(), camera));
+            }
+
+            // bots also make a random city when main player makes city
+            for (int i = 1; i < players.size(); i++) {
+                cost = 10000 * (players[i]._cityPositions.size() + 1);
+                if (players[i]._money.moneyBalance - cost >= 0) {
+                    auto iter = players[i]._allPixels.begin();
+                    std::advance(iter, rand() % players[i]._allPixels.size());
+                    players[i]._money.spendMoney(cost);
+                    players[i].AddCity(*iter);
+                }
             }
         }
     }
@@ -319,24 +348,19 @@ void checkCity() {
 
 void initPlayers() {
     // main character
-    players.push_back(Player(
-        {
-            static_cast<int>(playerPos.x),
-            static_cast<int>(playerPos.y)
-        },
-        10
-    ));
+    players.emplace_back(Pixel(playerPos), 10);
 
     // bots
     for (int i = 0; i < botCount; i++) {
         const float angle = 2 * PI * i / botCount;
-        players.push_back(Player(
-            {
-                static_cast<int>(playerPos.x + std::cos(angle) * botSpawnRadius),
-                static_cast<int>(playerPos.y + std::sin(angle) * botSpawnRadius)
-            },
+        players.emplace_back(
+            Pixel(
+                playerPos.x + std::cos(angle) * botSpawnRadius,
+                playerPos.y + std::sin(angle) * botSpawnRadius,
+                -1
+            ),
             5
-        ));
+        );
     }
 }
 

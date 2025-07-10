@@ -8,6 +8,8 @@
 #include <vector>
 #include <cmath>
 
+#include "raylib.h"
+
 
 struct Pixel {
     int x;
@@ -21,6 +23,13 @@ struct Pixel {
     bool operator==(const Pixel &other) const;
 
     void operator+=(const Pixel &other);
+
+    explicit operator Vector2() const;
+
+    Pixel() = default;
+    Pixel(int x, int y, int id);
+
+    explicit Pixel(Vector2 vec);
 
     struct Hasher {
         std::size_t operator()(const Pixel &p) const {
