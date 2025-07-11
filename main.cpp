@@ -27,9 +27,9 @@ Color grayScale(const unsigned char gray) {
 
 // ----- camera setting -----
 Camera2D camera{};
-constexpr int moveSpeed = 100;
+constexpr int moveSpeed = 50;
 constexpr int zoomSpeed = 5;
-constexpr float zoomMin = 0.1f;
+constexpr float zoomMin = 0.25f;
 constexpr float zoomMax = 10.0f;
 
 Vector2 playerPos(MAP_WIDTH / 2, MAP_HEIGHT / 2);
