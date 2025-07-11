@@ -9,6 +9,7 @@ class Sounds {
 
 public:
     Sound explosionSound;
+    Sound cityBuildSound;
     Music oceanSound;
     Music beachSound;
     Music fieldSound;

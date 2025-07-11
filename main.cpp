@@ -126,7 +126,10 @@ void gameLoop() {
     DrawTexture(G::territoryTexture, 0, 0, Fade(WHITE, 0.5));
 
     // """""Crosshair""""
-    DrawRectangle(playerPos.x, playerPos.y, 10, 10, WHITE);
+    int size = 6;
+    int thickness = 1;
+    DrawRectangle((int)playerPos.x - size, (int)playerPos.y - thickness / 2, size * 2 + 1, thickness, WHITE);
+    DrawRectangle((int)playerPos.x - thickness / 2, (int)playerPos.y - size, thickness, size * 2 + 1, WHITE);
 
     displayAllPlayerTags();
 
@@ -342,6 +345,7 @@ void checkCity() {
 
             if (MAIN_PLAYER._money.moneyBalance - cost >= 0) {
                 MAIN_PLAYER._money.spendMoney(cost);
+                mySounds.Play(mySounds.cityBuildSound);
                 MAIN_PLAYER.AddCity(GetScreenToWorld2D(GetMousePosition(), camera));
             }
 

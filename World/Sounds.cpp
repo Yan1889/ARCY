@@ -19,6 +19,7 @@ Sounds::Sounds()
 Sounds::~Sounds()
 {
     UnloadSound(explosionSound);
+    UnloadSound(cityBuildSound);
 
     UnloadMusicStream(oceanSound);
     UnloadMusicStream(beachSound);
@@ -31,6 +32,8 @@ Sounds::~Sounds()
 void Sounds::LoadAll()
 {
     explosionSound = LoadSound("assets/sounds/nukeexplosion.mp3");
+    cityBuildSound = LoadSound("assets/sounds/citybuilding.mp3");
+
     oceanSound = LoadMusicStream("assets/sounds/ocean.mp3");
     beachSound = LoadMusicStream("assets/sounds/beach.mp3");
     mountainSound = LoadMusicStream("assets/sounds/mountain.mp3");
