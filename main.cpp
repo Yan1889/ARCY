@@ -237,11 +237,11 @@ void handleControls() {
     if (IsKeyPressed(KEY_F11)) ToggleFullscreen();
     if (IsKeyDown(KEY_ESCAPE)) WindowShouldClose();
 
-    if (playerPos.x > 3000) playerPos.x = 3000;
-    else if (playerPos.x < -1000) playerPos.x = -1000;
+    if (playerPos.x > MAP_WIDTH) playerPos.x = MAP_WIDTH;
+    else if (playerPos.x < 0) playerPos.x = 0;
 
-    if (playerPos.y > 3000) playerPos.y = 3000;
-    else if (playerPos.y < -1000) playerPos.y = -1000;
+    if (playerPos.y > MAP_HEIGHT) playerPos.y = MAP_HEIGHT;
+    else if (playerPos.y < 0) playerPos.y = 0;
 
     camera.target = playerPos;
 
