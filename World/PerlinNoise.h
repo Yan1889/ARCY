@@ -8,6 +8,9 @@
 
 #include "raylib.h"
 
+inline int mapWidth = 2500;
+inline int mapHeight = 2500;
+
 struct Gradient {
     int level;
     Color color;

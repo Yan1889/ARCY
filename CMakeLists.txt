@@ -38,9 +38,11 @@ add_executable(ARCY main.cpp
         World/Money.h
         World/Pixel.h
         World/Pixel.cpp
+        World/Sounds.cpp
+        World/Sounds.h
 )
 
-file(COPY ${CMAKE_SOURCE_DIR}/src/images DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
 
 set(CITY_IMAGE ${CMAKE_CURRENT_SOURCE_DIR}/src/images/city.png)
 

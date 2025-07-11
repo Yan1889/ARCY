@@ -8,14 +8,16 @@
 #include "World/Player.h"
 #include "World/Globals.h"
 #include "World/Money.h"
+#include "World/Sounds.h"
+#include "World/PerlinNoise.h"
 
 #define SCREEN_WIDTH 1366 // Default 980
 #define SCREEN_HEIGHT 768 // Default 650
 #define MAIN_PLAYER players[0]
 #define MAIN_PLAYER_COLOR players[0]._color
 
-#define MAP_HEIGHT 2500
-#define MAP_WIDTH 2500
+#define MAP_HEIGHT mapHeight
+#define MAP_WIDTH mapWidth
 
 
 Color grayScale(const unsigned char gray) {
@@ -57,11 +59,14 @@ void checkCity();
 
 void checkExpansion();
 
+Sounds mySounds; // Activate audio
 
 int main() {
     srand(time(nullptr));
 
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "ARCY - An epic game");
+    mySounds.LoadAll();
+
     TextureCollection::LoadAll();
 
     // we dont need 4000 fps - Yes we need 4000+ fps to ditch Python! Sincerely Colin
@@ -70,8 +75,11 @@ int main() {
     initCamAndMap();
     initPlayers();
 
+    std::cout << "Path: " << GetWorkingDirectory() << std::endl;
+
     while (!WindowShouldClose()) {
         gameLoop();
+        mySounds.checkAtmosphere();
     }
     // clean up everything
     TextureCollection::UnloadAll();
@@ -118,6 +126,9 @@ void gameLoop() {
     }
     // territory texture
     DrawTexture(G::territoryTexture, 0, 0, Fade(WHITE, 0.5));
+
+    // """""Crosshair""""
+    DrawRectangle(playerPos.x, playerPos.y, 10, 10, WHITE);
 
     displayAllPlayerTags();
 
@@ -255,6 +266,8 @@ void checkExplosion() {
         if (MAIN_PLAYER._money.moneyBalance - cost < 0) return;
         MAIN_PLAYER._money.spendMoney(cost);
 
+        mySounds.Play(mySounds.explosionSound);
+
         const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), camera);
         const int radius = 50;
 
@@ -287,6 +300,8 @@ void checkExplosion() {
         int cost = 100000;
         if (MAIN_PLAYER._money.moneyBalance - cost < 0) return;
         MAIN_PLAYER._money.spendMoney(cost);
+
+        mySounds.Play(mySounds.explosionSound);
 
         const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), camera);
         const int radius = 300;
