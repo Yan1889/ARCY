@@ -31,7 +31,7 @@ Player::Player(const Pixel startPos, const int startRadius): _id(++G::playerCoun
     _lastActionTime = GetTime();
 
     GetOwnershipOfPixel(_centerPixel.x, _centerPixel.y);
-    Expand(0, 0.1);
+    Expand(0, 0.5);
 }
 
 
@@ -100,13 +100,17 @@ void Player::Expand(const int target, const float percentage) {
     // ----- fill attack queue -----
     for (const Pixel &borderPixel: _borderPixels) {
         for (const Pixel &potentialEnemyBorderPixel: borderPixel.GetNeighborPixels()) {
-            if (--_peopleWorkingOnAttack[queueIdx] <= 0) return;
-
             if (potentialEnemyBorderPixel.playerId == target) {
+                if (_peopleWorkingOnAttack[queueIdx] <= 0) return;
+
+                if (_pixelsQueuedUp.contains(potentialEnemyBorderPixel)) continue;
+
+                _pixelsQueuedUp.insert(potentialEnemyBorderPixel);
                 _allOnGoingAttackQueues[queueIdx].second.push({
-                    1, // all equal for now
+                    GetPriorityOfPixel(potentialEnemyBorderPixel.x, potentialEnemyBorderPixel.y),
                     potentialEnemyBorderPixel
                 });
+                _peopleWorkingOnAttack[queueIdx]--;
             }
         }
     }
@@ -118,26 +122,26 @@ void Player::ProcessAttackQueue(const int queueIdx) {
 
     const int attackPixelCount = queueToWorkOn.size() / 2;
     for (int i = 0; i < attackPixelCount; i++) {
-
         const Pixel newP = queueToWorkOn.top().second;
         queueToWorkOn.pop();
         GetOwnershipOfPixel(newP.x, newP.y);
 
-        if (--_peopleWorkingOnAttack[queueIdx] <= 0) continue;
 
         // update attack queue
-        for (const Pixel &neighbor: /*_borderPixels*/newP.GetNeighborPixels()) {
+        const auto &neighbors = newP.GetNeighborPixels();
+        for (const Pixel &neighbor: neighbors) {
+            if (_peopleWorkingOnAttack[queueIdx] <= 0) break; // no new Pixels
+
             if (neighbor.playerId != _id) {
-                const Color terrainColor = static_cast<const Color *>(G::perlin.data)[
-                    G::perlin.width * newP.y + newP.x];
-                const float priority = 1; // GetInvasionAcceptP(terrainColor);
-                // _attackQueue.emplace(priority, neighbor);
+                if (_pixelsQueuedUp.contains(neighbor)) continue;
+
+                _pixelsQueuedUp.insert(neighbor);
                 queueToWorkOn.push({
-                    priority,
+                    GetPriorityOfPixel(neighbor.x, neighbor.y),
                     neighbor
                 });
+                _peopleWorkingOnAttack[queueIdx]--;
             }
-
         }
     }
 }
@@ -169,15 +173,8 @@ void Player::GetOwnershipOfPixel(const int x, const int y) {
         _id
     };
 
-    // border
+    _borderPixels.push_back(newP);
     const std::vector<Pixel> neighbors = newP.GetNeighborPixels();
-    for (const Pixel &neighbor: neighbors) {
-        if (neighbor.playerId != _id) {
-            // newP is a border pixel
-            _borderPixels.push_back(newP);
-            break;
-        }
-    }
     // update border status of neighbors
     for (const Pixel &neighbor: neighbors) {
         bool wasBorderPixel = _borderSet.contains(neighbor);
@@ -208,6 +205,16 @@ void Player::IncreaseMoney() {
         _lastActionTime = currentTime;
     }
 }
+
+float Player::GetPriorityOfPixel(int x, int y) const {
+    const Color terrainColor = static_cast<const Color *>
+            (G::perlin.data)[G::perlin.width * y + x];
+
+    float priority = GetInvasionAcceptP(terrainColor);
+    priority += rand() / static_cast<float>(RAND_MAX) / 2; // some randomness
+    return priority;
+}
+
 
 float Player::GetInvasionAcceptP(const Color &terrainColor) {
     for (auto &mapPart: G::mapParts) {

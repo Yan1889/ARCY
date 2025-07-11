@@ -43,6 +43,7 @@ public:
     std::vector<int> _peopleWorkingOnAttack;
     // { {attackedPlayerId, { {prio1, pixel1}, {prio2, pixel2}, ... } ... }
     std::vector<std::pair<int, std::priority_queue<std::pair<float, Pixel>>>> _allOnGoingAttackQueues;
+    std::unordered_set<Pixel, Pixel::Hasher> _pixelsQueuedUp;
 
     Pixel _allPixelsSummed;
     Pixel _centerPixel;
@@ -57,6 +58,8 @@ public:
     static float GetInvasionAcceptP(const Color& terrainColor);
 
     void GetOwnershipOfPixel(int x, int y);
+
+    float GetPriorityOfPixel(int x, int y) const;
 
     void Update();
     void GrowPopulation();

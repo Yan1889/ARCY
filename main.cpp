@@ -181,10 +181,10 @@ void displayInfoTexts() {
     }
 
     DrawText(populationText, 0 + 25, GetScreenHeight() - 50, 20, MAIN_PLAYER_COLOR);
-    /*
-    const char *sendText = TextFormat("People exploring: %d", MAIN_PLAYER._peopleCurrentlyExploring);
+
+    const char *sendText = TextFormat("People exploring neutral land: %d", MAIN_PLAYER._allOnGoingAttackQueues[0].second.size());
     DrawText(sendText, 0 + 25, GetScreenHeight() - 25, 20, MAIN_PLAYER_COLOR);
-   */
+
 
     // money
     float moneyBalanceDisplay = static_cast<float>(MAIN_PLAYER._money.moneyBalance);
