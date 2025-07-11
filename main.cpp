@@ -75,8 +75,6 @@ int main() {
     initCamAndMap();
     initPlayers();
 
-    std::cout << "Path: " << GetWorkingDirectory() << std::endl;
-
     while (!WindowShouldClose()) {
         gameLoop();
         mySounds.checkAtmosphere();
