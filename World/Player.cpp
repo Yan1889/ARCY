@@ -30,26 +30,15 @@ Player::Player(const Pixel startPos, const int startRadius): _id(++G::playerCoun
     _money = Money();
     _lastActionTime = GetTime();
 
-
-    for (int x = startPos.x - startRadius; x < startPos.x + startRadius; x++) {
-        const int dx = x - startPos.x;
-        const int dh = std::sqrt(startRadius * startRadius - dx * dx);
-
-        const int yMin = startPos.y - dh;
-        const int yMax = startPos.y + dh;
-
-        for (int y = yMin; y <= yMax; y++) {
-            GetOwnershipOfPixel(x, y);
-        }
-    }
-    UpdateFrontier();
+    GetOwnershipOfPixel(_centerPixel.x, _centerPixel.y);
+    Expand(0, 0.1);
 }
 
 
 void Player::Update() {
     // expand
-    if (_peopleCurrentlyExploring > 0) {
-        ExpandOnceOnAllFrontierPixels();
+    for (int i = 0; i < _allOnGoingAttackQueues.size(); i++) {
+        ProcessAttackQueue(i);
     }
 
     // Add money depending on population
@@ -88,94 +77,79 @@ void Player::GrowPopulation() {
     }
 }
 
-void Player::Expand(const float percentage) {
-    const int peopleAllowedToLeave = _maxPeopleExploring - _peopleCurrentlyExploring;
-    const int newPeopleLeaving = std::min(peopleAllowedToLeave, static_cast<int>(_population * percentage));
-
-    _peopleCurrentlyExploring += newPeopleLeaving;
+void Player::Expand(const int target, const float percentage) {
+    const int newPeopleLeaving = _population * percentage;
     _population -= newPeopleLeaving;
+
+    // ----- init/find an attack queue -----
+    int queueIdx = -1;
+    for (int i = 0; i < _allOnGoingAttackQueues.size(); i++) {
+        if (target == _allOnGoingAttackQueues[i].first) {
+            // the player is already being attacked
+            queueIdx = i;
+            break;
+        }
+    }
+    if (queueIdx == -1) {
+        _allOnGoingAttackQueues.push_back({target, {}});
+        _peopleWorkingOnAttack.push_back(newPeopleLeaving);
+        queueIdx = _allOnGoingAttackQueues.size() - 1;
+    } else {
+        _peopleWorkingOnAttack[queueIdx] += newPeopleLeaving;
+    }
+    // ----- fill attack queue -----
+    for (const Pixel &borderPixel: _borderPixels) {
+        for (const Pixel &potentialEnemyBorderPixel: borderPixel.GetNeighborPixels()) {
+            if (--_peopleWorkingOnAttack[queueIdx] <= 0) return;
+
+            if (potentialEnemyBorderPixel.playerId == target) {
+                _allOnGoingAttackQueues[queueIdx].second.push({
+                    1, // all equal for now
+                    potentialEnemyBorderPixel
+                });
+            }
+        }
+    }
 }
 
 
-void Player::ExpandOnceOnAllFrontierPixels() {
-    const int frontierSnapshotSize = _frontierPixels.size();
-    std::unordered_set<Pixel, Pixel::Hasher> newPixels;
+void Player::ProcessAttackQueue(const int queueIdx) {
+    auto &queueToWorkOn = _allOnGoingAttackQueues[queueIdx].second;
 
-    static std::mt19937 rng(std::random_device{}());
-    std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+    const int attackPixelCount = queueToWorkOn.size() / 2;
+    for (int i = 0; i < attackPixelCount; i++) {
 
-    for (int i = 0; i < frontierSnapshotSize && _peopleCurrentlyExploring > 0; i++) {
-        auto neighborPixels = _frontierPixels[i].GetNeighborPixels();
-        std::ranges::shuffle(neighborPixels, rng);
+        const Pixel newP = queueToWorkOn.top().second;
+        queueToWorkOn.pop();
+        GetOwnershipOfPixel(newP.x, newP.y);
 
-        for (const Pixel &newP: neighborPixels) {
-            if (newP.playerId != 0) continue;
+        if (--_peopleWorkingOnAttack[queueIdx] <= 0) continue;
 
-            Color terrain = static_cast<const Color *>(G::perlin.data)[G::perlin.width * newP.y + newP.x];
-            float invasionP = GetInvasionAcceptP(terrain);
-
-            if (invasionP == 0 || invasionP < dist(rng)) {
-                _peopleCurrentlyExploring--;
-                break;
+        // update attack queue
+        for (const Pixel &neighbor: /*_borderPixels*/newP.GetNeighborPixels()) {
+            if (neighbor.playerId != _id) {
+                const Color terrainColor = static_cast<const Color *>(G::perlin.data)[
+                    G::perlin.width * newP.y + newP.x];
+                const float priority = 1; // GetInvasionAcceptP(terrainColor);
+                // _attackQueue.emplace(priority, neighbor);
+                queueToWorkOn.push({
+                    priority,
+                    neighbor
+                });
             }
 
-            if (_allPixels.contains(newP) || !newPixels.insert(newP).second) continue;
-
-            GetOwnershipOfPixel(newP.x, newP.y);
-            _frontierPixels.push_back(newP);
-            _frontierSet.insert(newP);
-            _peopleCurrentlyExploring--;
-            break; // only one pixel per frontier per turn
-        }
-    }
-
-    std::vector<Pixel> updatedFrontier;
-    updatedFrontier.reserve(_frontierPixels.size());
-
-    for (const Pixel &p: _frontierPixels) {
-        if (IsFrontierPixel(p)) {
-            updatedFrontier.push_back(p);
-        } else {
-            _frontierSet.erase(p);
-        }
-    }
-    _frontierPixels = std::move(updatedFrontier);
-}
-
-bool Player::IsFrontierPixel(const Pixel &p) const {
-    for (const Pixel &n: p.GetNeighborPixels()) {
-        if (!_allPixels.contains(n)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-void Player::UpdateFrontier() {
-    _frontierPixels.clear();
-    _frontierSet.clear();
-
-    for (const Pixel p: _allPixels) {
-        const std::vector<Pixel> neighbors = p.GetNeighborPixels();
-
-        for (const Pixel &n: neighbors) {
-            if (!_allPixels.contains(n)) {
-                _frontierPixels.push_back(p);
-                _frontierSet.insert(p);
-                break;
-            }
         }
     }
 }
 
 void Player::GetOwnershipOfPixel(const int x, const int y) {
-    _allPixels.insert(G::territoryMap[y][x]);
-
     G::territoryMap[y][x] = {x, y, _id};
+    const Pixel &newP = G::territoryMap[y][x];
+    _allPixels.insert(newP);
+
+    // texture
     static_cast<Color *>(G::territoryImage.data)[y * G::WIDTH + x] = _color;
-
     const Color buffer[]{_color};
-
     UpdateTextureRec(
         G::territoryTexture,
         Rectangle{
@@ -188,12 +162,39 @@ void Player::GetOwnershipOfPixel(const int x, const int y) {
     );
 
     // center
-    _allPixelsSummed += G::territoryMap[y][x];
+    _allPixelsSummed += newP;
     _centerPixel = {
         _allPixelsSummed.x / static_cast<int>(_allPixels.size()),
         _allPixelsSummed.y / static_cast<int>(_allPixels.size()),
         _id
     };
+
+    // border
+    const std::vector<Pixel> neighbors = newP.GetNeighborPixels();
+    for (const Pixel &neighbor: neighbors) {
+        if (neighbor.playerId != _id) {
+            // newP is a border pixel
+            _borderPixels.push_back(newP);
+            break;
+        }
+    }
+    // update border status of neighbors
+    for (const Pixel &neighbor: neighbors) {
+        bool wasBorderPixel = _borderSet.contains(neighbor);
+        bool nowBorderPixel = false;
+        for (const Pixel &nn: neighbor.GetNeighborPixels()) {
+            if (nn.playerId != _id) {
+                nowBorderPixel = true;
+                _borderPixels.push_back(neighbor);
+                break;
+            }
+        }
+        if (nowBorderPixel && !wasBorderPixel) {
+            _borderPixels.push_back(newP);
+        } else if (!nowBorderPixel && wasBorderPixel) {
+            _borderPixels.erase(std::ranges::find(_borderPixels, newP));
+        }
+    }
 }
 
 void Player::IncreaseMoney() {

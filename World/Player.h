@@ -4,6 +4,7 @@
 
 #ifndef POPULATION_H
 #define POPULATION_H
+#include <queue>
 #include <unordered_set>
 #include <vector>
 
@@ -28,9 +29,6 @@ public:
     float _growth{};
     float _growthFactor = 0.0085f;
 
-    int _peopleCurrentlyExploring{};
-    int _maxPeopleExploring = 10000;
-
     // money
     float _cooldownTime = 1.0f;
     float _lastActionTime;
@@ -38,21 +36,23 @@ public:
 
     // territory
     std::unordered_set<Pixel, Pixel::Hasher> _allPixels;
-    std::vector<Pixel> _frontierPixels;
-    std::unordered_set<Pixel, Pixel::Hasher> _frontierSet;
+    std::vector<Pixel> _borderPixels;
+    std::unordered_set<Pixel, Pixel::Hasher> _borderSet;
+
+    // attack
+    std::vector<int> _peopleWorkingOnAttack;
+    // { {attackedPlayerId, { {prio1, pixel1}, {prio2, pixel2}, ... } ... }
+    std::vector<std::pair<int, std::priority_queue<std::pair<float, Pixel>>>> _allOnGoingAttackQueues;
+
     Pixel _allPixelsSummed;
     Pixel _centerPixel;
 
 
     Player(Pixel startPos, int startRadius);
 
-    void Expand(float percentage);
+    void Expand(int target, float percentage);
 
-    void ExpandOnceOnAllFrontierPixels();
-
-    void UpdateFrontier();
-
-    bool IsFrontierPixel(const Pixel& p) const;
+    void ProcessAttackQueue(int queueIdx);
 
     static float GetInvasionAcceptP(const Color& terrainColor);
 
