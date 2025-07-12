@@ -10,3 +10,8 @@ void Money::spendMoney(int cost)
 
     moneyBalance -= cost;
 }
+
+void Money::getMoney(int amount)
+{
+    moneyBalance += amount;
+}

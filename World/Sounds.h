@@ -9,12 +9,16 @@ class Sounds {
 
 public:
     Sound explosionSound;
+    Sound farExplosionSound;
+    Sound distantExplosionSound;
     Sound cityBuildSound;
+
     Music oceanSound;
     Music beachSound;
     Music fieldSound;
     Music forestSound;
     Music mountainSound;
+    Music radiationSound;
 
     Sounds();
     ~Sounds();

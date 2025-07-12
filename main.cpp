@@ -267,10 +267,28 @@ void checkExplosion() {
         if (MAIN_PLAYER._money.moneyBalance - cost < 0) return;
         MAIN_PLAYER._money.spendMoney(cost);
 
-        mySounds.Play(mySounds.explosionSound);
-
         const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), camera);
         const int radius = 50;
+
+        // Satz des Pythagoras kein Problem
+
+        int a = playerPos.y - mousePos.y;
+        int b = playerPos.x - mousePos.x;
+
+        int c = sqrt(a * a + b * b);
+
+        if (c >= 1000)
+        {
+            mySounds.Play(mySounds.distantExplosionSound);
+        }
+        else if (c >= 500)
+        {
+            mySounds.Play(mySounds.farExplosionSound);
+        }
+        else
+        {
+            mySounds.Play(mySounds.explosionSound);
+        }
 
         for (int y = -radius; y <= radius; y++) {
             for (int x = -radius; x <= radius; x++) {
@@ -302,10 +320,24 @@ void checkExplosion() {
         if (MAIN_PLAYER._money.moneyBalance - cost < 0) return;
         MAIN_PLAYER._money.spendMoney(cost);
 
-        mySounds.Play(mySounds.explosionSound);
-
         const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), camera);
         const int radius = 300;
+
+        // Satz des Pythagoras kein Problem
+
+        int a = playerPos.y - mousePos.y;
+        int b = playerPos.x - mousePos.x;
+
+        int c = sqrt(a * a + b * b);
+
+        if (c >= 1000)
+        {
+            mySounds.Play(mySounds.farExplosionSound);
+        }
+        else
+        {
+            mySounds.Play(mySounds.explosionSound);
+        }
 
         for (int y = -radius; y <= radius; y++) {
             for (int x = -radius; x <= radius; x++) {
