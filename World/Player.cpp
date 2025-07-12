@@ -102,7 +102,7 @@ void Player::Expand(const int target, const float percentage) {
     }
     // ----- fill attack queue -----
     for (Pixel *borderPixel: _borderPixels) {
-        for (Pixel *potentialEnemyBorderPixel: borderPixel->GetNeighborPixels()) {
+        for (Pixel *potentialEnemyBorderPixel: borderPixel->GetNeighbors()) {
             if (potentialEnemyBorderPixel->playerId == target) {
                 if (_peopleWorkingOnAttack[queueIdx] <= 0) return;
 
@@ -137,7 +137,7 @@ void Player::ProcessAttackQueue(const int queueIdx) {
         _pixelsQueuedUp[queueIdx].erase(newP);
 
         // update attack queue
-        const auto &neighbors = newP->GetNeighborPixels();
+        const auto &neighbors = newP->GetNeighbors();
         for (Pixel *neighbor: neighbors) {
             if (_peopleWorkingOnAttack[queueIdx] <= 0) break; // no new Pixels
 
@@ -181,13 +181,13 @@ void Player::GetOwnershipOfPixel(const int x, const int y) {
     _centerPixel_x = _allPixelsSummed_x / static_cast<int>(_allPixels.size());
     _centerPixel_y = _allPixelsSummed_y / static_cast<int>(_allPixels.size());
 
-    std::vector<Pixel *> affectedPixels = newP->GetNeighborPixels();
+    std::vector<Pixel *> affectedPixels = newP->GetNeighbors();
     affectedPixels.push_back(newP);
     // update border status of neighbors
     for (Pixel *neighbor: affectedPixels) {
         bool wasBorderPixel = _borderSet.contains(neighbor);
         bool nowBorderPixel = false;
-        for (Pixel *nn: neighbor->GetNeighborPixels()) {
+        for (Pixel *nn: neighbor->GetNeighbors()) {
             if (nn->playerId != _id) {
                 nowBorderPixel = true;
                 break;

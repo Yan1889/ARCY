@@ -16,13 +16,21 @@ struct Pixel {
     int y;
     int playerId;
 
-    [[nodiscard]] std::vector<Pixel*> GetNeighborPixels() const;
+    bool loaded = false;
+
+    std::vector<Pixel *> neighborsCached;
+
+
+    Pixel() = default;
+    Pixel(int x, int y, int id);
+
+    void LoadNeighbors();
+
+    const std::vector<Pixel *>& GetNeighbors();
 
     bool operator<(const Pixel &other) const;
 
     bool operator==(const Pixel &other) const;
-
-    void operator+=(const Pixel &other);
 
     Color GetColor() const;
 

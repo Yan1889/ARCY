@@ -394,7 +394,6 @@ void checkCity() {
 
 void initPlayers() {
     // main character
-    std::cout << "player pos: " << playerPos.x << " " << playerPos.y << std::endl;
     players.emplace_back(Player(
         &G::territoryMap[static_cast<int>(playerPos.x)][static_cast<int>(playerPos.y)],
         10
@@ -435,12 +434,19 @@ void initCamAndMap() {
     G::perlinTexture = LoadTextureFromImage(G::perlin);
 
 
+    G::territoryImage = GenImageColor(G::WIDTH, G::HEIGHT, BLANK);
+    G::territoryTexture = LoadTextureFromImage(G::territoryImage);
+
+
     G::territoryMap = std::vector<std::vector<Pixel> >(MAP_WIDTH, std::vector<Pixel>(MAP_HEIGHT));
     for (int y = 0; y < MAP_HEIGHT; y++) {
         for (int x = 0; x < MAP_WIDTH; x++) {
             G::territoryMap[x][y] = {x, y, 0};
         }
     }
-    G::territoryImage = GenImageColor(G::WIDTH, G::HEIGHT, BLANK);
-    G::territoryTexture = LoadTextureFromImage(G::territoryImage);
+    for (int y = 0; y < MAP_HEIGHT; y++) {
+        for (int x = 0; x < MAP_WIDTH; x++) {
+            G::territoryMap[x][y].LoadNeighbors();
+        }
+    }
 }
