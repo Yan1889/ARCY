@@ -105,7 +105,7 @@ void gameLoop() {
     DrawTextureV(G::perlinTexture, Vector2{0, 0}, WHITE);
 
     for (const Player &p: players) {
-        for (const Pixel &pixel: p._frontierPixels) {
+        for (const Pixel &pixel: p._borderPixels) {
             DrawPixel(pixel.x, pixel.y, p._color);
         }
     }
@@ -181,8 +181,10 @@ void displayInfoTexts() {
     }
 
     DrawText(populationText, 0 + 25, GetScreenHeight() - 50, 20, MAIN_PLAYER_COLOR);
-    const char *sendText = TextFormat("People exploring: %d", MAIN_PLAYER._peopleCurrentlyExploring);
+
+    const char *sendText = TextFormat("People exploring neutral land: %d", MAIN_PLAYER._allOnGoingAttackQueues[0].second.size());
     DrawText(sendText, 0 + 25, GetScreenHeight() - 25, 20, MAIN_PLAYER_COLOR);
+
 
     // money
     float moneyBalanceDisplay = static_cast<float>(MAIN_PLAYER._money.moneyBalance);
@@ -256,7 +258,7 @@ void checkExpansion() {
     // expand with space is clicked
     if (IsKeyPressed(KEY_SPACE) && MAIN_PLAYER._population / 2 >= 100) {
         for (Player &p: players) {
-            p.Expand(0.5);
+            p.Expand(0, 0.5);
         }
     }
 }

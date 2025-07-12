@@ -33,7 +33,9 @@ struct Pixel {
 
     struct Hasher {
         std::size_t operator()(const Pixel &p) const {
-            return std::hash<int>()(p.x) ^ (std::hash<int>()(p.y) << 1);
+            std::size_t seed = std::hash<int>()(p.x);
+            seed ^= std::hash<int>()(p.y) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+            return seed;
         }
     };
 };
