@@ -27,8 +27,8 @@ if (NOT raylib_FOUND)
 endif()
 
 add_executable(ARCY main.cpp
-        World/PerlinNoise.cpp
-        World/PerlinNoise.h
+        World/Map/PerlinNoise.cpp
+        World/Map/PerlinNoise.h
         World/TextureCollection.cpp
         World/TextureCollection.h
         World/Player.cpp
@@ -36,10 +36,12 @@ add_executable(ARCY main.cpp
         World/Globals.h
         World/Money.cpp
         World/Money.h
-        World/Pixel.h
-        World/Pixel.cpp
+        World/Map/Pixel.h
+        World/Map/Pixel.cpp
         World/Sounds.cpp
         World/Sounds.h
+        World/Map/PixelRef.cpp
+        World/Map/PixelRef.h
 )
 
 file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})

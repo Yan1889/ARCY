@@ -9,7 +9,7 @@
 #include "World/Globals.h"
 #include "World/Money.h"
 #include "World/Sounds.h"
-#include "World/PerlinNoise.h"
+#include "World/Map/PerlinNoise.h"
 
 #define SCREEN_WIDTH 1366 // Default 980
 #define SCREEN_HEIGHT 768 // Default 650
@@ -105,14 +105,14 @@ void gameLoop() {
     DrawTextureV(G::perlinTexture, Vector2{0, 0}, WHITE);
 
     for (const Player &p: players) {
-        for (const Pixel &pixel: p._borderPixels) {
+        for (const PixelRef &pixel: p._borderPixels) {
             DrawPixel(pixel.x, pixel.y, p._color);
         }
     }
 
     // display every city for each player
     for (const Player &p: players) {
-        for (const Pixel &cityPos: p._cityPositions) {
+        for (const PixelRef &cityPos: p._cityPositions) {
             DrawTextureEx(
                 TextureCollection::city,
                 Vector2(cityPos.x - cityRadius, cityPos.y - cityRadius),
@@ -128,8 +128,8 @@ void gameLoop() {
     // """""Crosshair""""
     int size = 6;
     int thickness = 1;
-    DrawRectangle((int)playerPos.x - size, (int)playerPos.y - thickness / 2, size * 2 + 1, thickness, WHITE);
-    DrawRectangle((int)playerPos.x - thickness / 2, (int)playerPos.y - size, thickness, size * 2 + 1, WHITE);
+    DrawRectangle((int) playerPos.x - size, (int) playerPos.y - thickness / 2, size * 2 + 1, thickness, WHITE);
+    DrawRectangle((int) playerPos.x - thickness / 2, (int) playerPos.y - size, thickness, size * 2 + 1, WHITE);
 
     displayAllPlayerTags();
 
@@ -182,7 +182,8 @@ void displayInfoTexts() {
 
     DrawText(populationText, 0 + 25, GetScreenHeight() - 50, 20, MAIN_PLAYER_COLOR);
 
-    const char *sendText = TextFormat("People exploring neutral land: %d", MAIN_PLAYER._allOnGoingAttackQueues[0].second.size());
+    const char *sendText = TextFormat("People exploring neutral land: %d",
+                                      MAIN_PLAYER._allOnGoingAttackQueues[0].second.size());
     DrawText(sendText, 0 + 25, GetScreenHeight() - 25, 20, MAIN_PLAYER_COLOR);
 
 
@@ -372,7 +373,10 @@ void checkExplosion() {
 void checkCity() {
     // Create cities when left-clicking
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        const Pixel pixelClicked(GetScreenToWorld2D(GetMousePosition(), camera));
+        const PixelRef pixelClicked{
+            static_cast<int>(GetScreenToWorld2D(GetMousePosition(), camera).x),
+            static_cast<int>(GetScreenToWorld2D(GetMousePosition(), camera).y)
+        };
 
         if (MAIN_PLAYER._allPixels.contains(pixelClicked)) {
             int cost = 10000 * (MAIN_PLAYER._cityPositions.size() + 1);
@@ -399,7 +403,13 @@ void checkCity() {
 
 void initPlayers() {
     // main character
-    players.emplace_back(Pixel(playerPos), 10);
+    players.emplace_back(Player(
+        {
+            static_cast<int>(playerPos.x),
+            static_cast<int>(playerPos.y)
+        },
+        10
+    ));
 
     // bots
     for (int i = 0; i < botCount; i++) {

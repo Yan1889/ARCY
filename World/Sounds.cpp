@@ -9,7 +9,6 @@
 
 #include "TextureCollection.h"
 #include "Globals.h"
-#include "PerlinNoise.h"
 
 Sounds::Sounds()
 {

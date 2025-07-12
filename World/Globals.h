@@ -6,8 +6,8 @@
 #define GLOBALS_H
 #include <vector>
 
-#include "PerlinNoise.h"
-#include "Pixel.h"
+#include "Map/PerlinNoise.h"
+#include "Map/Pixel.h"
 #include "raylib.h"
 
 struct Gradient;

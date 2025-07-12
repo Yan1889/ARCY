@@ -9,9 +9,8 @@
 #include <vector>
 
 #include "Money.h"
-#include "Pixel.h"
 #include "raylib.h"
-
+#include "Map/PixelRef.h"
 
 
 class Player {
@@ -25,7 +24,7 @@ public:
     float _growthCooldown = 100;
     float _growthRate = 100;
     int _cityCount{};
-    std::vector<Pixel> _cityPositions;
+    std::vector<PixelRef> _cityPositions;
     float _growth{};
     float _growthFactor = 0.0085f;
 
@@ -35,18 +34,18 @@ public:
     Money _money;
 
     // territory
-    std::unordered_set<Pixel, Pixel::Hasher> _allPixels;
-    std::vector<Pixel> _borderPixels;
-    std::unordered_set<Pixel, Pixel::Hasher> _borderSet;
+    std::unordered_set<PixelRef, PixelRef::Hasher> _allPixels;
+    std::vector<PixelRef> _borderPixels;
+    std::unordered_set<PixelRef, PixelRef::Hasher> _borderSet;
 
     // attack
     std::vector<int> _peopleWorkingOnAttack;
     // { {attackedPlayerId, { {prio1, pixel1}, {prio2, pixel2}, ... } ... }
-    std::vector<std::pair<int, std::priority_queue<std::pair<float, Pixel>>>> _allOnGoingAttackQueues;
-    std::vector<std::unordered_set<Pixel, Pixel::Hasher>> _pixelsQueuedUp;
+    std::vector<std::pair<int, std::priority_queue<std::pair<float, PixelRef>>>> _allOnGoingAttackQueues;
+    std::vector<std::unordered_set<PixelRef, PixelRef::Hasher>> _pixelsQueuedUp;
 
-    Pixel _allPixelsSummed;
-    Pixel _centerPixel;
+    PixelRef _allPixelsSummed;
+    PixelRef _centerPixel;
 
 
     Player(Pixel startPos, int startRadius);
@@ -65,7 +64,7 @@ public:
     void GrowPopulation();
     void IncreaseMoney();
     void AddCity(const Vector2& pos);
-    void AddCity(const Pixel& pos);
+    void AddCity(const PixelRef& pos);
 };
 
 
