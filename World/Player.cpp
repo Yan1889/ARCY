@@ -106,11 +106,14 @@ void Player::Expand(const int target, const float percentage) {
 
                 if (_pixelsQueuedUp[queueIdx].contains(potentialEnemyBorderPixel)) continue;
 
-                _pixelsQueuedUp[queueIdx].insert(potentialEnemyBorderPixel);
+                const float priority = GetPriorityOfPixel(potentialEnemyBorderPixel.x, potentialEnemyBorderPixel.y);
+                if (priority == 0) continue; // water or mountains are impossible
+
                 _allOnGoingAttackQueues[queueIdx].second.push({
-                    GetPriorityOfPixel(potentialEnemyBorderPixel.x, potentialEnemyBorderPixel.y),
+                    priority,
                     potentialEnemyBorderPixel
                 });
+                _pixelsQueuedUp[queueIdx].insert(potentialEnemyBorderPixel);
                 _peopleWorkingOnAttack[queueIdx]--;
             }
         }
@@ -137,9 +140,12 @@ void Player::ProcessAttackQueue(const int queueIdx) {
 
             if (neighbor.GetPlayerId() == _id || _pixelsQueuedUp[queueIdx].contains(neighbor)) continue;
 
+            const float priority = GetPriorityOfPixel(neighbor.x, neighbor.y);
+            if (priority == 0) continue; // water or mountain are impossible
+
             _pixelsQueuedUp[queueIdx].insert(neighbor);
             queueToWorkOn.push({
-                GetPriorityOfPixel(neighbor.x, neighbor.y),
+                priority,
                 neighbor
             });
             _peopleWorkingOnAttack[queueIdx]--;
@@ -176,11 +182,11 @@ void Player::GetOwnershipOfPixel(const int x, const int y) {
     std::vector<PixelRef> affectedPixels = newP.GetNeighborPixels();
     affectedPixels.push_back(newP);
 
-    for (const PixelRef &p : affectedPixels) {
+    for (const PixelRef &p: affectedPixels) {
         bool wasBorder = _borderSet.contains(p);
         bool isNowBorder = false;
 
-        for (const PixelRef &n : p.GetNeighborPixels()) {
+        for (const PixelRef &n: p.GetNeighborPixels()) {
             if (n.GetPlayerId() != _id) {
                 isNowBorder = true;
                 break;
@@ -239,6 +245,8 @@ void Player::IncreaseMoney() {
 
 float Player::GetPriorityOfPixel(int x, int y) const {
     float priority = GetInvasionAcceptP(PixelRef{x, y}.GetColor());
+    if (priority == 0) return 0;
+
     priority += rand() / static_cast<float>(RAND_MAX) / 2; // some randomness
     return priority;
 }
