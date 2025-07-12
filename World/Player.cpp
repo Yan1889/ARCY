@@ -106,8 +106,8 @@ void Player::Expand(const int target, const float percentage) {
 
                 if (_pixelsQueuedUp[queueIdx].contains(potentialEnemyBorderPixel)) continue;
 
-                const float priority = GetPriorityOfPixel(potentialEnemyBorderPixel.x, potentialEnemyBorderPixel.y);
-                if (priority == 0) continue; // water or mountains are impossible
+                const float priority = GetPriorityOfPixel(potentialEnemyBorderPixel, _allOnGoingAttackQueues[queueIdx].first);
+                if (priority == 0) continue; // skip this impossible pixel
 
                 _allOnGoingAttackQueues[queueIdx].second.push({
                     priority,
@@ -140,7 +140,7 @@ void Player::ProcessAttackQueue(const int queueIdx) {
 
             if (neighbor.GetPlayerId() == _id || _pixelsQueuedUp[queueIdx].contains(neighbor)) continue;
 
-            const float priority = GetPriorityOfPixel(neighbor.x, neighbor.y);
+            const float priority = GetPriorityOfPixel(neighbor, _allOnGoingAttackQueues[queueIdx].first);
             if (priority == 0) continue; // water or mountain are impossible
 
             _pixelsQueuedUp[queueIdx].insert(neighbor);
@@ -181,35 +181,6 @@ void Player::GetOwnershipOfPixel(const int x, const int y) {
 
     std::vector<PixelRef> affectedPixels = newP.GetNeighborPixels();
     affectedPixels.push_back(newP);
-
-    for (const PixelRef &p: affectedPixels) {
-        bool wasBorder = _borderSet.contains(p);
-        bool isNowBorder = false;
-
-        for (const PixelRef &n: p.GetNeighborPixels()) {
-            if (n.GetPlayerId() != _id) {
-                isNowBorder = true;
-                break;
-            }
-        }
-
-        if (isNowBorder && !wasBorder) {
-            _borderSet.insert(p);
-            _borderPixels.push_back(p);
-        } else if (!isNowBorder && wasBorder) {
-            _borderSet.erase(p);
-
-            auto it = std::ranges::find(_borderPixels, p);
-            if (it != _borderPixels.end()) {
-                _borderPixels.erase(it);
-            }
-        }
-    }
-
-
-    /*
-    std::vector<PixelRef> affectedPixels = newP.GetNeighborPixels();
-    affectedPixels.push_back(newP);
     // update border status of neighbors
     for (const PixelRef &neighbor: affectedPixels) {
         bool wasBorderPixel = _borderSet.contains(neighbor);
@@ -228,7 +199,6 @@ void Player::GetOwnershipOfPixel(const int x, const int y) {
             _borderSet.erase(neighbor);
         }
     }
-    */
 }
 
 void Player::IncreaseMoney() {
@@ -243,9 +213,11 @@ void Player::IncreaseMoney() {
     }
 }
 
-float Player::GetPriorityOfPixel(int x, int y) const {
-    float priority = GetInvasionAcceptP(PixelRef{x, y}.GetColor());
-    if (priority == 0) return 0;
+float Player::GetPriorityOfPixel(const PixelRef p, const int targetId) const {
+    if (p.GetPlayerId() != targetId) return 0;
+
+    float priority = GetInvasionAcceptP(p.GetColor());
+    if (priority == 0) return 0; // impossible
 
     priority += rand() / static_cast<float>(RAND_MAX) / 2; // some randomness
     return priority;

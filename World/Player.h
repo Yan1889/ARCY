@@ -58,7 +58,7 @@ public:
 
     void GetOwnershipOfPixel(int x, int y);
 
-    float GetPriorityOfPixel(int x, int y) const;
+    float GetPriorityOfPixel(PixelRef p, int targetId) const;
 
     void Update();
     void GrowPopulation();
