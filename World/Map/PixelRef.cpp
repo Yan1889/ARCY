@@ -21,10 +21,10 @@ Color PixelRef::GetColor() const {
 std::vector<PixelRef> PixelRef::GetNeighborPixels() const {
     std::vector<PixelRef> result;
 
-    if (y > 0) result.emplace_back(y - 1, x); // Up
-    if (y + 1 < G::HEIGHT) result.emplace_back(y + 1, x); // Down
-    if (x > 0) result.emplace_back(y, x - 1); // Left
-    if (x + 1 < G::WIDTH) result.emplace_back(y, x + 1); // Right
+    if (y > 0) result.emplace_back(x - 1, y); // Up
+    if (y + 1 < G::HEIGHT) result.emplace_back(x + 1, y); // Down
+    if (x > 0) result.emplace_back(x, y - 1); // Left
+    if (x + 1 < G::WIDTH) result.emplace_back(x, y + 1); // Right
 
     return result;
 }

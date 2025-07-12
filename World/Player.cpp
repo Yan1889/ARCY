@@ -149,7 +149,7 @@ void Player::ProcessAttackQueue(const int queueIdx) {
 
 void Player::GetOwnershipOfPixel(const int x, const int y) {
     G::territoryMap[y][x] = {x, y, _id};
-    const PixelRef &newP = {y, x};
+    const PixelRef newP = {x, y};
     _allPixels.insert(newP);
 
     // texture
@@ -175,6 +175,35 @@ void Player::GetOwnershipOfPixel(const int x, const int y) {
 
     std::vector<PixelRef> affectedPixels = newP.GetNeighborPixels();
     affectedPixels.push_back(newP);
+
+    for (const PixelRef &p : affectedPixels) {
+        bool wasBorder = _borderSet.contains(p);
+        bool isNowBorder = false;
+
+        for (const PixelRef &n : p.GetNeighborPixels()) {
+            if (n.GetPlayerId() != _id) {
+                isNowBorder = true;
+                break;
+            }
+        }
+
+        if (isNowBorder && !wasBorder) {
+            _borderSet.insert(p);
+            _borderPixels.push_back(p);
+        } else if (!isNowBorder && wasBorder) {
+            _borderSet.erase(p);
+
+            auto it = std::ranges::find(_borderPixels, p);
+            if (it != _borderPixels.end()) {
+                _borderPixels.erase(it);
+            }
+        }
+    }
+
+
+    /*
+    std::vector<PixelRef> affectedPixels = newP.GetNeighborPixels();
+    affectedPixels.push_back(newP);
     // update border status of neighbors
     for (const PixelRef &neighbor: affectedPixels) {
         bool wasBorderPixel = _borderSet.contains(neighbor);
@@ -193,6 +222,7 @@ void Player::GetOwnershipOfPixel(const int x, const int y) {
             _borderSet.erase(neighbor);
         }
     }
+    */
 }
 
 void Player::IncreaseMoney() {

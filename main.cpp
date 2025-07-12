@@ -4,11 +4,11 @@
 #include <vector>
 
 #include "raylib.h"
-#include "World/TextureCollection.h"
+#include "World/Loaders/TextureCollection.h"
 #include "World/Player.h"
 #include "World/Globals.h"
 #include "World/Money.h"
-#include "World/Sounds.h"
+#include "World/Loaders/Sounds.h"
 #include "World/Map/PerlinNoise.h"
 
 #define SCREEN_WIDTH 1366 // Default 980

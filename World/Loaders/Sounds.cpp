@@ -8,7 +8,7 @@
 #include <ostream>
 
 #include "TextureCollection.h"
-#include "Globals.h"
+#include "../Globals.h"
 
 Sounds::Sounds()
 {

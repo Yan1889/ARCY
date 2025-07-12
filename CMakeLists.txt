@@ -29,8 +29,8 @@ endif()
 add_executable(ARCY main.cpp
         World/Map/PerlinNoise.cpp
         World/Map/PerlinNoise.h
-        World/TextureCollection.cpp
-        World/TextureCollection.h
+        World/Loaders/TextureCollection.cpp
+        World/Loaders/TextureCollection.h
         World/Player.cpp
         World/Player.h
         World/Globals.h
@@ -38,8 +38,8 @@ add_executable(ARCY main.cpp
         World/Money.h
         World/Map/Pixel.h
         World/Map/Pixel.cpp
-        World/Sounds.cpp
-        World/Sounds.h
+        World/Loaders/Sounds.cpp
+        World/Loaders/Sounds.h
         World/Map/PixelRef.cpp
         World/Map/PixelRef.h
 )
