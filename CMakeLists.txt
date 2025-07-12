@@ -40,8 +40,6 @@ add_executable(ARCY main.cpp
         World/Map/Pixel.cpp
         World/Loaders/Sounds.cpp
         World/Loaders/Sounds.h
-        World/Map/PixelRef.cpp
-        World/Map/PixelRef.h
 )
 
 file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})

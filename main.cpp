@@ -105,17 +105,17 @@ void gameLoop() {
     DrawTextureV(G::perlinTexture, Vector2{0, 0}, WHITE);
 
     for (const Player &p: players) {
-        for (const PixelRef &pixel: p._borderPixels) {
-            DrawPixel(pixel.x, pixel.y, p._color);
+        for (Pixel *pixel: p._borderPixels) {
+            DrawPixel(pixel->x, pixel->y, p._color);
         }
     }
 
     // display every city for each player
     for (const Player &p: players) {
-        for (const PixelRef &cityPos: p._cityPositions) {
+        for (Pixel *cityPos: p._cityPositions) {
             DrawTextureEx(
                 TextureCollection::city,
-                Vector2(cityPos.x - cityRadius, cityPos.y - cityRadius),
+                Vector2(cityPos->x - cityRadius, cityPos->y - cityRadius),
                 0,
                 2 * cityRadius / TextureCollection::city.width,
                 WHITE
@@ -225,8 +225,8 @@ void displayAllPlayerTags() {
 
         Vector2 textSize = MeasureTextEx(GetFontDefault(), name, fontSize, 1);
         Vector2 textPos = {
-            players[i]._centerPixel.x - textSize.x / 2,
-            players[i]._centerPixel.y - textSize.y / 2
+            players[i]._centerPixel_x - textSize.x / 2,
+            players[i]._centerPixel_y - textSize.y / 2
         };
         DrawTextEx(GetFontDefault(), name, textPos, fontSize, spacing, WHITE);
     }
@@ -280,16 +280,11 @@ void checkExplosion() {
 
         int c = sqrt(a * a + b * b);
 
-        if (c >= 1000)
-        {
+        if (c >= 1000) {
             mySounds.Play(mySounds.distantExplosionSound);
-        }
-        else if (c >= 500)
-        {
+        } else if (c >= 500) {
             mySounds.Play(mySounds.farExplosionSound);
-        }
-        else
-        {
+        } else {
             mySounds.Play(mySounds.explosionSound);
         }
 
@@ -333,12 +328,9 @@ void checkExplosion() {
 
         int c = sqrt(a * a + b * b);
 
-        if (c >= 1000)
-        {
+        if (c >= 1000) {
             mySounds.Play(mySounds.farExplosionSound);
-        }
-        else
-        {
+        } else {
             mySounds.Play(mySounds.explosionSound);
         }
 
@@ -373,10 +365,9 @@ void checkExplosion() {
 void checkCity() {
     // Create cities when left-clicking
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        const PixelRef pixelClicked{
-            static_cast<int>(GetScreenToWorld2D(GetMousePosition(), camera).x),
-            static_cast<int>(GetScreenToWorld2D(GetMousePosition(), camera).y)
-        };
+        Pixel *pixelClicked = &G::territoryMap
+                [static_cast<int>(GetScreenToWorld2D(GetMousePosition(), camera).x)]
+                [static_cast<int>(GetScreenToWorld2D(GetMousePosition(), camera).y)];
 
         if (MAIN_PLAYER._allPixels.contains(pixelClicked)) {
             int cost = 10000 * (MAIN_PLAYER._cityPositions.size() + 1);
@@ -403,11 +394,9 @@ void checkCity() {
 
 void initPlayers() {
     // main character
+    std::cout << "player pos: " << playerPos.x << " " << playerPos.y << std::endl;
     players.emplace_back(Player(
-        {
-            static_cast<int>(playerPos.x),
-            static_cast<int>(playerPos.y)
-        },
+        &G::territoryMap[static_cast<int>(playerPos.x)][static_cast<int>(playerPos.y)],
         10
     ));
 
@@ -415,11 +404,9 @@ void initPlayers() {
     for (int i = 0; i < botCount; i++) {
         const float angle = 2 * PI * i / botCount;
         players.emplace_back(
-            Pixel(
-                playerPos.x + std::cos(angle) * botSpawnRadius,
-                playerPos.y + std::sin(angle) * botSpawnRadius,
-                -1
-            ),
+            &G::territoryMap
+            [playerPos.x + std::cos(angle) * botSpawnRadius]
+            [playerPos.y + std::sin(angle) * botSpawnRadius],
             5
         );
     }
@@ -448,10 +435,10 @@ void initCamAndMap() {
     G::perlinTexture = LoadTextureFromImage(G::perlin);
 
 
-    G::territoryMap = std::vector<std::vector<Pixel> >(MAP_HEIGHT, std::vector<Pixel>(MAP_WIDTH));
+    G::territoryMap = std::vector<std::vector<Pixel> >(MAP_WIDTH, std::vector<Pixel>(MAP_HEIGHT));
     for (int y = 0; y < MAP_HEIGHT; y++) {
         for (int x = 0; x < MAP_WIDTH; x++) {
-            G::territoryMap[y][x] = {x, y, 0};
+            G::territoryMap[x][y] = {x, y, 0};
         }
     }
     G::territoryImage = GenImageColor(G::WIDTH, G::HEIGHT, BLANK);

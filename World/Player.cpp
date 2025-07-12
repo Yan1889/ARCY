@@ -14,9 +14,11 @@
 
 #include "raylib.h"
 
-Player::Player(const Pixel startPos, const int startRadius): _id(++G::playerCount) {
-    _centerPixel = {startPos.x, startPos.y};
-    _allPixelsSummed = _centerPixel;
+Player::Player(Pixel* startPos, const int startRadius): _id(++G::playerCount) {
+    _centerPixel_x = startPos->x;
+    _centerPixel_y = startPos->y;
+    _allPixelsSummed_x = _centerPixel_x;
+    _allPixelsSummed_x = _centerPixel_y;
 
     do {
         _color = Color{
@@ -30,7 +32,7 @@ Player::Player(const Pixel startPos, const int startRadius): _id(++G::playerCoun
     _money = Money();
     _lastActionTime = GetTime();
 
-    GetOwnershipOfPixel(_centerPixel.x, _centerPixel.y);
+    GetOwnershipOfPixel(_centerPixel_x, _centerPixel_y);
     Expand(0, 0.5);
 }
 
@@ -99,14 +101,15 @@ void Player::Expand(const int target, const float percentage) {
         _peopleWorkingOnAttack[queueIdx] += newPeopleLeaving;
     }
     // ----- fill attack queue -----
-    for (const PixelRef &borderPixel: _borderPixels) {
-        for (const PixelRef &potentialEnemyBorderPixel: borderPixel.GetNeighborPixels()) {
-            if (potentialEnemyBorderPixel.GetPlayerId() == target) {
+    for (Pixel *borderPixel: _borderPixels) {
+        for (Pixel *potentialEnemyBorderPixel: borderPixel->GetNeighborPixels()) {
+            if (potentialEnemyBorderPixel->playerId == target) {
                 if (_peopleWorkingOnAttack[queueIdx] <= 0) return;
 
                 if (_pixelsQueuedUp[queueIdx].contains(potentialEnemyBorderPixel)) continue;
 
-                const float priority = GetPriorityOfPixel(potentialEnemyBorderPixel, _allOnGoingAttackQueues[queueIdx].first);
+                const float priority = GetPriorityOfPixel(potentialEnemyBorderPixel,
+                                                          _allOnGoingAttackQueues[queueIdx].first);
                 if (priority == 0) continue; // skip this impossible pixel
 
                 _allOnGoingAttackQueues[queueIdx].second.push({
@@ -128,17 +131,17 @@ void Player::ProcessAttackQueue(const int queueIdx) {
     const int attackPixelCount = queueToWorkOn.size() / 6;
 
     for (int i = 0; i < attackPixelCount; i++) {
-        const PixelRef newP = queueToWorkOn.top().second;
+        Pixel *newP = queueToWorkOn.top().second;
         queueToWorkOn.pop();
-        GetOwnershipOfPixel(newP.x, newP.y);
+        GetOwnershipOfPixel(newP->x, newP->y);
         _pixelsQueuedUp[queueIdx].erase(newP);
 
         // update attack queue
-        const auto &neighbors = newP.GetNeighborPixels();
-        for (const PixelRef &neighbor: neighbors) {
+        const auto &neighbors = newP->GetNeighborPixels();
+        for (Pixel *neighbor: neighbors) {
             if (_peopleWorkingOnAttack[queueIdx] <= 0) break; // no new Pixels
 
-            if (neighbor.GetPlayerId() == _id || _pixelsQueuedUp[queueIdx].contains(neighbor)) continue;
+            if (neighbor->playerId == _id || _pixelsQueuedUp[queueIdx].contains(neighbor)) continue;
 
             const float priority = GetPriorityOfPixel(neighbor, _allOnGoingAttackQueues[queueIdx].first);
             if (priority == 0) continue; // water or mountain are impossible
@@ -154,8 +157,8 @@ void Player::ProcessAttackQueue(const int queueIdx) {
 }
 
 void Player::GetOwnershipOfPixel(const int x, const int y) {
-    G::territoryMap[y][x] = {x, y, _id};
-    const PixelRef newP = {x, y};
+    G::territoryMap[x][y] = {x, y, _id};
+    Pixel *newP = &G::territoryMap[x][y];
     _allPixels.insert(newP);
 
     // texture
@@ -173,20 +176,19 @@ void Player::GetOwnershipOfPixel(const int x, const int y) {
     );
 
     // center
-    _allPixelsSummed += newP;
-    _centerPixel = {
-        _allPixelsSummed.x / static_cast<int>(_allPixels.size()),
-        _allPixelsSummed.y / static_cast<int>(_allPixels.size()),
-    };
+    _allPixelsSummed_x += newP->x;
+    _allPixelsSummed_y += newP->y;
+    _centerPixel_x = _allPixelsSummed_x / static_cast<int>(_allPixels.size());
+    _centerPixel_y = _allPixelsSummed_y / static_cast<int>(_allPixels.size());
 
-    std::vector<PixelRef> affectedPixels = newP.GetNeighborPixels();
+    std::vector<Pixel *> affectedPixels = newP->GetNeighborPixels();
     affectedPixels.push_back(newP);
     // update border status of neighbors
-    for (const PixelRef &neighbor: affectedPixels) {
+    for (Pixel *neighbor: affectedPixels) {
         bool wasBorderPixel = _borderSet.contains(neighbor);
         bool nowBorderPixel = false;
-        for (const PixelRef &nn: neighbor.GetNeighborPixels()) {
-            if (nn.GetPlayerId() != _id) {
+        for (Pixel *nn: neighbor->GetNeighborPixels()) {
+            if (nn->playerId != _id) {
                 nowBorderPixel = true;
                 break;
             }
@@ -213,10 +215,10 @@ void Player::IncreaseMoney() {
     }
 }
 
-float Player::GetPriorityOfPixel(const PixelRef p, const int targetId) const {
-    if (p.GetPlayerId() != targetId) return 0;
+float Player::GetPriorityOfPixel(Pixel *p, const int targetId) const {
+    if (p->playerId != targetId) return 0;
 
-    float priority = GetInvasionAcceptP(p.GetColor());
+    float priority = GetInvasionAcceptP(p->GetColor());
     if (priority == 0) return 0; // impossible
 
     priority += rand() / static_cast<float>(RAND_MAX) / 2; // some randomness
@@ -235,13 +237,12 @@ float Player::GetInvasionAcceptP(const Color &terrainColor) {
 
 void Player::AddCity(const Vector2 &pos) {
     _cityCount++;
-    _cityPositions.push_back(PixelRef{
-        static_cast<int>(pos.x),
-        static_cast<int>(pos.y)
-    });
+    _cityPositions.push_back(
+        &G::territoryMap[static_cast<int>(pos.x)][static_cast<int>(pos.y)]
+    );
 }
 
-void Player::AddCity(const PixelRef &pos) {
+void Player::AddCity(Pixel* pos) {
     _cityCount++;
     _cityPositions.push_back(pos);
 }

@@ -37,7 +37,7 @@ namespace G {
 
     inline int WIDTH;
     inline int HEIGHT;
-    inline std::vector<std::vector<Pixel> > territoryMap{}; // [y][x]
+    inline std::vector<std::vector<Pixel> > territoryMap{}; // [x][y]
     inline Texture2D territoryTexture;
     inline Image territoryImage;
 
