@@ -76,8 +76,10 @@ int main() {
         gameLoop();
         mySounds.checkAtmosphere();
     }
+
     // clean up everything
     TextureCollection::UnloadAll();
+    UnloadImage(G::territoryImage);
 
     CloseWindow();
     return 0;
@@ -103,7 +105,7 @@ void gameLoop() {
 
     for (const Player &p: G::players) {
         for (Pixel *pixel: p._borderPixels) {
-            DrawPixel(pixel->x, pixel->y, p._color);
+            // DrawPixel(pixel->x, pixel->y, p._color);
         }
     }
 
@@ -258,7 +260,7 @@ void checkExpansionAndAttack() {
     // expand with space is clicked
     if (IsKeyPressed(KEY_SPACE) && MAIN_PLAYER._population / 2 >= 100) {
         for (Player &p: G::players) {
-            p.Expand(0, 0.5);
+            p.Expand(-1, 0.5);
         }
     }
 
@@ -268,7 +270,7 @@ void checkExpansionAndAttack() {
                 [static_cast<int>(GetScreenToWorld2D(GetMousePosition(), camera).x)]
                 [static_cast<int>(GetScreenToWorld2D(GetMousePosition(), camera).y)];
         const int playerIdClickd = pixelClicked->playerId;
-        if (playerIdClickd == 1) return; // clicked on himself
+        if (playerIdClickd == 0) return; // clicked on himself
 
         MAIN_PLAYER.Expand(playerIdClickd, 0.5);
     }
@@ -277,7 +279,7 @@ void checkExpansionAndAttack() {
     // for testing
     if (IsKeyDown(KEY_A)) {
         for (int i = 1; i < G::players.size(); i++) {
-            G::players[i].Expand(1, 0.5);
+            G::players[i].Expand(0, 0.5);
         }
     }
 }
@@ -456,7 +458,7 @@ void initCamAndMap() {
     G::territoryMap = std::vector<std::vector<Pixel> >(G::MAP_WIDTH, std::vector<Pixel>(G::MAP_HEIGHT));
     for (int y = 0; y < G::MAP_HEIGHT; y++) {
         for (int x = 0; x < G::MAP_WIDTH; x++) {
-            G::territoryMap[x][y] = {x, y, 0};
+            G::territoryMap[x][y] = {x, y, -1};
         }
     }
     for (int y = 0; y < G::MAP_HEIGHT; y++) {

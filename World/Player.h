@@ -35,9 +35,9 @@ public:
     Money _money;
 
     // territory
-    std::unordered_set<Pixel*> _allPixels;
-    std::deque<Pixel*> _borderPixels;
-    std::unordered_set<Pixel*> _borderSet;
+    std::unordered_set<Pixel *> _allPixels;
+    std::vector<Pixel *> _borderPixels;
+    std::unordered_set<Pixel *> _borderSet;
 
     // attack
     std::vector<int> _peopleWorkingOnAttack;
@@ -66,6 +66,8 @@ public:
 
     void Update();
     void GrowPopulation();
+    void AddBorderPixel(Pixel* pixel);
+    void RemoveBorderPixel(Pixel* pixel);
     void IncreaseMoney();
     void AddCity(const Vector2& pos);
     void AddCity(Pixel* pos);

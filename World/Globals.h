@@ -43,8 +43,7 @@ namespace G {
     inline Image territoryImage;
 
     inline void ChangeColorOfPixel(Pixel* pixel, Color color) {
-        static_cast<Color *>(G::territoryImage.data)[pixel->y * G::MAP_WIDTH + pixel->x] = color;
-        const Color buffer[]{color};
+        static_cast<Color *>(territoryImage.data)[pixel->y * MAP_WIDTH + pixel->x] = color;
         UpdateTextureRec(
             territoryTexture,
             Rectangle{
@@ -53,7 +52,7 @@ namespace G {
                 1,
                 1
             },
-            buffer
+            &color
         );
     }
 }

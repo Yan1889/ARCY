@@ -9,12 +9,11 @@
 #include <algorithm>
 
 // Test
-#include <random>
 #include <stack>
 
 #include "raylib.h"
 
-Player::Player(Pixel* startPos, const int startRadius): _id(G::players.size() + 1) {
+Player::Player(Pixel *startPos, const int startRadius): _id(G::players.size()) {
     _centerPixel_x = startPos->x;
     _centerPixel_y = startPos->y;
     _allPixelsSummed_x = _centerPixel_x;
@@ -33,7 +32,7 @@ Player::Player(Pixel* startPos, const int startRadius): _id(G::players.size() + 
     _lastActionTime = GetTime();
 
     GetOwnershipOfPixel(&G::territoryMap[_centerPixel_x][_centerPixel_y]);
-    Expand(0, 0.5);
+    Expand(-1, 0.5);
 }
 
 
@@ -133,8 +132,13 @@ void Player::ProcessAttackQueue(const int queueIdx) {
     for (int i = 0; i < attackPixelCount; i++) {
         Pixel *newP = queueToWorkOn.top().second;
         queueToWorkOn.pop();
-        GetOwnershipOfPixel(newP);
         _pixelsQueuedUp[queueIdx].erase(newP);
+
+        if (newP->playerId != _allOnGoingAttackQueues[queueIdx].first) {
+            _peopleWorkingOnAttack[queueIdx]++;
+            continue;
+        }
+        GetOwnershipOfPixel(newP);
 
         // update attack queue
         const auto &neighbors = newP->GetNeighbors();
@@ -156,10 +160,9 @@ void Player::ProcessAttackQueue(const int queueIdx) {
     }
 }
 
-void Player::GetOwnershipOfPixel(Pixel* newP) {
-    if (newP->playerId != 0) {
-        // invading
-        G::players[newP->playerId - 1].LooseOwnershipOfPixel(newP);
+void Player::GetOwnershipOfPixel(Pixel *newP) {
+    if (newP->playerId != -1) {
+        G::players[newP->playerId].LooseOwnershipOfPixel(newP);
     }
 
     newP->playerId = _id;
@@ -186,16 +189,14 @@ void Player::GetOwnershipOfPixel(Pixel* newP) {
             }
         }
         if (nowBorderPixel && !wasBorderPixel) {
-            _borderPixels.push_back(neighbor);
-            _borderSet.insert(neighbor);
+            AddBorderPixel(neighbor);
         } else if (!nowBorderPixel && wasBorderPixel) {
-            _borderPixels.erase(std::ranges::find(_borderPixels, neighbor));
-            _borderSet.erase(neighbor);
+            RemoveBorderPixel(neighbor);
         }
     }
 }
 
-void Player::LooseOwnershipOfPixel(Pixel* newP) {
+void Player::LooseOwnershipOfPixel(Pixel *newP) {
     _allPixels.erase(newP);
 
     // center
@@ -217,11 +218,24 @@ void Player::LooseOwnershipOfPixel(Pixel* newP) {
             }
         }
         if (nowBorderPixel && !wasBorderPixel) {
-            _borderPixels.push_back(neighbor);
-            _borderSet.insert(neighbor);
+            AddBorderPixel(neighbor);
         } else if (!nowBorderPixel && wasBorderPixel) {
-            _borderPixels.erase(std::ranges::find(_borderPixels, neighbor));
-            _borderSet.erase(neighbor);
+            RemoveBorderPixel(neighbor);
+        }
+    }
+}
+
+void Player::AddBorderPixel(Pixel *p) {
+    if (_borderSet.insert(p).second) {
+        _borderPixels.push_back(p);
+    }
+}
+
+void Player::RemoveBorderPixel(Pixel *p) {
+    if (_borderSet.erase(p)) {
+        auto it = std::ranges::find(_borderPixels, p);
+        if (it != _borderPixels.end()) {
+            _borderPixels.erase(it);
         }
     }
 }
@@ -265,7 +279,7 @@ void Player::AddCity(const Vector2 &pos) {
     );
 }
 
-void Player::AddCity(Pixel* pos) {
+void Player::AddCity(Pixel *pos) {
     _cityCount++;
     _cityPositions.push_back(pos);
 }
