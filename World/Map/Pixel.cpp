@@ -12,9 +12,9 @@ Pixel::Pixel(const int x, const int y, const int id): x(x), y(y), playerId(id) {
 
 void Pixel::LoadNeighbors() {
     if (x > 0) neighborsCached.emplace_back(&G::territoryMap[x - 1][y]); // Up
-    if (x + 1 < G::WIDTH) neighborsCached.emplace_back(&G::territoryMap[x + 1][y]); // Down
+    if (x + 1 < G::MAP_WIDTH) neighborsCached.emplace_back(&G::territoryMap[x + 1][y]); // Down
     if (y > 0) neighborsCached.emplace_back(&G::territoryMap[x][y - 1]); // Left
-    if (y + 1 < G::HEIGHT) neighborsCached.emplace_back(&G::territoryMap[x][y + 1]); // Right
+    if (y + 1 < G::MAP_HEIGHT) neighborsCached.emplace_back(&G::territoryMap[x][y + 1]); // Right
 }
 
 const std::vector<Pixel *>& Pixel::GetNeighbors() {

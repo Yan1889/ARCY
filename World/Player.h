@@ -60,6 +60,7 @@ public:
     static float GetInvasionAcceptP(const Color& terrainColor);
 
     void GetOwnershipOfPixel(Pixel* newP);
+    void LooseOwnershipOfPixel(Pixel* newP);
 
     float GetPriorityOfPixel(Pixel* p, int targetId) const;
 

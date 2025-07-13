@@ -14,7 +14,7 @@
 
 #include "raylib.h"
 
-Player::Player(Pixel* startPos, const int startRadius): _id(++G::playerCount) {
+Player::Player(Pixel* startPos, const int startRadius): _id(G::players.size() + 1) {
     _centerPixel_x = startPos->x;
     _centerPixel_y = startPos->y;
     _allPixelsSummed_x = _centerPixel_x;
@@ -157,26 +157,50 @@ void Player::ProcessAttackQueue(const int queueIdx) {
 }
 
 void Player::GetOwnershipOfPixel(Pixel* newP) {
+    if (newP->playerId != 0) {
+        // invading
+        G::players[newP->playerId - 1].LooseOwnershipOfPixel(newP);
+    }
+
     newP->playerId = _id;
     _allPixels.insert(newP);
 
-    // texture
-    static_cast<Color *>(G::territoryImage.data)[newP->y * G::WIDTH + newP->x] = _color;
-    const Color buffer[]{_color};
-    UpdateTextureRec(
-        G::territoryTexture,
-        Rectangle{
-            static_cast<float>(newP->x),
-            static_cast<float>(newP->y),
-            1,
-            1
-        },
-        buffer
-    );
+    G::ChangeColorOfPixel(newP, _color);
 
     // center
     _allPixelsSummed_x += newP->x;
     _allPixelsSummed_y += newP->y;
+    _centerPixel_x = _allPixelsSummed_x / static_cast<int>(_allPixels.size());
+    _centerPixel_y = _allPixelsSummed_y / static_cast<int>(_allPixels.size());
+
+    std::vector<Pixel *> affectedPixels = newP->GetNeighbors();
+    affectedPixels.push_back(newP);
+    // update border status of neighbors
+    for (Pixel *neighbor: affectedPixels) {
+        bool wasBorderPixel = _borderSet.contains(neighbor);
+        bool nowBorderPixel = false;
+        for (Pixel *nn: neighbor->GetNeighbors()) {
+            if (nn->playerId != _id) {
+                nowBorderPixel = true;
+                break;
+            }
+        }
+        if (nowBorderPixel && !wasBorderPixel) {
+            _borderPixels.push_back(neighbor);
+            _borderSet.insert(neighbor);
+        } else if (!nowBorderPixel && wasBorderPixel) {
+            _borderPixels.erase(std::ranges::find(_borderPixels, neighbor));
+            _borderSet.erase(neighbor);
+        }
+    }
+}
+
+void Player::LooseOwnershipOfPixel(Pixel* newP) {
+    _allPixels.erase(newP);
+
+    // center
+    _allPixelsSummed_x -= newP->x;
+    _allPixelsSummed_y -= newP->y;
     _centerPixel_x = _allPixelsSummed_x / static_cast<int>(_allPixels.size());
     _centerPixel_y = _allPixelsSummed_y / static_cast<int>(_allPixels.size());
 

@@ -85,7 +85,7 @@ void Sounds::checkAtmosphere()
     // Ocean
     if (ColorToInt(pixelColor) == ColorToInt(mapColors[0]) ||
         ColorToInt(pixelColor) == ColorToInt(mapColors[1])) ResumeMusicStream(oceanSound);
-    else if (playerPos.x < 0 || playerPos.x > mapWidth || playerPos.y < 0 || playerPos.y > mapHeight) ResumeMusicStream(oceanSound);
+    else if (playerPos.x < 0 || playerPos.x > G::MAP_WIDTH || playerPos.y < 0 || playerPos.y > G::MAP_HEIGHT) ResumeMusicStream(oceanSound);
     else PauseMusicStream(oceanSound);
 
     // Beach

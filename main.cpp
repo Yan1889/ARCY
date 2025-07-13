@@ -7,17 +7,15 @@
 #include "World/Loaders/TextureCollection.h"
 #include "World/Player.h"
 #include "World/Globals.h"
-#include "World/Money.h"
 #include "World/Loaders/Sounds.h"
 #include "World/Map/PerlinNoise.h"
 
 #define SCREEN_WIDTH 1366 // Default 980
 #define SCREEN_HEIGHT 768 // Default 650
-#define MAIN_PLAYER players[0]
-#define MAIN_PLAYER_COLOR players[0]._color
 
-#define MAP_HEIGHT mapHeight
-#define MAP_WIDTH mapWidth
+
+#define MAIN_PLAYER G::players[0]
+#define MAIN_PLAYER_COLOR G::players[0]._color
 
 
 Color grayScale(const unsigned char gray) {
@@ -32,11 +30,10 @@ constexpr int zoomSpeed = 5;
 constexpr float zoomMin = 0.25f;
 constexpr float zoomMax = 10.0f;
 
-Vector2 playerPos(MAP_WIDTH / 2, MAP_HEIGHT / 2);
-std::vector<Player> players{};
+Vector2 playerPos(G::MAP_WIDTH / 2, G::MAP_HEIGHT / 2);
 
 constexpr int botCount = 10;
-constexpr int botSpawnRadius = 500;
+constexpr int botSpawnRadius = 100;
 
 constexpr float cityRadius = 20;
 
@@ -57,7 +54,7 @@ void checkExplosion();
 
 void checkCity();
 
-void checkExpansion();
+void checkExpansionAndAttack();
 
 Sounds mySounds; // Activate audio
 
@@ -90,9 +87,9 @@ void gameLoop() {
     handleControls();
     checkExplosion();
     checkCity();
-    checkExpansion();
+    checkExpansionAndAttack();
 
-    for (Player &p: players) {
+    for (Player &p: G::players) {
         p.Update();
     }
 
@@ -104,14 +101,14 @@ void gameLoop() {
     // terrain bg texture
     DrawTextureV(G::perlinTexture, Vector2{0, 0}, WHITE);
 
-    for (const Player &p: players) {
+    for (const Player &p: G::players) {
         for (Pixel *pixel: p._borderPixels) {
             DrawPixel(pixel->x, pixel->y, p._color);
         }
     }
 
     // display every city for each player
-    for (const Player &p: players) {
+    for (const Player &p: G::players) {
         for (Pixel *cityPos: p._cityPositions) {
             DrawTextureEx(
                 TextureCollection::city,
@@ -145,7 +142,7 @@ void displayInfoTexts() {
     DrawText("Move with WASD", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20, 20, MAIN_PLAYER_COLOR);
     DrawText("Up or Down Arrow to zoom", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 40, 20,
              MAIN_PLAYER_COLOR);
-    DrawText("Left-click to build a city ($10K * city count)", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 80,
+    DrawText("Right-click to build a city ($10K * city count)", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 80,
              20, MAIN_PLAYER_COLOR);
     DrawText("Esc to exit the game", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 120, 20, MAIN_PLAYER_COLOR);
     DrawText("1 to drop a atom bomb ($10K), 2 a hydrogen bomb ($100K)", GetScreenWidth() / 20 - 25,
@@ -153,6 +150,8 @@ void displayInfoTexts() {
     DrawText("F11 to toggle fullscreen", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 200, 20,
              MAIN_PLAYER_COLOR);
     DrawText("Space to expand your territory", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 240, 20,
+             MAIN_PLAYER_COLOR);
+    DrawText("Left-Click to attack another player", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 280, 20,
              MAIN_PLAYER_COLOR);
 
     // fps
@@ -212,8 +211,8 @@ void displayInfoTexts() {
 }
 
 void displayAllPlayerTags() {
-    for (int i = 0; i < players.size(); i++) {
-        const float diameter = 2 * std::sqrt(players[i]._allPixels.size() / PI); // A = π * r^2 => r = sqrt(A / π)
+    for (int i = 0; i < G::players.size(); i++) {
+        const float diameter = 2 * std::sqrt(G::players[i]._allPixels.size() / PI); // A = π * r^2 => r = sqrt(A / π)
         // Shows who you are
         const char *name = i == 0 ? "You" : ("NPC " + std::to_string(i)).c_str();
         const int charCount = strlen(name);
@@ -225,8 +224,8 @@ void displayAllPlayerTags() {
 
         Vector2 textSize = MeasureTextEx(GetFontDefault(), name, fontSize, 1);
         Vector2 textPos = {
-            players[i]._centerPixel_x - textSize.x / 2,
-            players[i]._centerPixel_y - textSize.y / 2
+            G::players[i]._centerPixel_x - textSize.x / 2,
+            G::players[i]._centerPixel_y - textSize.y / 2
         };
         DrawTextEx(GetFontDefault(), name, textPos, fontSize, spacing, WHITE);
     }
@@ -240,10 +239,10 @@ void handleControls() {
     if (IsKeyPressed(KEY_F11)) ToggleFullscreen();
     if (IsKeyDown(KEY_ESCAPE)) WindowShouldClose();
 
-    if (playerPos.x > MAP_WIDTH) playerPos.x = MAP_WIDTH;
+    if (playerPos.x > G::MAP_WIDTH) playerPos.x = G::MAP_WIDTH;
     else if (playerPos.x < 0) playerPos.x = 0;
 
-    if (playerPos.y > MAP_HEIGHT) playerPos.y = MAP_HEIGHT;
+    if (playerPos.y > G::MAP_HEIGHT) playerPos.y = G::MAP_HEIGHT;
     else if (playerPos.y < 0) playerPos.y = 0;
 
     camera.target = playerPos;
@@ -255,11 +254,30 @@ void handleControls() {
     if (camera.zoom > zoomMax) camera.zoom = zoomMax;
 }
 
-void checkExpansion() {
+void checkExpansionAndAttack() {
     // expand with space is clicked
     if (IsKeyPressed(KEY_SPACE) && MAIN_PLAYER._population / 2 >= 100) {
-        for (Player &p: players) {
+        for (Player &p: G::players) {
             p.Expand(0, 0.5);
+        }
+    }
+
+    // attack player if left-click
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        Pixel *pixelClicked = &G::territoryMap
+                [static_cast<int>(GetScreenToWorld2D(GetMousePosition(), camera).x)]
+                [static_cast<int>(GetScreenToWorld2D(GetMousePosition(), camera).y)];
+        const int playerIdClickd = pixelClicked->playerId;
+        if (playerIdClickd == 1) return; // clicked on himself
+
+        MAIN_PLAYER.Expand(playerIdClickd, 0.5);
+    }
+
+
+    // for testing
+    if (IsKeyDown(KEY_A)) {
+        for (int i = 1; i < G::players.size(); i++) {
+            G::players[i].Expand(1, 0.5);
         }
     }
 }
@@ -297,7 +315,7 @@ void checkExplosion() {
                 float noise = GetRandomValue(50, 100) / 100.0f;
 
                 if (distance <= 1.0f && noise > distance) {
-                    if (px >= 0 && py >= 0 && px < MAP_WIDTH && py < MAP_HEIGHT) {
+                    if (px >= 0 && py >= 0 && px < G::MAP_WIDTH && py < G::MAP_HEIGHT) {
                         Color explosionColor = Color{
                             (unsigned char) GetRandomValue(0, 200), // Red
                             (unsigned char) GetRandomValue(230, 255), // Green
@@ -343,7 +361,7 @@ void checkExplosion() {
                 float noise = GetRandomValue(50, 100) / 100.0f;
 
                 if (distance <= 1.0f && noise > distance) {
-                    if (px >= 0 && py >= 0 && px < MAP_WIDTH && py < MAP_HEIGHT) {
+                    if (px >= 0 && py >= 0 && px < G::MAP_WIDTH && py < G::MAP_HEIGHT) {
                         Color explosionColor = Color{
                             (unsigned char) GetRandomValue(0, 200), // Red
                             (unsigned char) GetRandomValue(230, 255), // Green
@@ -363,8 +381,8 @@ void checkExplosion() {
 }
 
 void checkCity() {
-    // Create cities when left-clicking
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+    // Create cities when right-clicking
+    if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) {
         Pixel *pixelClicked = &G::territoryMap
                 [static_cast<int>(GetScreenToWorld2D(GetMousePosition(), camera).x)]
                 [static_cast<int>(GetScreenToWorld2D(GetMousePosition(), camera).y)];
@@ -379,13 +397,13 @@ void checkCity() {
             }
 
             // bots also make a random city when main player makes city
-            for (int i = 1; i < players.size(); i++) {
-                cost = 10000 * (players[i]._cityPositions.size() + 1);
-                if (players[i]._money.moneyBalance - cost >= 0) {
-                    auto iter = players[i]._allPixels.begin();
-                    std::advance(iter, rand() % players[i]._allPixels.size());
-                    players[i]._money.spendMoney(cost);
-                    players[i].AddCity(*iter);
+            for (int i = 1; i < G::players.size(); i++) {
+                cost = 10000 * (G::players[i]._cityPositions.size() + 1);
+                if (G::players[i]._money.moneyBalance - cost >= 0) {
+                    auto iter = G::players[i]._allPixels.begin();
+                    std::advance(iter, rand() % G::players[i]._allPixels.size());
+                    G::players[i]._money.spendMoney(cost);
+                    G::players[i].AddCity(*iter);
                 }
             }
         }
@@ -394,7 +412,7 @@ void checkCity() {
 
 void initPlayers() {
     // main character
-    players.emplace_back(Player(
+    G::players.emplace_back(Player(
         &G::territoryMap[static_cast<int>(playerPos.x)][static_cast<int>(playerPos.y)],
         10
     ));
@@ -402,7 +420,7 @@ void initPlayers() {
     // bots
     for (int i = 0; i < botCount; i++) {
         const float angle = 2 * PI * i / botCount;
-        players.emplace_back(
+        G::players.emplace_back(
             &G::territoryMap
             [playerPos.x + std::cos(angle) * botSpawnRadius]
             [playerPos.y + std::sin(angle) * botSpawnRadius],
@@ -418,34 +436,31 @@ void initCamAndMap() {
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
 
-    // map
-    G::InitMap(MAP_WIDTH, MAP_HEIGHT);
-
     // terrain
     G::perlin = GenImagePerlinNoise(
-        MAP_WIDTH, MAP_HEIGHT,
-        static_cast<int>(rand() * 10000.0f / RAND_MAX) * (MAP_WIDTH / 2),
-        static_cast<int>(rand() * 10000.0f / RAND_MAX) * (MAP_HEIGHT / 2),
+        G::MAP_WIDTH, G::MAP_HEIGHT,
+        static_cast<int>(rand() * 10000.0f / RAND_MAX) * (G::MAP_WIDTH / 2),
+        static_cast<int>(rand() * 10000.0f / RAND_MAX) * (G::MAP_HEIGHT / 2),
         6
     );
-    std::vector<std::vector<float> > falloff = PerlinNoise::GenerateFalloffMap(MAP_WIDTH, MAP_HEIGHT);
+    std::vector<std::vector<float> > falloff = PerlinNoise::GenerateFalloffMap(G::MAP_WIDTH, G::MAP_HEIGHT);
     PerlinNoise::ApplyFalloffToImage(&G::perlin, falloff); // finally use falloff
     PerlinNoise::proceedMap(&G::perlin, G::mapParts);
     G::perlinTexture = LoadTextureFromImage(G::perlin);
 
 
-    G::territoryImage = GenImageColor(G::WIDTH, G::HEIGHT, BLANK);
+    G::territoryImage = GenImageColor(G::MAP_WIDTH, G::MAP_HEIGHT, BLANK);
     G::territoryTexture = LoadTextureFromImage(G::territoryImage);
 
 
-    G::territoryMap = std::vector<std::vector<Pixel> >(MAP_WIDTH, std::vector<Pixel>(MAP_HEIGHT));
-    for (int y = 0; y < MAP_HEIGHT; y++) {
-        for (int x = 0; x < MAP_WIDTH; x++) {
+    G::territoryMap = std::vector<std::vector<Pixel> >(G::MAP_WIDTH, std::vector<Pixel>(G::MAP_HEIGHT));
+    for (int y = 0; y < G::MAP_HEIGHT; y++) {
+        for (int x = 0; x < G::MAP_WIDTH; x++) {
             G::territoryMap[x][y] = {x, y, 0};
         }
     }
-    for (int y = 0; y < MAP_HEIGHT; y++) {
-        for (int x = 0; x < MAP_WIDTH; x++) {
+    for (int y = 0; y < G::MAP_HEIGHT; y++) {
+        for (int x = 0; x < G::MAP_WIDTH; x++) {
             G::territoryMap[x][y].LoadNeighbors();
         }
     }

@@ -9,13 +9,16 @@
 #include "Map/PerlinNoise.h"
 #include "Map/Pixel.h"
 #include "raylib.h"
+#include "Player.h"
 
 struct Gradient;
 
-class Player;
 
 // G for global
 namespace G {
+    constexpr int MAP_WIDTH = 2500;
+    constexpr int MAP_HEIGHT = 2500;
+
     inline Image perlin;
     inline Texture2D perlinTexture{0};
     inline std::vector<Gradient> mapParts = {
@@ -33,18 +36,25 @@ namespace G {
 
     inline float maxDifficulty = 30;
 
-    inline int playerCount;
+    inline std::vector<Player> players;
 
-    inline int WIDTH;
-    inline int HEIGHT;
-    inline std::vector<std::vector<Pixel> > territoryMap{}; // [x][y]
+    inline std::vector<std::vector<Pixel> > territoryMap; // [x][y]
     inline Texture2D territoryTexture;
     inline Image territoryImage;
 
-
-    inline void InitMap(const int w, const int h) {
-        WIDTH = w;
-        HEIGHT = h;
+    inline void ChangeColorOfPixel(Pixel* pixel, Color color) {
+        static_cast<Color *>(G::territoryImage.data)[pixel->y * G::MAP_WIDTH + pixel->x] = color;
+        const Color buffer[]{color};
+        UpdateTextureRec(
+            territoryTexture,
+            Rectangle{
+                static_cast<float>(pixel->x),
+                static_cast<float>(pixel->y),
+                1,
+                1
+            },
+            buffer
+        );
     }
 }
 
