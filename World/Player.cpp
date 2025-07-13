@@ -8,9 +8,6 @@
 #include <variant>
 #include <algorithm>
 
-// Test
-#include <stack>
-
 #include "raylib.h"
 
 Player::Player(Pixel *startPos, const int startRadius): _id(G::players.size()) {
@@ -83,20 +80,17 @@ void Player::Expand(const int target, const float percentage) {
     _population -= newPeopleLeaving;
 
     // ----- init/find an attack queue -----
-    int queueIdx = -1;
-    for (int i = 0; i < _allOnGoingAttackQueues.size(); i++) {
-        if (target == _allOnGoingAttackQueues[i].first) {
-            // the player is already being attacked
-            queueIdx = i;
-            break;
-        }
-    }
-    if (queueIdx == -1) {
+    int queueIdx;
+
+    auto iter = _attackedPlayerIdToQueueIdxMap.find(target);
+    if (iter == _attackedPlayerIdToQueueIdxMap.end()) {
+        queueIdx = _allOnGoingAttackQueues.size();
         _allOnGoingAttackQueues.push_back({target, {}});
         _peopleWorkingOnAttack.push_back(newPeopleLeaving);
         _pixelsQueuedUp.push_back({});
-        queueIdx = _allOnGoingAttackQueues.size() - 1;
+        _attackedPlayerIdToQueueIdxMap[target] = queueIdx;
     } else {
+        queueIdx = iter->second;
         _peopleWorkingOnAttack[queueIdx] += newPeopleLeaving;
     }
     // ----- fill attack queue -----
@@ -107,11 +101,13 @@ void Player::Expand(const int target, const float percentage) {
 
                 if (_pixelsQueuedUp[queueIdx].contains(potentialEnemyBorderPixel)) continue;
 
-                const float priority = GetPriorityOfPixel(potentialEnemyBorderPixel,
-                                                          _allOnGoingAttackQueues[queueIdx].first);
+                const float priority = GetPriorityOfPixel(
+                    potentialEnemyBorderPixel,
+                    _allOnGoingAttackQueues[queueIdx].targetPlayerId
+                );
                 if (priority == 0) continue; // skip this impossible pixel
 
-                _allOnGoingAttackQueues[queueIdx].second.push({
+                _allOnGoingAttackQueues[queueIdx].queue.push({
                     priority,
                     potentialEnemyBorderPixel
                 });
@@ -124,17 +120,17 @@ void Player::Expand(const int target, const float percentage) {
 
 
 void Player::ProcessAttackQueue(const int queueIdx) {
-    auto &queueToWorkOn = _allOnGoingAttackQueues[queueIdx].second;
+    auto &queueToWorkOn = _allOnGoingAttackQueues[queueIdx].queue;
 
     // 60fps => ~10 broder expansions / 1s
-    const int attackPixelCount = queueToWorkOn.size() / 6;
+    const int attackPixelCount = queueToWorkOn.size() / 2;
 
     for (int i = 0; i < attackPixelCount; i++) {
         Pixel *newP = queueToWorkOn.top().second;
         queueToWorkOn.pop();
         _pixelsQueuedUp[queueIdx].erase(newP);
 
-        if (newP->playerId != _allOnGoingAttackQueues[queueIdx].first) {
+        if (newP->playerId != _allOnGoingAttackQueues[queueIdx].targetPlayerId) {
             _peopleWorkingOnAttack[queueIdx]++;
             continue;
         }
@@ -147,7 +143,7 @@ void Player::ProcessAttackQueue(const int queueIdx) {
 
             if (neighbor->playerId == _id || _pixelsQueuedUp[queueIdx].contains(neighbor)) continue;
 
-            const float priority = GetPriorityOfPixel(neighbor, _allOnGoingAttackQueues[queueIdx].first);
+            const float priority = GetPriorityOfPixel(neighbor, _allOnGoingAttackQueues[queueIdx].targetPlayerId);
             if (priority == 0) continue; // water or mountain are impossible
 
             _pixelsQueuedUp[queueIdx].insert(neighbor);
@@ -162,69 +158,67 @@ void Player::ProcessAttackQueue(const int queueIdx) {
 
 void Player::GetOwnershipOfPixel(Pixel *newP) {
     if (newP->playerId != -1) {
-        G::players[newP->playerId].LooseOwnershipOfPixel(newP);
-    }
+        Player &attacker = *this;
+        Player &defender = G::players[newP->playerId];
 
-    newP->playerId = _id;
-    _allPixels.insert(newP);
+        attacker._allPixels.insert(newP);
+        defender._allPixels.erase(newP);
+
+        newP->playerId = _id;
+
+        attacker.UpdateBorderAroundPixel(newP);
+        defender.UpdateBorderAroundPixel(newP);
+
+        defender._allPixelsSummed_x -= newP->x;
+        defender._allPixelsSummed_y -= newP->y;
+        defender.RecalculateCenterPixel();
+    } else {
+        _allPixels.insert(newP);
+        newP->playerId = _id;
+        UpdateBorderAroundPixel(newP);
+    }
 
     G::ChangeColorOfPixel(newP, _color);
 
     // center
     _allPixelsSummed_x += newP->x;
     _allPixelsSummed_y += newP->y;
-    _centerPixel_x = _allPixelsSummed_x / static_cast<int>(_allPixels.size());
-    _centerPixel_y = _allPixelsSummed_y / static_cast<int>(_allPixels.size());
-
-    std::vector<Pixel *> affectedPixels = newP->GetNeighbors();
-    affectedPixels.push_back(newP);
-    // update border status of neighbors
-    for (Pixel *neighbor: affectedPixels) {
-        bool wasBorderPixel = _borderSet.contains(neighbor);
-        bool nowBorderPixel = false;
-        for (Pixel *nn: neighbor->GetNeighbors()) {
-            if (nn->playerId != _id) {
-                nowBorderPixel = true;
-                break;
-            }
-        }
-        if (nowBorderPixel && !wasBorderPixel) {
-            AddBorderPixel(neighbor);
-        } else if (!nowBorderPixel && wasBorderPixel) {
-            RemoveBorderPixel(neighbor);
-        }
-    }
+    RecalculateCenterPixel();
 }
 
-void Player::LooseOwnershipOfPixel(Pixel *newP) {
-    _allPixels.erase(newP);
+void Player::UpdateBorderAroundPixel(Pixel *pixel) {
+    UpdateBorderStatusOfPixel(pixel);
 
-    // center
-    _allPixelsSummed_x -= newP->x;
-    _allPixelsSummed_y -= newP->y;
-    _centerPixel_x = _allPixelsSummed_x / static_cast<int>(_allPixels.size());
-    _centerPixel_y = _allPixelsSummed_y / static_cast<int>(_allPixels.size());
-
-    std::vector<Pixel *> affectedPixels = newP->GetNeighbors();
-    affectedPixels.push_back(newP);
-    // update border status of neighbors
+    const std::vector<Pixel *>& affectedPixels = pixel->GetNeighbors();
     for (Pixel *neighbor: affectedPixels) {
-        bool wasBorderPixel = _borderSet.contains(neighbor);
-        bool nowBorderPixel = false;
-        for (Pixel *nn: neighbor->GetNeighbors()) {
-            if (nn->playerId != _id) {
-                nowBorderPixel = true;
-                break;
-            }
-        }
-        if (nowBorderPixel && !wasBorderPixel) {
-            AddBorderPixel(neighbor);
-        } else if (!nowBorderPixel && wasBorderPixel) {
-            RemoveBorderPixel(neighbor);
-        }
+        UpdateBorderStatusOfPixel(neighbor);
     }
 }
+void Player::UpdateBorderStatusOfPixel(Pixel *pixel) {
+    if (!_allPixels.contains(pixel)) {
+        // pixel isn't owned by player
+        RemoveBorderPixel(pixel);
+        return;
+    }
 
+    const bool wasBorderPixel = _borderSet.contains(pixel);
+    bool nowBorderPixel = false;
+    for (Pixel *nn: pixel->GetNeighbors()) {
+        if (nn->playerId != _id) {
+            nowBorderPixel = true;
+            break;
+        }
+    }
+    if (nowBorderPixel && !wasBorderPixel) {
+        AddBorderPixel(pixel);
+    } else if (!nowBorderPixel && wasBorderPixel) {
+        RemoveBorderPixel(pixel);
+    }
+}
+void Player::RecalculateCenterPixel() {
+    _centerPixel_x = _allPixelsSummed_x / static_cast<int>(_allPixels.size());
+    _centerPixel_y = _allPixelsSummed_y / static_cast<int>(_allPixels.size());
+}
 void Player::AddBorderPixel(Pixel *p) {
     if (_borderSet.insert(p).second) {
         _borderPixels.push_back(p);

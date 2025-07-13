@@ -4,7 +4,6 @@
 
 #include "PerlinNoise.h"
 
-#include <cmath>
 
 #include "raymath.h"
 

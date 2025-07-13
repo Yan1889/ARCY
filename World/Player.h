@@ -5,14 +5,19 @@
 #ifndef POPULATION_H
 #define POPULATION_H
 #include <queue>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
 #include "Money.h"
 #include "raylib.h"
 #include "Map/Pixel.h"
-// #include "Map/PixelRef.h"
 
+
+struct AttackQueue {
+    int targetPlayerId;
+    std::priority_queue<std::pair<float, Pixel *>> queue;
+};
 
 class Player {
 public:
@@ -41,8 +46,9 @@ public:
 
     // attack
     std::vector<int> _peopleWorkingOnAttack;
+    std::unordered_map<int, int> _attackedPlayerIdToQueueIdxMap;
     // { {attackedPlayerId, { {prio1, pixel1}, {prio2, pixel2}, ... } ... }
-    std::vector<std::pair<int, std::priority_queue<std::pair<float, Pixel *>>>> _allOnGoingAttackQueues;
+    std::vector<AttackQueue> _allOnGoingAttackQueues;
     std::vector<std::unordered_set<Pixel *>> _pixelsQueuedUp;
 
     int _allPixelsSummed_x{};
@@ -60,15 +66,19 @@ public:
     static float GetInvasionAcceptP(const Color& terrainColor);
 
     void GetOwnershipOfPixel(Pixel* newP);
-    void LooseOwnershipOfPixel(Pixel* newP);
 
     float GetPriorityOfPixel(Pixel* p, int targetId) const;
 
     void Update();
     void GrowPopulation();
+    void IncreaseMoney();
+
+    void UpdateBorderAroundPixel(Pixel* pixel);
+    void UpdateBorderStatusOfPixel(Pixel* pixel);
     void AddBorderPixel(Pixel* pixel);
     void RemoveBorderPixel(Pixel* pixel);
-    void IncreaseMoney();
+
+    void RecalculateCenterPixel();
     void AddCity(const Vector2& pos);
     void AddCity(Pixel* pos);
 };

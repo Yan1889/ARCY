@@ -42,7 +42,9 @@ void initCamAndMap();
 
 void initPlayers();
 
-void gameLoop();
+void frameLogic();
+
+void renderGame();
 
 void handleControls();
 
@@ -62,8 +64,8 @@ int main() {
     srand(time(nullptr));
 
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "ARCY - An epic game");
-    mySounds.LoadAll();
 
+    mySounds.LoadAll();
     TextureCollection::LoadAll();
 
     // we dont need 4000 fps - Yes we need 4000+ fps to ditch Python! Sincerely Colin
@@ -73,7 +75,8 @@ int main() {
     initPlayers();
 
     while (!WindowShouldClose()) {
-        gameLoop();
+        frameLogic();
+        renderGame();
         mySounds.checkAtmosphere();
     }
 
@@ -85,7 +88,7 @@ int main() {
     return 0;
 }
 
-void gameLoop() {
+void frameLogic() {
     handleControls();
     checkExplosion();
     checkCity();
@@ -94,7 +97,9 @@ void gameLoop() {
     for (Player &p: G::players) {
         p.Update();
     }
+}
 
+void renderGame() {
     BeginDrawing();
     ClearBackground(Color{90, 90, 255, 255});
 
@@ -105,7 +110,8 @@ void gameLoop() {
 
     for (const Player &p: G::players) {
         for (Pixel *pixel: p._borderPixels) {
-            // DrawPixel(pixel->x, pixel->y, p._color);
+            // if (pixel->playerId == p._id)
+                DrawPixel(pixel->x, pixel->y, p._color);
         }
     }
 
@@ -183,8 +189,10 @@ void displayInfoTexts() {
 
     DrawText(populationText, 0 + 25, GetScreenHeight() - 50, 20, MAIN_PLAYER_COLOR);
 
-    const char *sendText = TextFormat("People exploring neutral land: %d",
-                                      MAIN_PLAYER._allOnGoingAttackQueues[0].second.size());
+    const char *sendText = TextFormat(
+        "People exploring neutral land: %d",
+        MAIN_PLAYER._allOnGoingAttackQueues[0].queue.size() // neutral land attack queue
+    );
     DrawText(sendText, 0 + 25, GetScreenHeight() - 25, 20, MAIN_PLAYER_COLOR);
 
 
@@ -276,8 +284,8 @@ void checkExpansionAndAttack() {
     }
 
 
-    // for testing
-    if (IsKeyDown(KEY_A)) {
+    // for testing: every bot attacks you
+    if (IsKeyDown(KEY_ENTER)) {
         for (int i = 1; i < G::players.size(); i++) {
             G::players[i].Expand(0, 0.5);
         }
