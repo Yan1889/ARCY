@@ -4,9 +4,6 @@
 
 #include "Pixel.h"
 
-#include <iostream>
-#include <ostream>
-
 #include "../Globals.h"
 
 Pixel::Pixel(const int x, const int y, const int id): x(x), y(y), playerId(id) {
@@ -14,7 +11,6 @@ Pixel::Pixel(const int x, const int y, const int id): x(x), y(y), playerId(id) {
 
 
 void Pixel::LoadNeighbors() {
-    loaded = true;
     if (x > 0) neighborsCached.emplace_back(&G::territoryMap[x - 1][y]); // Up
     if (x + 1 < G::WIDTH) neighborsCached.emplace_back(&G::territoryMap[x + 1][y]); // Down
     if (y > 0) neighborsCached.emplace_back(&G::territoryMap[x][y - 1]); // Left
@@ -22,7 +18,6 @@ void Pixel::LoadNeighbors() {
 }
 
 const std::vector<Pixel *>& Pixel::GetNeighbors() {
-    if (!loaded) LoadNeighbors();
     return neighborsCached;
 }
 

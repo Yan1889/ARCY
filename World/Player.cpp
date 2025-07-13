@@ -32,7 +32,7 @@ Player::Player(Pixel* startPos, const int startRadius): _id(++G::playerCount) {
     _money = Money();
     _lastActionTime = GetTime();
 
-    GetOwnershipOfPixel(_centerPixel_x, _centerPixel_y);
+    GetOwnershipOfPixel(&G::territoryMap[_centerPixel_x][_centerPixel_y]);
     Expand(0, 0.5);
 }
 
@@ -133,7 +133,7 @@ void Player::ProcessAttackQueue(const int queueIdx) {
     for (int i = 0; i < attackPixelCount; i++) {
         Pixel *newP = queueToWorkOn.top().second;
         queueToWorkOn.pop();
-        GetOwnershipOfPixel(newP->x, newP->y);
+        GetOwnershipOfPixel(newP);
         _pixelsQueuedUp[queueIdx].erase(newP);
 
         // update attack queue
@@ -156,19 +156,18 @@ void Player::ProcessAttackQueue(const int queueIdx) {
     }
 }
 
-void Player::GetOwnershipOfPixel(const int x, const int y) {
-    G::territoryMap[x][y] = {x, y, _id};
-    Pixel *newP = &G::territoryMap[x][y];
+void Player::GetOwnershipOfPixel(Pixel* newP) {
+    newP->playerId = _id;
     _allPixels.insert(newP);
 
     // texture
-    static_cast<Color *>(G::territoryImage.data)[y * G::WIDTH + x] = _color;
+    static_cast<Color *>(G::territoryImage.data)[newP->y * G::WIDTH + newP->x] = _color;
     const Color buffer[]{_color};
     UpdateTextureRec(
         G::territoryTexture,
         Rectangle{
-            static_cast<float>(x),
-            static_cast<float>(y),
+            static_cast<float>(newP->x),
+            static_cast<float>(newP->y),
             1,
             1
         },

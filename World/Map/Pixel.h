@@ -16,8 +16,6 @@ struct Pixel {
     int y;
     int playerId;
 
-    bool loaded = false;
-
     std::vector<Pixel *> neighborsCached;
 
 

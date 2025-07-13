@@ -35,7 +35,7 @@ constexpr float zoomMax = 10.0f;
 Vector2 playerPos(MAP_WIDTH / 2, MAP_HEIGHT / 2);
 std::vector<Player> players{};
 
-constexpr int botCount = 30;
+constexpr int botCount = 10;
 constexpr int botSpawnRadius = 500;
 
 constexpr float cityRadius = 20;
