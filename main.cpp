@@ -160,6 +160,8 @@ void displayInfoTexts() {
              MAIN_PLAYER_COLOR);
     DrawText("Left-Click to attack another player", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 280, 20,
              MAIN_PLAYER_COLOR);
+    DrawText("Right-Click to build a city", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 320, 20,
+             MAIN_PLAYER_COLOR);
 
     // fps
     const int fps = GetFPS();
