@@ -78,7 +78,8 @@ public:
     void AddBorderPixel(Pixel* pixel);
     void RemoveBorderPixel(Pixel* pixel);
 
-    void RecalculateCenterPixel();
+    void RemovePixelFromCenter(Pixel* newP);
+    void AddPixelToCenter(Pixel* newP);
     void AddCity(const Vector2& pos);
     void AddCity(Pixel* pos);
 };

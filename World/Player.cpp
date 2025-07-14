@@ -157,43 +157,38 @@ void Player::ProcessAttackQueue(const int queueIdx) {
 }
 
 void Player::GetOwnershipOfPixel(Pixel *newP) {
-    if (newP->playerId != -1) {
-        Player &attacker = *this;
-        Player &defender = G::players[newP->playerId];
+    Player &attacker = *this;
+    attacker._allPixels.insert(newP);
 
-        attacker._allPixels.insert(newP);
+    if (newP->playerId != -1) {
+        Player &defender = G::players[newP->playerId];
         defender._allPixels.erase(newP);
 
         newP->playerId = _id;
 
-        attacker.UpdateBorderAroundPixel(newP);
         defender.UpdateBorderAroundPixel(newP);
-
-        defender._allPixelsSummed_x -= newP->x;
-        defender._allPixelsSummed_y -= newP->y;
-        defender.RecalculateCenterPixel();
+        defender.RemovePixelFromCenter(newP);
     } else {
-        _allPixels.insert(newP);
         newP->playerId = _id;
-        UpdateBorderAroundPixel(newP);
     }
+    attacker.UpdateBorderAroundPixel(newP);
+
 
     G::ChangeColorOfPixel(newP, _color);
 
     // center
-    _allPixelsSummed_x += newP->x;
-    _allPixelsSummed_y += newP->y;
-    RecalculateCenterPixel();
+    AddPixelToCenter(newP);
 }
 
 void Player::UpdateBorderAroundPixel(Pixel *pixel) {
     UpdateBorderStatusOfPixel(pixel);
 
-    const std::vector<Pixel *>& affectedPixels = pixel->GetNeighbors();
+    const std::vector<Pixel *> &affectedPixels = pixel->GetNeighbors();
     for (Pixel *neighbor: affectedPixels) {
         UpdateBorderStatusOfPixel(neighbor);
     }
 }
+
 void Player::UpdateBorderStatusOfPixel(Pixel *pixel) {
     if (!_allPixels.contains(pixel)) {
         // pixel isn't owned by player
@@ -215,10 +210,7 @@ void Player::UpdateBorderStatusOfPixel(Pixel *pixel) {
         RemoveBorderPixel(pixel);
     }
 }
-void Player::RecalculateCenterPixel() {
-    _centerPixel_x = _allPixelsSummed_x / static_cast<int>(_allPixels.size());
-    _centerPixel_y = _allPixelsSummed_y / static_cast<int>(_allPixels.size());
-}
+
 void Player::AddBorderPixel(Pixel *p) {
     if (_borderSet.insert(p).second) {
         _borderPixels.push_back(p);
@@ -265,6 +257,21 @@ float Player::GetInvasionAcceptP(const Color &terrainColor) {
     }
     return -1;
 }
+
+void Player::AddPixelToCenter(Pixel *newP) {
+    _allPixelsSummed_x += newP->x;
+    _allPixelsSummed_y += newP->y;
+    _centerPixel_x = _allPixelsSummed_x / static_cast<int>(_allPixels.size());
+    _centerPixel_y = _allPixelsSummed_y / static_cast<int>(_allPixels.size());
+}
+
+void Player::RemovePixelFromCenter(Pixel *newP) {
+    _allPixelsSummed_x -= newP->x;
+    _allPixelsSummed_y -= newP->y;
+    _centerPixel_x = _allPixelsSummed_x / static_cast<int>(_allPixels.size());
+    _centerPixel_y = _allPixelsSummed_y / static_cast<int>(_allPixels.size());
+}
+
 
 void Player::AddCity(const Vector2 &pos) {
     _cityCount++;
