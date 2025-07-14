@@ -334,6 +334,13 @@ void checkExplosion() {
                         };
 
                         ImageDrawPixel(&G::perlin, px, py, explosionColor);
+
+                        Pixel* nukedPixel = &G::territoryMap[px][py];
+                        for (Player& p : G::players) {
+                            if (p._allPixels.contains(nukedPixel)) {
+                                p.LooseOwnershipOfPixel(nukedPixel, true);
+                            }
+                        }
                     }
                 }
             }
@@ -380,6 +387,13 @@ void checkExplosion() {
                         };
 
                         ImageDrawPixel(&G::perlin, px, py, explosionColor);
+
+                        Pixel* nukedPixel = &G::territoryMap[px][py];
+                        for (Player& p : G::players) {
+                            if (p._allPixels.contains(nukedPixel)) {
+                                p.LooseOwnershipOfPixel(nukedPixel, true);
+                            }
+                        }
                     }
                 }
             }

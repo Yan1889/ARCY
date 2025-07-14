@@ -63,6 +63,8 @@ public:
 
     void ProcessAttackQueue(int queueIdx);
 
+    void LooseOwnershipOfPixel(Pixel * pixel, bool updateTextureToo);
+
     static float GetInvasionAcceptP(const Color& terrainColor);
 
     void GetOwnershipOfPixel(Pixel* newP);

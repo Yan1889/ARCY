@@ -162,15 +162,10 @@ void Player::GetOwnershipOfPixel(Pixel *newP) {
 
     if (newP->playerId != -1) {
         Player &defender = G::players[newP->playerId];
-        defender._allPixels.erase(newP);
-
-        newP->playerId = _id;
-
-        defender.UpdateBorderAroundPixel(newP);
-        defender.RemovePixelFromCenter(newP);
-    } else {
-        newP->playerId = _id;
+        defender.LooseOwnershipOfPixel(newP, false);
     }
+    newP->playerId = _id;
+
     attacker.UpdateBorderAroundPixel(newP);
 
 
@@ -208,6 +203,19 @@ void Player::UpdateBorderStatusOfPixel(Pixel *pixel) {
         AddBorderPixel(pixel);
     } else if (!nowBorderPixel && wasBorderPixel) {
         RemoveBorderPixel(pixel);
+    }
+}
+
+void Player::LooseOwnershipOfPixel(Pixel * pixel, bool updateTextureToo) {
+    _allPixels.erase(pixel);
+
+    pixel->playerId = -1;
+
+    UpdateBorderAroundPixel(pixel);
+    RemovePixelFromCenter(pixel);
+
+    if (updateTextureToo) {
+        G::ChangeColorOfPixel(pixel, BLANK);
     }
 }
 
@@ -259,6 +267,8 @@ float Player::GetInvasionAcceptP(const Color &terrainColor) {
 }
 
 void Player::AddPixelToCenter(Pixel *newP) {
+    if (_allPixels.size() == 0) return;
+
     _allPixelsSummed_x += newP->x;
     _allPixelsSummed_y += newP->y;
     _centerPixel_x = _allPixelsSummed_x / static_cast<int>(_allPixels.size());
@@ -266,6 +276,8 @@ void Player::AddPixelToCenter(Pixel *newP) {
 }
 
 void Player::RemovePixelFromCenter(Pixel *newP) {
+    if (_allPixels.size() == 0) return;
+
     _allPixelsSummed_x -= newP->x;
     _allPixelsSummed_y -= newP->y;
     _centerPixel_x = _allPixelsSummed_x / static_cast<int>(_allPixels.size());
