@@ -14,7 +14,7 @@ Player::Player(Pixel *startPos, const int startRadius): _id(G::players.size()) {
     _centerPixel_x = startPos->x;
     _centerPixel_y = startPos->y;
     _allPixelsSummed_x = _centerPixel_x;
-    _allPixelsSummed_x = _centerPixel_y;
+    _allPixelsSummed_y = _centerPixel_y;
 
     do {
         _color = Color{
@@ -87,7 +87,6 @@ void Player::Expand(const int target, const float percentage) {
         queueIdx = _allOnGoingAttackQueues.size();
         _allOnGoingAttackQueues.push_back({target, {}});
         _peopleWorkingOnAttack.push_back(newPeopleLeaving);
-        _pixelsQueuedUp.push_back({});
         _attackedPlayerIdToQueueIdxMap[target] = queueIdx;
     } else {
         queueIdx = iter->second;
@@ -99,7 +98,7 @@ void Player::Expand(const int target, const float percentage) {
             if (potentialEnemyBorderPixel->playerId == target) {
                 if (_peopleWorkingOnAttack[queueIdx] <= 0) return;
 
-                if (_pixelsQueuedUp[queueIdx].contains(potentialEnemyBorderPixel)) continue;
+                if (potentialEnemyBorderPixel->queuedUpForAttack) continue;
 
                 const float priority = GetPriorityOfPixel(
                     potentialEnemyBorderPixel,
@@ -111,7 +110,7 @@ void Player::Expand(const int target, const float percentage) {
                     priority,
                     potentialEnemyBorderPixel
                 });
-                _pixelsQueuedUp[queueIdx].insert(potentialEnemyBorderPixel);
+                potentialEnemyBorderPixel->queuedUpForAttack = true;
                 _peopleWorkingOnAttack[queueIdx]--;
             }
         }
@@ -128,7 +127,7 @@ void Player::ProcessAttackQueue(const int queueIdx) {
     for (int i = 0; i < attackPixelCount; i++) {
         Pixel *newP = queueToWorkOn.top().second;
         queueToWorkOn.pop();
-        _pixelsQueuedUp[queueIdx].erase(newP);
+        newP->queuedUpForAttack = false;
 
         if (newP->playerId != _allOnGoingAttackQueues[queueIdx].targetPlayerId) {
             _peopleWorkingOnAttack[queueIdx]++;
@@ -141,12 +140,12 @@ void Player::ProcessAttackQueue(const int queueIdx) {
         for (Pixel *neighbor: neighbors) {
             if (_peopleWorkingOnAttack[queueIdx] <= 0) break; // no new Pixels
 
-            if (neighbor->playerId == _id || _pixelsQueuedUp[queueIdx].contains(neighbor)) continue;
+            if (neighbor->playerId == _id || neighbor->queuedUpForAttack) continue;
 
             const float priority = GetPriorityOfPixel(neighbor, _allOnGoingAttackQueues[queueIdx].targetPlayerId);
             if (priority == 0) continue; // water or mountain are impossible
 
-            _pixelsQueuedUp[queueIdx].insert(neighbor);
+            neighbor->queuedUpForAttack = true;
             queueToWorkOn.push({
                 priority,
                 neighbor
@@ -162,7 +161,7 @@ void Player::GetOwnershipOfPixel(Pixel *newP) {
 
     if (newP->playerId != -1) {
         Player &defender = G::players[newP->playerId];
-        defender.LooseOwnershipOfPixel(newP, false);
+        defender.LoseOwnershipOfPixel(newP, false);
     }
     newP->playerId = _id;
 
@@ -206,7 +205,7 @@ void Player::UpdateBorderStatusOfPixel(Pixel *pixel) {
     }
 }
 
-void Player::LooseOwnershipOfPixel(Pixel * pixel, bool updateTextureToo) {
+void Player::LoseOwnershipOfPixel(Pixel * pixel, bool updateTextureToo) {
     _allPixels.erase(pixel);
 
     pixel->playerId = -1;
@@ -267,7 +266,7 @@ float Player::GetInvasionAcceptP(const Color &terrainColor) {
 }
 
 void Player::AddPixelToCenter(Pixel *newP) {
-    if (_allPixels.size() == 0) return;
+    if (_allPixels.empty()) return;
 
     _allPixelsSummed_x += newP->x;
     _allPixelsSummed_y += newP->y;
@@ -276,7 +275,7 @@ void Player::AddPixelToCenter(Pixel *newP) {
 }
 
 void Player::RemovePixelFromCenter(Pixel *newP) {
-    if (_allPixels.size() == 0) return;
+    if (_allPixels.empty()) return;
 
     _allPixelsSummed_x -= newP->x;
     _allPixelsSummed_y -= newP->y;

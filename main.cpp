@@ -350,7 +350,7 @@ void checkExplosion() {
                     Pixel *nukedPixel = &G::territoryMap[px][py];
                     for (Player &p: G::players) {
                         if (p._allPixels.contains(nukedPixel)) {
-                            p.LooseOwnershipOfPixel(nukedPixel, true);
+                            p.LoseOwnershipOfPixel(nukedPixel, true);
                         }
                     }
                 }

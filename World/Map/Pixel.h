@@ -16,6 +16,8 @@ struct Pixel {
     int y;
     int playerId;
 
+    bool queuedUpForAttack = false;
+
     std::vector<Pixel *> neighborsCached;
 
 

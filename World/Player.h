@@ -41,7 +41,7 @@ public:
 
     // territory
     std::unordered_set<Pixel *> _allPixels;
-    std::vector<Pixel *> _borderPixels;
+    std::deque<Pixel *> _borderPixels;
     std::unordered_set<Pixel *> _borderSet;
 
     // attack
@@ -49,7 +49,6 @@ public:
     std::unordered_map<int, int> _attackedPlayerIdToQueueIdxMap;
     // { {attackedPlayerId, { {prio1, pixel1}, {prio2, pixel2}, ... } ... }
     std::vector<AttackQueue> _allOnGoingAttackQueues;
-    std::vector<std::unordered_set<Pixel *>> _pixelsQueuedUp;
 
     int _allPixelsSummed_x{};
     int _allPixelsSummed_y{};
@@ -63,7 +62,7 @@ public:
 
     void ProcessAttackQueue(int queueIdx);
 
-    void LooseOwnershipOfPixel(Pixel * pixel, bool updateTextureToo);
+    void LoseOwnershipOfPixel(Pixel * pixel, bool updateTextureToo);
 
     static float GetInvasionAcceptP(const Color& terrainColor);
 
