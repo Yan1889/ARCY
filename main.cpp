@@ -110,8 +110,7 @@ void renderGame() {
 
     for (const Player &p: G::players) {
         for (Pixel *pixel: p._borderPixels) {
-            // if (pixel->playerId == p._id)
-                DrawPixel(pixel->x, pixel->y, p._color);
+            DrawPixel(pixel->x, pixel->y, p._color);
         }
     }
 
@@ -293,21 +292,24 @@ void checkExpansionAndAttack() {
 }
 
 void checkExplosion() {
+    if (!IsKeyPressed(KEY_ONE) && !IsKeyPressed(KEY_TWO)) return;
+
+    const int cost = IsKeyPressed(KEY_ONE) ? 10000 : 100000;
+
+    if (MAIN_PLAYER._money.moneyBalance - cost < 0) return;
+    MAIN_PLAYER._money.spendMoney(cost);
+
+    const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), camera);
+    const int radius = IsKeyPressed(KEY_ONE) ? 50 : 300;
+
+    // Satz des Pythagoras kein Problem
+
+    int a = playerPos.y - mousePos.y;
+    int b = playerPos.x - mousePos.x;
+    int c = sqrt(a * a + b * b);
+
+    // sounds
     if (IsKeyPressed(KEY_ONE)) {
-        int cost = 10000;
-        if (MAIN_PLAYER._money.moneyBalance - cost < 0) return;
-        MAIN_PLAYER._money.spendMoney(cost);
-
-        const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), camera);
-        const int radius = 50;
-
-        // Satz des Pythagoras kein Problem
-
-        int a = playerPos.y - mousePos.y;
-        int b = playerPos.x - mousePos.x;
-
-        int c = sqrt(a * a + b * b);
-
         if (c >= 1000) {
             mySounds.Play(mySounds.distantExplosionSound);
         } else if (c >= 500) {
@@ -315,93 +317,46 @@ void checkExplosion() {
         } else {
             mySounds.Play(mySounds.explosionSound);
         }
-
-        for (int y = -radius; y <= radius; y++) {
-            for (int x = -radius; x <= radius; x++) {
-                int px = (int) mousePos.x + x;
-                int py = (int) mousePos.y + y;
-
-                float distance = sqrtf((float) (x * x + y * y)) / radius;
-                float noise = GetRandomValue(50, 100) / 100.0f;
-
-                if (distance <= 1.0f && noise > distance) {
-                    if (px >= 0 && py >= 0 && px < G::MAP_WIDTH && py < G::MAP_HEIGHT) {
-                        Color explosionColor = Color{
-                            (unsigned char) GetRandomValue(0, 200), // Red
-                            (unsigned char) GetRandomValue(230, 255), // Green
-                            (unsigned char) GetRandomValue(0, 50), // Blue                                       // Blue
-                            255 // Alpha
-                        };
-
-                        ImageDrawPixel(&G::perlin, px, py, explosionColor);
-
-                        Pixel* nukedPixel = &G::territoryMap[px][py];
-                        for (Player& p : G::players) {
-                            if (p._allPixels.contains(nukedPixel)) {
-                                p.LooseOwnershipOfPixel(nukedPixel, true);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        UnloadTexture(G::perlinTexture);
-        G::perlinTexture = LoadTextureFromImage(G::perlin);
-    } else if (IsKeyPressed(KEY_TWO)) {
-        int cost = 100000;
-        if (MAIN_PLAYER._money.moneyBalance - cost < 0) return;
-        MAIN_PLAYER._money.spendMoney(cost);
-
-        const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), camera);
-        const int radius = 300;
-
-        // Satz des Pythagoras kein Problem
-
-        int a = playerPos.y - mousePos.y;
-        int b = playerPos.x - mousePos.x;
-
-        int c = sqrt(a * a + b * b);
-
+    } else {
         if (c >= 1000) {
             mySounds.Play(mySounds.farExplosionSound);
         } else {
             mySounds.Play(mySounds.explosionSound);
         }
+    }
 
-        for (int y = -radius; y <= radius; y++) {
-            for (int x = -radius; x <= radius; x++) {
-                int px = (int) mousePos.x + x;
-                int py = (int) mousePos.y + y;
+    // texture & logic
+    for (int y = -radius; y <= radius; y++) {
+        for (int x = -radius; x <= radius; x++) {
+            int px = (int) mousePos.x + x;
+            int py = (int) mousePos.y + y;
 
-                float distance = sqrtf((float) (x * x + y * y)) / radius;
-                float noise = GetRandomValue(50, 100) / 100.0f;
+            float distance = sqrtf((float) (x * x + y * y)) / radius;
+            float noise = GetRandomValue(50, 100) / 100.0f;
 
-                if (distance <= 1.0f && noise > distance) {
-                    if (px >= 0 && py >= 0 && px < G::MAP_WIDTH && py < G::MAP_HEIGHT) {
-                        Color explosionColor = Color{
-                            (unsigned char) GetRandomValue(0, 200), // Red
-                            (unsigned char) GetRandomValue(230, 255), // Green
-                            (unsigned char) GetRandomValue(0, 50), // Blue                                       // Blue
-                            255 // Alpha
-                        };
+            if (distance <= 1.0f && noise > distance) {
+                if (px >= 0 && py >= 0 && px < G::MAP_WIDTH && py < G::MAP_HEIGHT) {
+                    Color explosionColor = Color{
+                        (unsigned char) GetRandomValue(0, 200),
+                        (unsigned char) GetRandomValue(230, 255),
+                        (unsigned char) GetRandomValue(0, 50),
+                        255
+                    };
 
-                        ImageDrawPixel(&G::perlin, px, py, explosionColor);
+                    ImageDrawPixel(&G::perlin, px, py, explosionColor);
 
-                        Pixel* nukedPixel = &G::territoryMap[px][py];
-                        for (Player& p : G::players) {
-                            if (p._allPixels.contains(nukedPixel)) {
-                                p.LooseOwnershipOfPixel(nukedPixel, true);
-                            }
+                    Pixel *nukedPixel = &G::territoryMap[px][py];
+                    for (Player &p: G::players) {
+                        if (p._allPixels.contains(nukedPixel)) {
+                            p.LooseOwnershipOfPixel(nukedPixel, true);
                         }
                     }
                 }
             }
         }
-
-        UnloadTexture(G::perlinTexture);
-        G::perlinTexture = LoadTextureFromImage(G::perlin);
     }
+    UnloadTexture(G::perlinTexture);
+    G::perlinTexture = LoadTextureFromImage(G::perlin);
 }
 
 void checkCity() {
