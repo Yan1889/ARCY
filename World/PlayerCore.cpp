@@ -94,7 +94,7 @@ void Player::GetOwnershipOfPixel(Pixel *newP) {
 
     attacker.InsertBorderAroundPixel(newP);
 
-    G::ChangeColorOfPixel(newP, _color);
+    ImageDrawPixel(&G::territoryImage, newP->x, newP->y, _color);
 
     // center
     AddPixelToCenter(newP);
@@ -140,7 +140,7 @@ void Player::LoseOwnershipOfPixel(Pixel *pixel, const bool updateTextureToo) {
     RemovePixelFromCenter(pixel);
 
     if (updateTextureToo) {
-        G::ChangeColorOfPixel(pixel, BLANK);
+        ImageDrawPixel(&G::territoryImage, pixel->x, pixel->y, BLANK);
     }
 
     // die if too small

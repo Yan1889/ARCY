@@ -113,6 +113,8 @@ void renderGame() {
 
     // terrain bg texture
     DrawTextureV(G::perlinTexture, Vector2{0, 0}, WHITE);
+    // nuke bg texture
+    DrawTextureV(G::explosionTexture, Vector2{0, 0}, WHITE);
 
     for (const Player &p: G::players) {
         for (Pixel *pixel: p._borderPixels) {
@@ -134,7 +136,7 @@ void renderGame() {
     }
 
     // territory texture
-    G::UpdateTerritoryTexture();
+    UpdateTexture(G::territoryTexture, G::territoryImage.data);
     DrawTexture(G::territoryTexture, 0, 0, Fade(WHITE, 0.5));
 
     // """""Crosshair""""
@@ -353,27 +355,25 @@ void checkExplosion() {
 
             if (distance <= 1.0f && noise > distance) {
                 if (px >= 0 && py >= 0 && px < G::MAP_WIDTH && py < G::MAP_HEIGHT) {
-                    Color explosionColor = Color{
-                        (unsigned char) GetRandomValue(0, 200),
-                        (unsigned char) GetRandomValue(230, 255),
-                        (unsigned char) GetRandomValue(0, 50),
-                        255
-                    };
-
-                    ImageDrawPixel(&G::perlin, px, py, explosionColor);
-
                     Pixel *nukedPixel = &G::territoryMap[px][py];
                     for (Player &p: G::players) {
                         if (p._allPixels.contains(nukedPixel)) {
                             p.LoseOwnershipOfPixel(nukedPixel, true);
                         }
                     }
+
+                    const Color explosionColor{
+                        (unsigned char) GetRandomValue(0, 200),
+                        (unsigned char) GetRandomValue(230, 255),
+                        (unsigned char) GetRandomValue(0, 50),
+                        255
+                    };
+                    ImageDrawPixel(&G::explosionImage, px, py, explosionColor);
                 }
             }
         }
     }
-    UnloadTexture(G::perlinTexture);
-    G::perlinTexture = LoadTextureFromImage(G::perlin);
+    UpdateTexture(G::explosionTexture, G::explosionImage.data);
 }
 */
 
@@ -447,11 +447,11 @@ void initCamAndMap() {
     PerlinNoise::proceedMap(&G::perlin, G::mapParts);
     G::perlinTexture = LoadTextureFromImage(G::perlin);
 
+    G::explosionImage = GenImageColor(G::MAP_WIDTH, G::MAP_HEIGHT, BLANK);
+    G::explosionTexture = LoadTextureFromImage(G::explosionImage);
 
     G::territoryImage = GenImageColor(G::MAP_WIDTH, G::MAP_HEIGHT, BLANK);
     G::territoryTexture = LoadTextureFromImage(G::territoryImage);
-
-
     G::territoryMap = std::vector<std::vector<Pixel> >(G::MAP_WIDTH, std::vector<Pixel>(G::MAP_HEIGHT));
     for (int y = 0; y < G::MAP_HEIGHT; y++) {
         for (int x = 0; x < G::MAP_WIDTH; x++) {

@@ -19,6 +19,8 @@ namespace G {
     constexpr int MAP_WIDTH = 2500;
     constexpr int MAP_HEIGHT = 2500;
 
+    inline int targetFPS = 60;
+
     inline Image perlin;
     inline Texture2D perlinTexture{0};
     inline std::vector<Gradient> mapParts = {
@@ -38,16 +40,12 @@ namespace G {
 
     inline std::vector<Player> players;
 
+    inline Image explosionImage;
+    inline Texture2D explosionTexture;
+
     inline std::vector<std::vector<Pixel> > territoryMap; // [x][y]
     inline Texture2D territoryTexture;
     inline Image territoryImage;
-
-    inline void ChangeColorOfPixel(Pixel* pixel, Color color) {
-        static_cast<Color *>(territoryImage.data)[pixel->y * MAP_WIDTH + pixel->x] = color;
-    }
-    inline void UpdateTerritoryTexture() {
-        UpdateTexture(territoryTexture, territoryImage.data);
-    }
 }
 
 #endif //GLOBALS_H
