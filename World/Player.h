@@ -28,7 +28,7 @@ public:
     bool _dead{};
 
     // population
-    int _population = 100;
+    int _population = 1000;
     int _maxPopulation{};
     float _growthCooldown = 100;
     float _growthRate = 100;
@@ -68,7 +68,8 @@ public:
     void GetOwnershipOfPixel(Pixel* newP);
     void LoseOwnershipOfPixel(Pixel * pixel, bool updateTextureToo);
 
-    void UpdateBorderAroundPixel(Pixel* pixel);
+    void UpdateAllPixelsToBeUpdated();
+    void InsertBorderAroundPixel(Pixel* pixel);
     void UpdateBorderStatusOfPixel(Pixel* pixel);
     void AddBorderPixel(Pixel* pixel);
     void RemoveBorderPixel(Pixel* pixel);
