@@ -6,14 +6,15 @@
 #include "Player.h"
 
 void Player::Expand(const int target, const float percentage) {
+    if (_population / 2 < 100) return; // not enough troops
+
     const int newPeopleLeaving = _population * percentage;
     _population -= newPeopleLeaving;
 
     // ----- init/find an attack queue -----
     int queueIdx;
 
-    auto iter = _attackedPlayerIdToQueueIdxMap.find(target);
-    if (iter == _attackedPlayerIdToQueueIdxMap.end()) {
+    if (!_attackedPlayerIdToQueueIdxMap.contains(target)) {
         queueIdx = _allOnGoingAttackQueues.size();
         _allOnGoingAttackQueues.push_back({
             target,
@@ -22,7 +23,7 @@ void Player::Expand(const int target, const float percentage) {
         });
         _attackedPlayerIdToQueueIdxMap[target] = queueIdx;
     } else {
-        queueIdx = iter->second;
+        queueIdx = _attackedPlayerIdToQueueIdxMap[target];
         _allOnGoingAttackQueues[queueIdx].troops += newPeopleLeaving;
     }
     // ----- fill attack queue -----
@@ -54,18 +55,26 @@ void Player::ProcessAttackQueue(const int queueIdx) {
         newP->queuedUpForAttack = false;
 
         if (newP->playerId != _allOnGoingAttackQueues[queueIdx].targetPlayerId) continue;
+
         attackToWorkOn.troops--;
+
+        // randomly don't get the pixel even though lost troops for it
+        if (!newP->acceptRandomly()) {
+            queueToWorkOn.push(newP);
+            newP->queuedUpForAttack = true;
+            continue;
+        }
+
 
         GetOwnershipOfPixel(newP);
 
         // update attack queue
-        const auto &neighbors = newP->GetNeighbors();
-        for (Pixel *neighbor: neighbors) {
+        for (Pixel *neighbor: newP->GetNeighbors()) {
             if (attackToWorkOn.troops <= 0) break; // no new Pixels
-
-            if (neighbor->playerId == _id || neighbor->queuedUpForAttack) continue;
-
-            if (neighbor->invasionAcceptProbability == 0) continue; // water or mountain are impossible
+            if (neighbor->playerId == _id
+                || neighbor->queuedUpForAttack
+                || neighbor->invasionAcceptProbability == 0)
+                continue;
 
             neighbor->queuedUpForAttack = true;
             queueToWorkOn.push(neighbor);
@@ -83,9 +92,7 @@ void Player::GetOwnershipOfPixel(Pixel *newP) {
     }
     newP->playerId = _id;
 
-    // attacker.UpdateBorderAroundPixel(newP);
-    _pixelsToBeUpdated.insert(newP);
-    for (Pixel* p : newP->GetNeighbors()) _pixelsToBeUpdated.insert(p);
+    attacker.InsertBorderAroundPixel(newP);
 
     G::ChangeColorOfPixel(newP, _color);
 
@@ -93,12 +100,12 @@ void Player::GetOwnershipOfPixel(Pixel *newP) {
     AddPixelToCenter(newP);
 }
 
-void Player::UpdateBorderAroundPixel(Pixel *pixel) {
-    UpdateBorderStatusOfPixel(pixel);
+void Player::InsertBorderAroundPixel(Pixel *pixel) {
+    _pixelsToBeUpdated.insert(pixel);
 
     const std::vector<Pixel *> &affectedPixels = pixel->GetNeighbors();
     for (Pixel *neighbor: affectedPixels) {
-        UpdateBorderStatusOfPixel(neighbor);
+        _pixelsToBeUpdated.insert(neighbor);
     }
 }
 
@@ -124,12 +131,12 @@ void Player::UpdateBorderStatusOfPixel(Pixel *pixel) {
     }
 }
 
-void Player::LoseOwnershipOfPixel(Pixel *pixel, bool updateTextureToo) {
+void Player::LoseOwnershipOfPixel(Pixel *pixel, const bool updateTextureToo) {
     _allPixels.erase(pixel);
 
     pixel->playerId = -1;
 
-    UpdateBorderAroundPixel(pixel);
+    InsertBorderAroundPixel(pixel);
     RemovePixelFromCenter(pixel);
 
     if (updateTextureToo) {
@@ -137,7 +144,7 @@ void Player::LoseOwnershipOfPixel(Pixel *pixel, bool updateTextureToo) {
     }
 
     // die if too small
-    if (_allPixels.size() == 0) {
+    if (_allPixels.empty()) {
         _dead = true;
     }
 }

@@ -203,7 +203,7 @@ void displayInfoTexts() {
 
     const char *sendText = TextFormat(
         "People exploring neutral land: %d",
-        MAIN_PLAYER._allOnGoingAttackQueues[0].troops // neutral land attack queue
+        MAIN_PLAYER._allOnGoingAttackQueues.size() >= 1? MAIN_PLAYER._allOnGoingAttackQueues[0].troops : 0
     );
     DrawText(sendText, 0 + 25, GetScreenHeight() - 25, 20, MAIN_PLAYER_COLOR);
 
@@ -280,7 +280,7 @@ void handleControls() {
 
 void checkExpansionAndAttack() {
     // expand with space is clicked
-    if (IsKeyPressed(KEY_SPACE) && MAIN_PLAYER._population / 2 >= 100) {
+    if (IsKeyPressed(KEY_SPACE)) {
         for (int i = 0; i < G::players.size(); i++) {
             if (G::players[i]._dead) continue;
             G::players[i].Expand(-1, 0.5);
@@ -391,18 +391,18 @@ void checkCity() {
                 MAIN_PLAYER._money.spendMoney(cost);
                 mySounds.Play(mySounds.cityBuildSound);
                 MAIN_PLAYER.AddCity(GetScreenToWorld2D(GetMousePosition(), camera));
-            }
 
-            // bots also make a random city when main player makes city
-            for (int i = 1; i < G::players.size(); i++) {
-                if (G::players[i]._dead) continue;
+                // bots also make a random city when main player makes city
+                for (int i = 1; i < G::players.size(); i++) {
+                    if (G::players[i]._dead) continue;
 
-                cost = 10000 * (G::players[i]._cityPositions.size() + 1);
-                if (G::players[i]._money.moneyBalance - cost >= 0) {
-                    auto iter = G::players[i]._allPixels.begin();
-                    std::advance(iter, rand() % G::players[i]._allPixels.size());
-                    G::players[i]._money.spendMoney(cost);
-                    G::players[i].AddCity(*iter);
+                    cost = 10000 * (G::players[i]._cityPositions.size() + 1);
+                    if (G::players[i]._money.moneyBalance - cost >= 0) {
+                        auto iter = G::players[i]._allPixels.begin();
+                        std::advance(iter, rand() % G::players[i]._allPixels.size());
+                        G::players[i]._money.spendMoney(cost);
+                        G::players[i].AddCity(*iter);
+                    }
                 }
             }
         }
