@@ -42,8 +42,10 @@ namespace G {
     inline Texture2D territoryTexture;
     inline Image territoryImage;
 
+
+
     inline void ChangeColorOfPixel(Pixel* pixel, Color color) {
-        static_cast<Color *>(territoryImage.data)[pixel->y * MAP_WIDTH + pixel->x] = color;
+        // static_cast<Color *>(territoryImage.data)[pixel->y * MAP_WIDTH + pixel->x] = color;
         UpdateTextureRec(
             territoryTexture,
             Rectangle{

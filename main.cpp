@@ -94,8 +94,9 @@ void frameLogic() {
     checkCity();
     checkExpansionAndAttack();
 
-    for (Player &p: G::players) {
-        p.Update();
+    for (int i = 0; i < G::players.size(); i++) {
+        if (G::players[i]._dead) continue;
+        G::players[i].Update();
     }
 }
 
@@ -160,8 +161,6 @@ void displayInfoTexts() {
              MAIN_PLAYER_COLOR);
     DrawText("Left-Click to attack another player", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 280, 20,
              MAIN_PLAYER_COLOR);
-    DrawText("Right-Click to build a city", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 320, 20,
-             MAIN_PLAYER_COLOR);
 
     // fps
     const int fps = GetFPS();
@@ -192,7 +191,7 @@ void displayInfoTexts() {
 
     const char *sendText = TextFormat(
         "People exploring neutral land: %d",
-        MAIN_PLAYER._allOnGoingAttackQueues[0].queue.size() // neutral land attack queue
+        MAIN_PLAYER._allOnGoingAttackQueues[0].troops // neutral land attack queue
     );
     DrawText(sendText, 0 + 25, GetScreenHeight() - 25, 20, MAIN_PLAYER_COLOR);
 
@@ -223,6 +222,8 @@ void displayInfoTexts() {
 
 void displayAllPlayerTags() {
     for (int i = 0; i < G::players.size(); i++) {
+        if (G::players[i]._dead) continue;
+
         const float diameter = 2 * std::sqrt(G::players[i]._allPixels.size() / PI); // A = π * r^2 => r = sqrt(A / π)
         // Shows who you are
         const char *name = i == 0 ? "You" : ("NPC " + std::to_string(i)).c_str();
@@ -268,8 +269,9 @@ void handleControls() {
 void checkExpansionAndAttack() {
     // expand with space is clicked
     if (IsKeyPressed(KEY_SPACE) && MAIN_PLAYER._population / 2 >= 100) {
-        for (Player &p: G::players) {
-            p.Expand(-1, 0.5);
+        for (int i = 0; i < G::players.size(); i++) {
+            if (G::players[i]._dead) continue;
+            G::players[i].Expand(-1, 0.5);
         }
     }
 
@@ -379,6 +381,8 @@ void checkCity() {
 
             // bots also make a random city when main player makes city
             for (int i = 1; i < G::players.size(); i++) {
+                if (G::players[i]._dead) continue;
+
                 cost = 10000 * (G::players[i]._cityPositions.size() + 1);
                 if (G::players[i]._money.moneyBalance - cost >= 0) {
                     auto iter = G::players[i]._allPixels.begin();
@@ -437,7 +441,7 @@ void initCamAndMap() {
     G::territoryMap = std::vector<std::vector<Pixel> >(G::MAP_WIDTH, std::vector<Pixel>(G::MAP_HEIGHT));
     for (int y = 0; y < G::MAP_HEIGHT; y++) {
         for (int x = 0; x < G::MAP_WIDTH; x++) {
-            G::territoryMap[x][y] = {x, y, -1};
+            G::territoryMap[x][y] = Pixel(x, y, -1);
         }
     }
     for (int y = 0; y < G::MAP_HEIGHT; y++) {

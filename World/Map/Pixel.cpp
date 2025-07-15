@@ -6,7 +6,7 @@
 
 #include "../Globals.h"
 
-Pixel::Pixel(const int x, const int y, const int id): x(x), y(y), playerId(id) {
+Pixel::Pixel(const int x, const int y, const int id): x(x), y(y), playerId(id), invasionAcceptProbability(GetColorProbability()) {
 }
 
 
@@ -24,6 +24,16 @@ const std::vector<Pixel *>& Pixel::GetNeighbors() {
 
 Color Pixel::GetColor() const {
     return static_cast<const Color *>(G::perlin.data)[G::perlin.width * y + x];
+}
+
+float Pixel::GetColorProbability() const {
+    Color terrainColor = GetColor();
+    for (auto &mapPart: G::mapParts) {
+        if (terrainColor.r == mapPart.color.r) {
+            return mapPart.difficulty;
+        }
+    }
+    return -1;
 }
 
 bool Pixel::operator<(const Pixel &other) const {

@@ -16,8 +16,8 @@ struct Pixel {
     int y;
     int playerId;
 
+    float invasionAcceptProbability;
     bool queuedUpForAttack = false;
-
     std::vector<Pixel *> neighborsCached;
 
 
@@ -33,6 +33,8 @@ struct Pixel {
     bool operator==(const Pixel &other) const;
 
     Color GetColor() const;
+
+    float GetColorProbability() const;
 
     struct Hasher {
         std::size_t operator()(const Pixel &p) const {

@@ -16,13 +16,16 @@
 
 struct AttackQueue {
     int targetPlayerId;
-    std::priority_queue<std::pair<float, Pixel *>> queue;
+    int troops;
+    std::queue<Pixel *> queue;
 };
 
 class Player {
 public:
     int _id;
-    Color _color{};
+    Color _color;
+
+    bool _dead{};
 
     // population
     int _population = 100;
@@ -45,7 +48,6 @@ public:
     std::unordered_set<Pixel *> _borderSet;
 
     // attack
-    std::vector<int> _peopleWorkingOnAttack;
     std::unordered_map<int, int> _attackedPlayerIdToQueueIdxMap;
     // { {attackedPlayerId, { {prio1, pixel1}, {prio2, pixel2}, ... } ... }
     std::vector<AttackQueue> _allOnGoingAttackQueues;
@@ -58,27 +60,20 @@ public:
 
     Player(Pixel* startPos, int startRadius);
 
+    void Update();
     void Expand(int target, float percentage);
 
     void ProcessAttackQueue(int queueIdx);
-
-    void LoseOwnershipOfPixel(Pixel * pixel, bool updateTextureToo);
-
-    static float GetInvasionAcceptP(const Color& terrainColor);
-
     void GetOwnershipOfPixel(Pixel* newP);
-
-    float GetPriorityOfPixel(Pixel* p, int targetId) const;
-
-    void Update();
-    void GrowPopulation();
-    void IncreaseMoney();
+    void LoseOwnershipOfPixel(Pixel * pixel, bool updateTextureToo);
 
     void UpdateBorderAroundPixel(Pixel* pixel);
     void UpdateBorderStatusOfPixel(Pixel* pixel);
     void AddBorderPixel(Pixel* pixel);
     void RemoveBorderPixel(Pixel* pixel);
 
+    void GrowPopulation();
+    void IncreaseMoney();
     void RemovePixelFromCenter(Pixel* newP);
     void AddPixelToCenter(Pixel* newP);
     void AddCity(const Vector2& pos);
