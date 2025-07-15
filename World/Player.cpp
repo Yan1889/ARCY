@@ -87,10 +87,10 @@ void Player::IncreaseMoney() {
 }
 
 void Player::UpdateAllDirty() {
-    for (Pixel* p : _pixelsToBeUpdated) {
+    for (Pixel *p: _dirtyPixels) {
         UpdateSingleDirty(p);
     }
-    _pixelsToBeUpdated.clear();
+    _dirtyPixels.clear();
 }
 
 void Player::AddPixelToCenter(Pixel *newP) {

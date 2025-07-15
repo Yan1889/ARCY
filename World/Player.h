@@ -46,7 +46,7 @@ public:
     std::unordered_set<Pixel *> _allPixels;
     std::deque<Pixel *> _borderPixels;
     std::unordered_set<Pixel *> _borderSet;
-    std::unordered_set<Pixel *> _pixelsToBeUpdated;
+    std::unordered_set<Pixel *> _dirtyPixels;
 
     // attack
     std::unordered_map<int, int> _attackedPlayerIdToQueueIdxMap;
@@ -64,6 +64,7 @@ public:
     void Update();
     void Expand(int target, float percentage);
 
+    void ReFillAttackQueueFromScratch(int queueIdx);
     void ProcessAttackQueue(int queueIdx);
     void GetOwnershipOfPixel(Pixel* newP);
     void LoseOwnershipOfPixel(Pixel * pixel, bool updateTextureToo);

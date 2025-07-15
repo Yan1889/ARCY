@@ -26,25 +26,18 @@ void Player::Expand(const int target, const float percentage) {
         queueIdx = _attackedPlayerIdToQueueIdxMap[target];
         _allOnGoingAttackQueues[queueIdx].troops += newPeopleLeaving;
     }
-    // ----- fill attack queue -----
-    for (Pixel *borderPixel: _borderPixels) {
-        for (Pixel *potentialEnemyBorderPixel: borderPixel->GetNeighbors()) {
-            if (potentialEnemyBorderPixel->queuedUpForAttack ||
-                potentialEnemyBorderPixel->playerId != target ||
-                potentialEnemyBorderPixel->invasionAcceptProbability == 0)
-                continue;
-
-            _allOnGoingAttackQueues[queueIdx].queue.push(potentialEnemyBorderPixel);
-            potentialEnemyBorderPixel->queuedUpForAttack = true;
-            if (_allOnGoingAttackQueues[queueIdx].troops <= 0) return;
-        }
-    }
+    ReFillAttackQueueFromScratch(queueIdx);
 }
 
 
 void Player::ProcessAttackQueue(const int queueIdx) {
     AttackQueue &attackToWorkOn = _allOnGoingAttackQueues[queueIdx];
     auto &queueToWorkOn = attackToWorkOn.queue;
+
+    // refilling it from scratch if necessary
+    if (!_dirtyPixels.empty()) {
+        ReFillAttackQueueFromScratch(queueIdx);
+    }
 
     // 60fps => ~10 border expansions / 1s
     const int maxPixelsPerFrame = 100;
@@ -82,6 +75,29 @@ void Player::ProcessAttackQueue(const int queueIdx) {
     }
 }
 
+void Player::ReFillAttackQueueFromScratch(const int queueIdx) {
+    // clear the old one
+    while (!_allOnGoingAttackQueues[queueIdx].queue.empty()) {
+        Pixel *p = _allOnGoingAttackQueues[queueIdx].queue.front();
+        p->queuedUpForAttack = false;
+        _allOnGoingAttackQueues[queueIdx].queue.pop();
+    }
+
+    // refill
+    const int target = _allOnGoingAttackQueues[queueIdx].targetPlayerId;
+    for (Pixel *borderPixel: _borderPixels) {
+        for (Pixel *potentialEnemyBorderPixel: borderPixel->GetNeighbors()) {
+            if (potentialEnemyBorderPixel->queuedUpForAttack ||
+                potentialEnemyBorderPixel->playerId != target ||
+                potentialEnemyBorderPixel->invasionAcceptProbability == 0)
+                continue;
+
+            _allOnGoingAttackQueues[queueIdx].queue.push(potentialEnemyBorderPixel);
+            potentialEnemyBorderPixel->queuedUpForAttack = true;
+        }
+    }
+}
+
 void Player::GetOwnershipOfPixel(Pixel *newP) {
     Player &attacker = *this;
     attacker._allPixels.insert(newP);
@@ -101,11 +117,11 @@ void Player::GetOwnershipOfPixel(Pixel *newP) {
 }
 
 void Player::MarkPixelAsDirty(Pixel *pixel) {
-    _pixelsToBeUpdated.insert(pixel);
+    _dirtyPixels.insert(pixel);
 
     const std::vector<Pixel *> &affectedPixels = pixel->GetNeighbors();
     for (Pixel *neighbor: affectedPixels) {
-        _pixelsToBeUpdated.insert(neighbor);
+        _dirtyPixels.insert(neighbor);
     }
 }
 
