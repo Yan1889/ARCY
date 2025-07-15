@@ -46,6 +46,7 @@ public:
     std::unordered_set<Pixel *> _allPixels;
     std::deque<Pixel *> _borderPixels;
     std::unordered_set<Pixel *> _borderSet;
+    std::unordered_set<Pixel *> _pixelsToBeUpdated;
 
     // attack
     std::unordered_map<int, int> _attackedPlayerIdToQueueIdxMap;

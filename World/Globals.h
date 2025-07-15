@@ -45,17 +45,11 @@ namespace G {
 
 
     inline void ChangeColorOfPixel(Pixel* pixel, Color color) {
-        // static_cast<Color *>(territoryImage.data)[pixel->y * MAP_WIDTH + pixel->x] = color;
-        UpdateTextureRec(
-            territoryTexture,
-            Rectangle{
-                static_cast<float>(pixel->x),
-                static_cast<float>(pixel->y),
-                1,
-                1
-            },
-            &color
-        );
+        static_cast<Color *>(territoryImage.data)[pixel->y * MAP_WIDTH + pixel->x] = color;
+    }
+
+    inline void UpdateTerritoryTexture() {
+        UpdateTexture(territoryTexture, territoryImage.data);
     }
 }
 

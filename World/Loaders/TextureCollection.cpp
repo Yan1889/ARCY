@@ -12,7 +12,7 @@ void TextureCollection::LoadAll() {
     // city = LoadTexture("city.png");
 
     // was ist hier los haha
-    city = LoadTexture("images/city.png");
+    city = LoadTexture("assets/images/city.png");
 }
 
 void TextureCollection::UnloadAll() {

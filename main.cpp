@@ -127,7 +127,9 @@ void renderGame() {
             );
         }
     }
+
     // territory texture
+    G::UpdateTerritoryTexture();
     DrawTexture(G::territoryTexture, 0, 0, Fade(WHITE, 0.5));
 
     // """""Crosshair""""

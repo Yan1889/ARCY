@@ -15,7 +15,11 @@ void Player::Expand(const int target, const float percentage) {
     auto iter = _attackedPlayerIdToQueueIdxMap.find(target);
     if (iter == _attackedPlayerIdToQueueIdxMap.end()) {
         queueIdx = _allOnGoingAttackQueues.size();
-        _allOnGoingAttackQueues.push_back({target, 0, {}});
+        _allOnGoingAttackQueues.push_back({
+            target,
+            newPeopleLeaving,
+            {}
+        });
         _attackedPlayerIdToQueueIdxMap[target] = queueIdx;
     } else {
         queueIdx = iter->second;
@@ -26,7 +30,8 @@ void Player::Expand(const int target, const float percentage) {
         for (Pixel *potentialEnemyBorderPixel: borderPixel->GetNeighbors()) {
             if (potentialEnemyBorderPixel->queuedUpForAttack ||
                 potentialEnemyBorderPixel->playerId != target ||
-                potentialEnemyBorderPixel->invasionAcceptProbability == 0) continue;
+                potentialEnemyBorderPixel->invasionAcceptProbability == 0)
+                continue;
 
             _allOnGoingAttackQueues[queueIdx].queue.push(potentialEnemyBorderPixel);
             potentialEnemyBorderPixel->queuedUpForAttack = true;
@@ -40,7 +45,7 @@ void Player::ProcessAttackQueue(const int queueIdx) {
     AttackQueue &attackToWorkOn = _allOnGoingAttackQueues[queueIdx];
     auto &queueToWorkOn = attackToWorkOn.queue;
 
-    // 60fps => ~10 broder expansions / 1s
+    // 60fps => ~10 border expansions / 1s
     const int maxPixelsPerFrame = 100;
 
     for (int i = 0; i < maxPixelsPerFrame && !queueToWorkOn.empty() && attackToWorkOn.troops > 0; i++) {
@@ -48,12 +53,9 @@ void Player::ProcessAttackQueue(const int queueIdx) {
         queueToWorkOn.pop();
         newP->queuedUpForAttack = false;
 
+        if (newP->playerId != _allOnGoingAttackQueues[queueIdx].targetPlayerId) continue;
         attackToWorkOn.troops--;
 
-        if (newP->playerId != _allOnGoingAttackQueues[queueIdx].targetPlayerId) {
-            attackToWorkOn.troops++;
-            continue;
-        }
         GetOwnershipOfPixel(newP);
 
         // update attack queue
@@ -81,8 +83,9 @@ void Player::GetOwnershipOfPixel(Pixel *newP) {
     }
     newP->playerId = _id;
 
-    attacker.UpdateBorderAroundPixel(newP);
-
+    // attacker.UpdateBorderAroundPixel(newP);
+    _pixelsToBeUpdated.insert(newP);
+    for (Pixel* p : newP->GetNeighbors()) _pixelsToBeUpdated.insert(p);
 
     G::ChangeColorOfPixel(newP, _color);
 
@@ -134,10 +137,7 @@ void Player::LoseOwnershipOfPixel(Pixel *pixel, bool updateTextureToo) {
     }
 
     // die if too small
-    if (_allPixels.size() == 30) {
-        for (Pixel *pixelToBeDeleted: _allPixels) {
-            LoseOwnershipOfPixel(pixelToBeDeleted, true);
-        }
+    if (_allPixels.size() == 0) {
         _dead = true;
     }
 }

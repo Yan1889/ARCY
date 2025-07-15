@@ -37,6 +37,10 @@ void Player::Update() {
     for (int i = 0; i < _allOnGoingAttackQueues.size(); i++) {
         ProcessAttackQueue(i);
     }
+    for (Pixel* p : _pixelsToBeUpdated) {
+        UpdateBorderStatusOfPixel(p);
+    }
+    _pixelsToBeUpdated.clear();
 
     // Add money depending on population
     IncreaseMoney();
