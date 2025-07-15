@@ -29,7 +29,7 @@ Player::Player(Pixel *startPos, const int startRadius): _id(G::players.size()) {
     _lastActionTime = GetTime();
 
     GetOwnershipOfPixel(&G::territoryMap[_centerPixel_x][_centerPixel_y]);
-    UpdateAllPixelsToBeUpdated();
+    UpdateAllDirty();
 
     Expand(-1, 0.5);
 }
@@ -39,7 +39,7 @@ void Player::Update() {
     for (int i = 0; i < _allOnGoingAttackQueues.size(); i++) {
         ProcessAttackQueue(i);
     }
-    UpdateAllPixelsToBeUpdated();
+    UpdateAllDirty();
 
     // Add money depending on population
     IncreaseMoney();
@@ -86,9 +86,9 @@ void Player::IncreaseMoney() {
     }
 }
 
-void Player::UpdateAllPixelsToBeUpdated() {
+void Player::UpdateAllDirty() {
     for (Pixel* p : _pixelsToBeUpdated) {
-        UpdateBorderStatusOfPixel(p);
+        UpdateSingleDirty(p);
     }
     _pixelsToBeUpdated.clear();
 }

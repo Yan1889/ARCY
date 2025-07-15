@@ -92,7 +92,7 @@ void Player::GetOwnershipOfPixel(Pixel *newP) {
     }
     newP->playerId = _id;
 
-    attacker.InsertBorderAroundPixel(newP);
+    attacker.MarkPixelAsDirty(newP);
 
     ImageDrawPixel(&G::territoryImage, newP->x, newP->y, _color);
 
@@ -100,7 +100,7 @@ void Player::GetOwnershipOfPixel(Pixel *newP) {
     AddPixelToCenter(newP);
 }
 
-void Player::InsertBorderAroundPixel(Pixel *pixel) {
+void Player::MarkPixelAsDirty(Pixel *pixel) {
     _pixelsToBeUpdated.insert(pixel);
 
     const std::vector<Pixel *> &affectedPixels = pixel->GetNeighbors();
@@ -109,7 +109,7 @@ void Player::InsertBorderAroundPixel(Pixel *pixel) {
     }
 }
 
-void Player::UpdateBorderStatusOfPixel(Pixel *pixel) {
+void Player::UpdateSingleDirty(Pixel *pixel) {
     if (!_allPixels.contains(pixel)) {
         // pixel isn't owned by player
         RemoveBorderPixel(pixel);
@@ -136,7 +136,7 @@ void Player::LoseOwnershipOfPixel(Pixel *pixel, const bool updateTextureToo) {
 
     pixel->playerId = -1;
 
-    InsertBorderAroundPixel(pixel);
+    MarkPixelAsDirty(pixel);
     RemovePixelFromCenter(pixel);
 
     if (updateTextureToo) {
@@ -145,6 +145,7 @@ void Player::LoseOwnershipOfPixel(Pixel *pixel, const bool updateTextureToo) {
 
     // die if too small
     if (_allPixels.empty()) {
+        UpdateAllDirty();
         _dead = true;
     }
 }

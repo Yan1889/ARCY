@@ -94,8 +94,7 @@ void frameLogic() {
     handleControls();
     checkCity();
     checkExpansionAndAttack();
-    if (!activeBomb.isActive)
-    {
+    if (!activeBomb.isActive) {
         activeBomb.checkExplosion();
     }
 
@@ -205,7 +204,7 @@ void displayInfoTexts() {
 
     const char *sendText = TextFormat(
         "People exploring neutral land: %d",
-        MAIN_PLAYER._allOnGoingAttackQueues.size() >= 1? MAIN_PLAYER._allOnGoingAttackQueues[0].troops : 0
+        MAIN_PLAYER._allOnGoingAttackQueues.size() >= 1 ? MAIN_PLAYER._allOnGoingAttackQueues[0].troops : 0
     );
     DrawText(sendText, 0 + 25, GetScreenHeight() - 25, 20, MAIN_PLAYER_COLOR);
 
@@ -308,74 +307,6 @@ void checkExpansionAndAttack() {
         }
     }
 }
-
-/*
-void checkExplosion() {
-    if (!IsKeyPressed(KEY_ONE) && !IsKeyPressed(KEY_TWO)) return;
-
-    const int cost = IsKeyPressed(KEY_ONE) ? 10000 : 100000;
-
-    if (MAIN_PLAYER._money.moneyBalance - cost < 0) return;
-    MAIN_PLAYER._money.spendMoney(cost);
-
-    const Vector2 mousePos = GetScreenToWorld2D(GetMousePosition(), camera);
-    const int radius = IsKeyPressed(KEY_ONE) ? 50 : 300;
-
-    // Satz des Pythagoras kein Problem
-
-    int a = playerPos.y - mousePos.y;
-    int b = playerPos.x - mousePos.x;
-    int c = sqrt(a * a + b * b);
-
-    // sounds
-    if (IsKeyPressed(KEY_ONE)) {
-        if (c >= 1000) {
-            mySounds.Play(mySounds.distantExplosionSound);
-        } else if (c >= 500) {
-            mySounds.Play(mySounds.farExplosionSound);
-        } else {
-            mySounds.Play(mySounds.explosionSound);
-        }
-    } else {
-        if (c >= 1000) {
-            mySounds.Play(mySounds.farExplosionSound);
-        } else {
-            mySounds.Play(mySounds.explosionSound);
-        }
-    }
-
-    // texture & logic
-    for (int y = -radius; y <= radius; y++) {
-        for (int x = -radius; x <= radius; x++) {
-            int px = (int) mousePos.x + x;
-            int py = (int) mousePos.y + y;
-
-            float distance = sqrtf((float) (x * x + y * y)) / radius;
-            float noise = GetRandomValue(50, 100) / 100.0f;
-
-            if (distance <= 1.0f && noise > distance) {
-                if (px >= 0 && py >= 0 && px < G::MAP_WIDTH && py < G::MAP_HEIGHT) {
-                    Pixel *nukedPixel = &G::territoryMap[px][py];
-                    for (Player &p: G::players) {
-                        if (p._allPixels.contains(nukedPixel)) {
-                            p.LoseOwnershipOfPixel(nukedPixel, true);
-                        }
-                    }
-
-                    const Color explosionColor{
-                        (unsigned char) GetRandomValue(0, 200),
-                        (unsigned char) GetRandomValue(230, 255),
-                        (unsigned char) GetRandomValue(0, 50),
-                        255
-                    };
-                    ImageDrawPixel(&G::explosionImage, px, py, explosionColor);
-                }
-            }
-        }
-    }
-    UpdateTexture(G::explosionTexture, G::explosionImage.data);
-}
-*/
 
 void checkCity() {
     // Create cities when right-clicking

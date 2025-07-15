@@ -68,9 +68,9 @@ public:
     void GetOwnershipOfPixel(Pixel* newP);
     void LoseOwnershipOfPixel(Pixel * pixel, bool updateTextureToo);
 
-    void UpdateAllPixelsToBeUpdated();
-    void InsertBorderAroundPixel(Pixel* pixel);
-    void UpdateBorderStatusOfPixel(Pixel* pixel);
+    void UpdateAllDirty();
+    void MarkPixelAsDirty(Pixel* pixel);
+    void UpdateSingleDirty(Pixel* pixel);
     void AddBorderPixel(Pixel* pixel);
     void RemoveBorderPixel(Pixel* pixel);
 
