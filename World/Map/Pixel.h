@@ -28,6 +28,8 @@ struct Pixel {
 
     const std::vector<Pixel *>& GetNeighbors();
 
+    bool acceptRandomly() const;
+
     bool operator<(const Pixel &other) const;
 
     bool operator==(const Pixel &other) const;

@@ -36,6 +36,10 @@ float Pixel::GetColorProbability() const {
     return -1;
 }
 
+bool Pixel::acceptRandomly() const {
+    return invasionAcceptProbability > static_cast<float>(rand()) / RAND_MAX;
+}
+
 bool Pixel::operator<(const Pixel &other) const {
     return std::tie(x, y) < std::tie(other.x, other.y);
 }

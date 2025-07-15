@@ -55,7 +55,16 @@ void Player::ProcessAttackQueue(const int queueIdx) {
         newP->queuedUpForAttack = false;
 
         if (newP->playerId != _allOnGoingAttackQueues[queueIdx].targetPlayerId) continue;
+
         attackToWorkOn.troops--;
+
+        // randomly don't get the pixel even though lost troops for it
+        if (!newP->acceptRandomly()) {
+            queueToWorkOn.push(newP);
+            newP->queuedUpForAttack = true;
+            continue;
+        }
+
 
         GetOwnershipOfPixel(newP);
 
