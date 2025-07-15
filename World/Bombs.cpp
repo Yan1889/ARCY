@@ -84,7 +84,7 @@ void Bombs::Explode(const int radius)
                         255
                     };
 
-                    ImageDrawPixel(&G::perlin, px, py, explosionColor);
+                    ImageDrawPixel(&G::explosionImage, px, py, explosionColor);
 
                     Pixel *nukedPixel = &G::territoryMap[px][py];
                     for (Player &p: G::players) {
@@ -96,8 +96,7 @@ void Bombs::Explode(const int radius)
             }
         }
     }
-    UnloadTexture(G::perlinTexture);
-    G::perlinTexture = LoadTextureFromImage(G::perlin);
+    UpdateTexture(G::explosionTexture, G::explosionImage.data);
 }
 
 void Bombs::checkSound(const int radiusComparison)

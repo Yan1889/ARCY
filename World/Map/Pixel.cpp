@@ -4,6 +4,9 @@
 
 #include "Pixel.h"
 
+#include <iostream>
+#include <ostream>
+
 #include "../Globals.h"
 
 Pixel::Pixel(const int x, const int y, const int id): x(x), y(y), playerId(id), invasionAcceptProbability(GetColorProbability()) {
@@ -37,7 +40,9 @@ float Pixel::GetColorProbability() const {
 }
 
 bool Pixel::acceptRandomly() const {
-    return invasionAcceptProbability > static_cast<float>(rand()) / RAND_MAX;
+    // radiation = 3x harder
+    const bool radiated = GetImageColor(G::explosionImage, x, y).a > 0;
+    return invasionAcceptProbability > static_cast<float>(rand()) / RAND_MAX * (radiated? 3 : 1);
 }
 
 bool Pixel::operator<(const Pixel &other) const {

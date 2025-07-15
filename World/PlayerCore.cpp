@@ -34,31 +34,24 @@ void Player::ProcessAttackQueue(const int queueIdx) {
     AttackQueue &attackToWorkOn = _allOnGoingAttackQueues[queueIdx];
     auto &queueToWorkOn = attackToWorkOn.queue;
 
-    // refilling it from scratch if necessary
-    if (!_dirtyPixels.empty()) {
-        ReFillAttackQueueFromScratch(queueIdx);
-    }
+    // refilling it from scratch
+    ReFillAttackQueueFromScratch(queueIdx);
 
     // 60fps => ~10 border expansions / 1s
     const int maxPixelsPerFrame = 100;
 
     for (int i = 0; i < maxPixelsPerFrame && !queueToWorkOn.empty() && attackToWorkOn.troops > 0; i++) {
         Pixel *newP = queueToWorkOn.front();
-        queueToWorkOn.pop();
-        newP->queuedUpForAttack = false;
 
         if (newP->playerId != _allOnGoingAttackQueues[queueIdx].targetPlayerId) continue;
 
         attackToWorkOn.troops--;
 
         // randomly don't get the pixel even though lost troops for it
-        if (!newP->acceptRandomly()) {
-            queueToWorkOn.push(newP);
-            newP->queuedUpForAttack = true;
-            continue;
-        }
+        if (!newP->acceptRandomly()) continue;
 
-
+        queueToWorkOn.pop();
+        newP->queuedUpForAttack = false;
         GetOwnershipOfPixel(newP);
 
         // update attack queue
