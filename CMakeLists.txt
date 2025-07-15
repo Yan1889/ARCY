@@ -41,6 +41,8 @@ add_executable(ARCY main.cpp
         World/Loaders/Sounds.cpp
         World/Loaders/Sounds.h
         World/PlayerCore.cpp
+        World/Bombs.cpp
+        World/Bombs.h
 )
 
 file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})

@@ -9,6 +9,7 @@
 #include "World/Globals.h"
 #include "World/Loaders/Sounds.h"
 #include "World/Map/PerlinNoise.h"
+#include "World/Bombs.h"
 
 #define SCREEN_WIDTH 1366 // Default 980
 #define SCREEN_HEIGHT 768 // Default 650
@@ -78,6 +79,7 @@ int main() {
         frameLogic();
         renderGame();
         mySounds.checkAtmosphere();
+        MAIN_PLAYER._money.getMoney(100000);
     }
 
     // clean up everything
@@ -90,9 +92,12 @@ int main() {
 
 void frameLogic() {
     handleControls();
-    checkExplosion();
     checkCity();
     checkExpansionAndAttack();
+    if (!activeBomb.isActive)
+    {
+        activeBomb.checkExplosion();
+    }
 
     for (int i = 0; i < G::players.size(); i++) {
         if (G::players[i]._dead) continue;
@@ -137,6 +142,11 @@ void renderGame() {
     int thickness = 1;
     DrawRectangle((int) playerPos.x - size, (int) playerPos.y - thickness / 2, size * 2 + 1, thickness, WHITE);
     DrawRectangle((int) playerPos.x - thickness / 2, (int) playerPos.y - size, thickness, size * 2 + 1, WHITE);
+
+    // Bomb test
+    if (activeBomb.isActive || !activeBomb.isExploding) {
+        activeBomb.Update();
+    }
 
     displayAllPlayerTags();
 
@@ -297,6 +307,7 @@ void checkExpansionAndAttack() {
     }
 }
 
+/*
 void checkExplosion() {
     if (!IsKeyPressed(KEY_ONE) && !IsKeyPressed(KEY_TWO)) return;
 
@@ -364,6 +375,7 @@ void checkExplosion() {
     UnloadTexture(G::perlinTexture);
     G::perlinTexture = LoadTextureFromImage(G::perlin);
 }
+*/
 
 void checkCity() {
     // Create cities when right-clicking
