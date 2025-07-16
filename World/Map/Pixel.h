@@ -22,6 +22,7 @@ struct Pixel {
 
 
     Pixel() = default;
+    Pixel(Vector2 v);
     Pixel(int x, int y, int id);
 
     void LoadNeighbors();
@@ -29,15 +30,14 @@ struct Pixel {
     const std::vector<Pixel *>& GetNeighbors();
 
     bool acceptRandomly() const;
-
-    bool operator<(const Pixel &other) const;
-
-    bool operator==(const Pixel &other) const;
-
     Color GetColor() const;
-
     float GetColorProbability() const;
 
+    Vector2 ToVector2() const;
+
+
+    bool operator<(const Pixel &other) const;
+    bool operator==(const Pixel &other) const;
     struct Hasher {
         std::size_t operator()(const Pixel &p) const {
             std::size_t seed = std::hash<int>()(p.x);
@@ -45,7 +45,6 @@ struct Pixel {
             return seed;
         }
     };
-
 };
 
 #endif //PIXEL_H

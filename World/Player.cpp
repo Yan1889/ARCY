@@ -93,6 +93,21 @@ void Player::UpdateAllDirty() {
     _dirtyPixels.clear();
 }
 
+void Player::AddBorderPixel(Pixel *p) {
+    if (_borderSet.insert(p).second) {
+        _borderPixels.push_back(p);
+    }
+}
+
+void Player::RemoveBorderPixel(Pixel *p) {
+    if (_borderSet.erase(p)) {
+        auto it = std::ranges::find(_borderPixels, p);
+        if (it != _borderPixels.end()) {
+            _borderPixels.erase(it);
+        }
+    }
+}
+
 void Player::AddPixelToCenter(Pixel *newP) {
     if (_allPixels.empty()) return;
 
@@ -124,17 +139,20 @@ void Player::AddCity(Pixel *pos) {
     _cityPositions.push_back(pos);
 }
 
-void Player::AddBorderPixel(Pixel *p) {
-    if (_borderSet.insert(p).second) {
-        _borderPixels.push_back(p);
-    }
-}
+Pixel* Player::GetNearestCityFromPixel(Pixel* target) const {
+    if (_cityPositions.empty()) return nullptr;
 
-void Player::RemoveBorderPixel(Pixel *p) {
-    if (_borderSet.erase(p)) {
-        auto it = std::ranges::find(_borderPixels, p);
-        if (it != _borderPixels.end()) {
-            _borderPixels.erase(it);
+    Pixel* bestP = nullptr;
+    float bestDistSquared = G::MAP_WIDTH * G::MAP_WIDTH + G::MAP_HEIGHT * G::MAP_HEIGHT;
+
+    for (Pixel* p : _cityPositions) {
+        const double dx = target->x - p->x;
+        const double dy = target->y - p->y;
+        const double distSquared = dx * dx + dy * dy;
+        if (distSquared < bestDistSquared) {
+            bestDistSquared = distSquared;
+            bestP = p;
         }
     }
+    return bestP;
 }

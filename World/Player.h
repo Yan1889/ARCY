@@ -58,7 +58,6 @@ public:
     int _centerPixel_x{};
     int _centerPixel_y{};
 
-
     Player(Pixel* startPos, int startRadius);
 
     void Update();
@@ -81,6 +80,7 @@ public:
     void AddPixelToCenter(Pixel* newP);
     void AddCity(const Vector2& pos);
     void AddCity(Pixel* pos);
+    Pixel* GetNearestCityFromPixel(Pixel* point) const;
 };
 
 

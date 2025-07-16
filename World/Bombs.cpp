@@ -52,12 +52,17 @@ void Bombs::Update() {
     const int cost = IsKeyPressed(KEY_ONE) ? 10000 : 100000;
 
     if (MAIN_PLAYER._money.moneyBalance - cost < 0) return;
-    MAIN_PLAYER._money.spendMoney(cost);
 
+    Vector2 targetPos = GetScreenToWorld2D(GetMousePosition(), camera);
+    Pixel* startPixel = MAIN_PLAYER.GetNearestCityFromPixel(&G::territoryMap[targetPos.x][targetPos.y]);
+
+    if (startPixel == nullptr) return;
+
+    MAIN_PLAYER._money.spendMoney(cost);
     allBombs.push_back({
-        .targetPos = GetScreenToWorld2D(GetMousePosition(), camera),
-        .originPos = {0, 0},
-        .bombPos = {0, 0},
+        .targetPos = targetPos,
+        .originPos = startPixel->ToVector2(),
+        .bombPos =  startPixel->ToVector2(),
         .time = 0,
         .bombSpeed = 1,
         .radius = IsKeyPressed(KEY_ONE) ? 50.f : 300.f,
