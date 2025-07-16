@@ -11,6 +11,7 @@
 #include "raymath.h"
 #include "Globals.h"
 #include "Loaders/Sounds.h"
+#include "Loaders/TextureCollection.h"
 
 #define MAIN_PLAYER G::players[0]
 
@@ -71,12 +72,35 @@ void Bombs::Update() {
         .time = 0,
         .bombSpeed = 1,
         .radius = IsKeyPressed(KEY_ONE) ? 50.f : 300.f,
+        .type = IsKeyPressed(KEY_ONE)? ATOM : HYDROGEN
     });
 }
 
 void Bombs::Render() {
     for (SingleBomb &b: allBombs) {
-        DrawCircleV(b.bombPos, 10, RED);
+        const float dx = b.targetPos.x - b.bombPos.x;
+        const float dy = b.targetPos.y - b.bombPos.y;
+        const float rotation = std::atan2(dy, dx);
+
+        Texture2D& t = b.type == ATOM? TextureCollection::atomBomb : TextureCollection::hydrogenBomb;
+        const float scale = b.type == ATOM? 0.2 : 0.5;
+
+        DrawTexturePro(
+            t,
+            Rectangle{0, 0, (float) t.width, (float) t.height},
+            Rectangle{
+                b.bombPos.x,
+                b.bombPos.y,
+                t.width * scale,
+                t.height * scale,
+            },
+            Vector2{
+                t.width / 2.f * scale,
+                t.height / 2.f * scale,
+            },
+            rotation * 180 / PI - 90,
+            WHITE
+        );
     }
 }
 

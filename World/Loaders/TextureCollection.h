@@ -8,7 +8,9 @@
 
 
 namespace  TextureCollection {
-    extern  Texture2D city;
+    inline Texture2D city;
+    inline Texture2D atomBomb;
+    inline Texture2D hydrogenBomb;
 
     void LoadAll();
     void UnloadAll();

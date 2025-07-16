@@ -9,6 +9,11 @@
 
 #include "raylib.h"
 
+enum BombType {
+    ATOM,
+    HYDROGEN
+};
+
 struct SingleBomb {
     Vector2 targetPos;
     Vector2 originPos;
@@ -16,6 +21,7 @@ struct SingleBomb {
     float time;
     float bombSpeed;
     float radius;
+    BombType type;
 
     bool operator==(const SingleBomb& other) const;
 };
