@@ -70,10 +70,8 @@ void Sounds::checkAtmosphere()
     UpdateMusicStream(forestSound);
     UpdateMusicStream(radiationSound);
 
-    Color pixelColor = GetImageColor(G::perlin, static_cast<int>(playerPos.x), static_cast<int>(playerPos.y));
-    Color radiationPixel = GetImageColor(G::explosionImage, static_cast<int>(playerPos.x), static_cast<int>(playerPos.y));
-
-    bool isContaminated = ColorToInt(radiationPixel) != ColorToInt(Color{0, 0, 0, 0});
+    const Color pixelColor = GetImageColor(G::perlin, static_cast<int>(playerPos.x), static_cast<int>(playerPos.y));
+    const bool isContaminated = G::territoryMap[static_cast<int>(playerPos.x)][static_cast<int>(playerPos.y)].contaminated;
 
     std::vector<Color> mapColors = {
         Color{90, 90, 255, 255},

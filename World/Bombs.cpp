@@ -104,13 +104,18 @@ void Bombs::Explode(SingleBomb &b) {
                     ImageDrawPixel(&G::explosionImage, px, py, explosionColor);
 
                     Pixel *nukedPixel = &G::territoryMap[px][py];
-                    if (nukedPixel->playerId < 0) continue;
-                    G::players[nukedPixel->playerId].LoseOwnershipOfPixel(nukedPixel, true);
+                    nukedPixel->contaminated = true;
+
+                    // remove from player
+                    if (nukedPixel->playerId >= 0) {
+                        G::players[nukedPixel->playerId].LoseOwnershipOfPixel(nukedPixel, true);
+                    }
+                    nukedPixel->playerId = -2;
                 }
             }
         }
     }
-    UpdateTexture(G::explosionTexture, G::explosionImage.data);
+    G::explosionTextureDirty = true;
 }
 
 void Bombs::checkSound(SingleBomb &bomb) {

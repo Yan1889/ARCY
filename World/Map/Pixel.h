@@ -17,12 +17,10 @@ struct Pixel {
     int playerId;
 
     float invasionAcceptProbability;
-    bool queuedUpForAttack = false;
+    bool contaminated{};
     std::vector<Pixel *> neighborsCached;
 
-
     Pixel() = default;
-    Pixel(Vector2 v);
     Pixel(int x, int y, int id);
 
     void LoadNeighbors();

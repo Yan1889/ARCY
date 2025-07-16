@@ -111,6 +111,10 @@ void renderGame() {
     // terrain bg texture
     DrawTextureV(G::perlinTexture, Vector2{0, 0}, WHITE);
     // nuke bg texture
+    if (G::explosionTextureDirty) {
+        UpdateTexture(G::explosionTexture, G::explosionImage.data);
+        G::explosionTextureDirty = false;
+    }
     DrawTextureV(G::explosionTexture, Vector2{0, 0}, WHITE);
 
     for (const Player &p: G::players) {
@@ -133,7 +137,10 @@ void renderGame() {
     }
 
     // territory texture
-    UpdateTexture(G::territoryTexture, G::territoryImage.data);
+    if (G::territoryTextureDirty) {
+        UpdateTexture(G::territoryTexture, G::territoryImage.data);
+        G::territoryTextureDirty = false;
+    }
     DrawTexture(G::territoryTexture, 0, 0, Fade(WHITE, 0.5));
 
     // """""Crosshair""""
@@ -200,7 +207,7 @@ void displayInfoTexts() {
 
     const char *sendText = TextFormat(
         "People exploring neutral land: %d",
-        MAIN_PLAYER._allOnGoingAttackQueues.size() >= 1 ? MAIN_PLAYER._allOnGoingAttackQueues[0].troops : 0
+        MAIN_PLAYER._targetToAttackMap.contains(-1)? MAIN_PLAYER._targetToAttackMap[-1].troops : 0
     );
     DrawText(sendText, 0 + 25, GetScreenHeight() - 25, 20, MAIN_PLAYER_COLOR);
 

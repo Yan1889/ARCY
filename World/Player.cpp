@@ -36,8 +36,8 @@ Player::Player(Pixel *startPos, const int startRadius): _id(G::players.size()) {
 
 void Player::Update() {
     // expand
-    for (int i = 0; i < _allOnGoingAttackQueues.size(); i++) {
-        ProcessAttackQueue(i);
+    for (auto& attackQueue : _targetToAttackMap) {
+        ProcessAttackQueue(attackQueue.second);
     }
     UpdateAllDirty();
 

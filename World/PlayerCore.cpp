@@ -11,99 +11,94 @@ void Player::Expand(const int target, const float percentage) {
     const int newPeopleLeaving = _population * percentage;
     _population -= newPeopleLeaving;
 
-    // ----- init/find an attack queue -----
-    int queueIdx;
-
-    if (!_attackedPlayerIdToQueueIdxMap.contains(target)) {
-        queueIdx = _allOnGoingAttackQueues.size();
-        _allOnGoingAttackQueues.push_back({
+    // insert if new target
+    if (!_targetToAttackMap.contains(target)) {
+        _targetToAttackMap[target] = {
             target,
-            newPeopleLeaving,
+            0,
             {}
-        });
-        _attackedPlayerIdToQueueIdxMap[target] = queueIdx;
-    } else {
-        queueIdx = _attackedPlayerIdToQueueIdxMap[target];
-        _allOnGoingAttackQueues[queueIdx].troops += newPeopleLeaving;
+        };
     }
-    ReFillAttackQueueFromScratch(queueIdx);
+    _targetToAttackMap[target].troops += newPeopleLeaving;
+    ReFillAttackQueueFromScratch(_targetToAttackMap[target]);
 }
 
 
-void Player::ProcessAttackQueue(const int queueIdx) {
-    AttackQueue &attackToWorkOn = _allOnGoingAttackQueues[queueIdx];
-    auto &queueToWorkOn = attackToWorkOn.queue;
+void Player::ProcessAttackQueue(AttackQueue& attackQueue) {
 
     // refilling it from scratch
-    ReFillAttackQueueFromScratch(queueIdx);
+    std::unordered_set<Pixel *> pixelsAlreadyInTheQueue = ReFillAttackQueueFromScratch(attackQueue);
 
     // 60fps => ~10 border expansions / 1s
     const int maxPixelsPerFrame = 100;
 
-    for (int i = 0; i < maxPixelsPerFrame && !queueToWorkOn.empty() && attackToWorkOn.troops > 0; i++) {
-        Pixel *newP = queueToWorkOn.front();
+    for (int i = 0; i < maxPixelsPerFrame && !attackQueue.queue.empty() && attackQueue.troops > 0; i++) {
+        Pixel *newP = attackQueue.queue.front();
 
-        if (newP->playerId != _allOnGoingAttackQueues[queueIdx].targetPlayerId) continue;
+        if (newP->playerId != attackQueue.targetPlayerId) continue;
 
-        attackToWorkOn.troops--;
+        attackQueue.troops--;
 
         // randomly don't get the pixel even though lost troops for it
         if (!newP->acceptRandomly()) continue;
 
-        queueToWorkOn.pop();
-        newP->queuedUpForAttack = false;
+        attackQueue.queue.pop();
+        pixelsAlreadyInTheQueue.erase(newP);
         GetOwnershipOfPixel(newP);
 
         // update attack queue
         for (Pixel *neighbor: newP->GetNeighbors()) {
-            if (attackToWorkOn.troops <= 0) break; // no new Pixels
+            if (attackQueue.troops <= 0) break; // no new Pixels
             if (neighbor->playerId == _id
-                || neighbor->queuedUpForAttack
+                || pixelsAlreadyInTheQueue.contains(neighbor)
                 || neighbor->invasionAcceptProbability == 0)
                 continue;
 
-            neighbor->queuedUpForAttack = true;
-            queueToWorkOn.push(neighbor);
+            pixelsAlreadyInTheQueue.insert(neighbor);
+            attackQueue.queue.push(neighbor);
         }
     }
 }
 
-void Player::ReFillAttackQueueFromScratch(const int queueIdx) {
+std::unordered_set<Pixel *> Player::ReFillAttackQueueFromScratch(AttackQueue& attackQueue) {
     // clear the old one
-    while (!_allOnGoingAttackQueues[queueIdx].queue.empty()) {
-        Pixel *p = _allOnGoingAttackQueues[queueIdx].queue.front();
-        p->queuedUpForAttack = false;
-        _allOnGoingAttackQueues[queueIdx].queue.pop();
-    }
+    attackQueue.queue = {};
+
+    std::unordered_set<Pixel *> pixelsAlreadyInTheQueue = {};
 
     // refill
-    const int target = _allOnGoingAttackQueues[queueIdx].targetPlayerId;
+    const int target = attackQueue.targetPlayerId;
     for (Pixel *borderPixel: _borderPixels) {
-        for (Pixel *potentialEnemyBorderPixel: borderPixel->GetNeighbors()) {
-            if (potentialEnemyBorderPixel->queuedUpForAttack ||
-                potentialEnemyBorderPixel->playerId != target ||
-                potentialEnemyBorderPixel->invasionAcceptProbability == 0)
+        for (Pixel *p: borderPixel->GetNeighbors()) {
+            if (pixelsAlreadyInTheQueue.contains(p) ||
+                p->playerId != target ||
+                p->invasionAcceptProbability == 0)
                 continue;
 
-            _allOnGoingAttackQueues[queueIdx].queue.push(potentialEnemyBorderPixel);
-            potentialEnemyBorderPixel->queuedUpForAttack = true;
+            attackQueue.queue.push(p);
+            pixelsAlreadyInTheQueue.insert(p);
         }
     }
+    return std::move(pixelsAlreadyInTheQueue);
 }
 
 void Player::GetOwnershipOfPixel(Pixel *newP) {
     Player &attacker = *this;
     attacker._allPixels.insert(newP);
 
-    if (newP->playerId != -1) {
+    if (newP->playerId >= 0) {
         Player &defender = G::players[newP->playerId];
         defender.LoseOwnershipOfPixel(newP, false);
+    } else if (newP->playerId == -2) {
+        // reclaim contaminated pixel
+        G::RemoveExplosionPixel(newP);
     }
     newP->playerId = _id;
 
     attacker.MarkPixelAsDirty(newP);
 
     ImageDrawPixel(&G::territoryImage, newP->x, newP->y, _color);
+    G::territoryTextureDirty = true;
 
     // center
     AddPixelToCenter(newP);
@@ -150,6 +145,7 @@ void Player::LoseOwnershipOfPixel(Pixel *pixel, const bool updateTextureToo) {
 
     if (updateTextureToo) {
         ImageDrawPixel(&G::territoryImage, pixel->x, pixel->y, BLANK);
+        G::territoryTextureDirty = true;
     }
 
     // die if too small

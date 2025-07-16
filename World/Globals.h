@@ -42,10 +42,17 @@ namespace G {
 
     inline Image explosionImage;
     inline Texture2D explosionTexture;
+    inline bool explosionTextureDirty{};
+    inline void RemoveExplosionPixel(Pixel* p) {
+        p->contaminated = false;
+        ImageDrawPixel(&explosionImage, p->x, p->y, BLANK);
+        explosionTextureDirty = true;
+    }
 
     inline std::vector<std::vector<Pixel> > territoryMap; // [x][y]
     inline Texture2D territoryTexture;
     inline Image territoryImage;
+    inline bool territoryTextureDirty{};
 }
 
 #endif //GLOBALS_H
