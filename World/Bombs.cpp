@@ -20,13 +20,10 @@ extern Vector2 playerPos;
 extern Sounds mySounds;
 
 std::vector<SingleBomb> Bombs::allBombs = {};
+std::vector<EffectAfterDetonation> Bombs::allEffects = {};
 
 bool SingleBomb::operator==(const SingleBomb &other) const {
     return bombPos.x == other.bombPos.x && bombPos.y == other.bombPos.y;
-}
-
-
-void Bombs::checkExplosion() {
 }
 
 void Bombs::Update() {
@@ -41,6 +38,10 @@ void Bombs::Update() {
 
             checkSound(b);
             Explode(b);
+            allEffects.push_back({
+                .pos = b.bombPos,
+                .radius = b.radius,
+            });
             it = allBombs.erase(it);
             --it;
         } else {
@@ -101,6 +102,55 @@ void Bombs::Render() {
             rotation * 180 / PI - 90,
             WHITE
         );
+    }
+    for (auto it = allEffects.begin(); it != allEffects.end(); ++it) {
+        EffectAfterDetonation& e = *it;
+        e.timeLeft -= GetFrameTime();
+
+        if (e.timeLeft < 0) {
+            it = allEffects.erase(it);
+            --it;
+        } else {
+            e.rotation += e.rotationStep * GetFrameTime();
+
+            Texture2D* t = &TextureCollection::explosion;
+            float scale = 2 * e.radius / t->width;
+            DrawTexturePro(
+                *t,
+                Rectangle{0, 0, (float) t->width, (float) t->height},
+                Rectangle{
+                    e.pos.x,
+                    e.pos.y,
+                    t->width * scale,
+                    t->height * scale,
+                },
+                Vector2{
+                    t->width / 2.f * scale,
+                    t->height / 2.f * scale,
+                },
+                e.rotation,
+                WHITE
+            );
+
+            t = &TextureCollection::flash;
+            scale = 1.5 * 2 * e.radius / t->width;
+            DrawTexturePro(
+                *t,
+                Rectangle{0, 0, (float) t->width, (float) t->height},
+                Rectangle{
+                    e.pos.x,
+                    e.pos.y,
+                    t->width * scale,
+                    t->height * scale,
+                },
+                Vector2{
+                    t->width / 2.f * scale,
+                    t->height / 2.f * scale,
+                },
+                -2 * e.rotation + 90,
+                WHITE
+            );
+        }
     }
 }
 

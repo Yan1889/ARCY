@@ -9,6 +9,8 @@ void TextureCollection::LoadAll() {
     city = LoadTexture("assets/images/city.png");
     atomBomb = LoadTexture("assets/images/atomBomb.png");
     hydrogenBomb = LoadTexture("assets/images/hydrogenBomb.png");
+    explosion = LoadTexture("assets/images/explosion.png");
+    flash = LoadTexture("assets/images/flash.png");
 }
 
 void TextureCollection::UnloadAll() {

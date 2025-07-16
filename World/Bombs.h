@@ -26,9 +26,17 @@ struct SingleBomb {
     bool operator==(const SingleBomb& other) const;
 };
 
+struct EffectAfterDetonation {
+    Vector2 pos;
+    float radius;
+    float timeLeft = 0.5;
+    float rotation = 0;
+    float rotationStep = 90; // 90°/s explosion; 180°/s flash
+};
+
 class Bombs {
     static std::vector<SingleBomb> allBombs;
-    static void checkExplosion();
+    static std::vector<EffectAfterDetonation> allEffects;
     static void Explode(SingleBomb& bomb);
     static void checkSound(SingleBomb& bomb);
 
