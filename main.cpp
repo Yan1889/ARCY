@@ -94,9 +94,7 @@ void frameLogic() {
     handleControls();
     checkCity();
     checkExpansionAndAttack();
-    if (!activeBomb.isActive) {
-        activeBomb.checkExplosion();
-    }
+    Bombs::Update();
 
     for (int i = 0; i < G::players.size(); i++) {
         if (G::players[i]._dead) continue;
@@ -145,9 +143,7 @@ void renderGame() {
     DrawRectangle((int) playerPos.x - thickness / 2, (int) playerPos.y - size, thickness, size * 2 + 1, WHITE);
 
     // Bomb test
-    if (activeBomb.isActive || !activeBomb.isExploding) {
-        activeBomb.Update();
-    }
+    Bombs::Render();
 
     displayAllPlayerTags();
 

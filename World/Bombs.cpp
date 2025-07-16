@@ -18,11 +18,35 @@ extern Camera2D camera;
 extern Vector2 playerPos;
 extern Sounds mySounds;
 
-Vector2 Bombs::originPos = {};
-Vector2 Bombs::targetPos = {};
-Bombs activeBomb;
+std::vector<SingleBomb> Bombs::allBombs = {};
+
+
+bool SingleBomb::operator==(const SingleBomb &other) const {
+    return bombPos.x == other.bombPos.x && bombPos.y == other.bombPos.y;
+}
+
 
 void Bombs::checkExplosion() {
+}
+
+void Bombs::Update() {
+    for (auto it = allBombs.begin(); it != allBombs.end(); ++it) {
+        SingleBomb& b = *it;
+
+        b.time += b.bombSpeed * GetFrameTime();
+        if (b.time >= 1.0f) {
+            b.time = 1.0f;
+            b.bombPos = b.targetPos;
+
+            checkSound(b);
+            Explode(b);
+            it = allBombs.erase(it);
+            --it;
+        } else {
+            b.bombPos = Vector2Lerp(b.originPos, b.targetPos, b.time);
+        }
+    }
+
     if (!IsKeyPressed(KEY_ONE) && !IsKeyPressed(KEY_TWO)) return;
 
     const int cost = IsKeyPressed(KEY_ONE) ? 10000 : 100000;
@@ -30,49 +54,30 @@ void Bombs::checkExplosion() {
     if (MAIN_PLAYER._money.moneyBalance - cost < 0) return;
     MAIN_PLAYER._money.spendMoney(cost);
 
-    targetPos = GetScreenToWorld2D(GetMousePosition(), camera);
-    const int radius = IsKeyPressed(KEY_ONE) ? 50 : 300;
-    originPos = {0, 0};
-
-    // Initializing
-    activeBomb = Bombs{};
-    activeBomb.time = 0.0f;
-    activeBomb.radius = radius;
-    activeBomb.bombSpeed = 0.5f;
-    activeBomb.isActive = true;
-    activeBomb.isExploding = false;
-    activeBomb.bombPos = originPos;
+    allBombs.push_back({
+        .targetPos = GetScreenToWorld2D(GetMousePosition(), camera),
+        .originPos = {0, 0},
+        .bombPos = {0, 0},
+        .time = 0,
+        .bombSpeed = 1,
+        .radius = IsKeyPressed(KEY_ONE) ? 50.f : 300.f,
+    });
 }
 
-void Bombs::Update()
-{
-    if (!isActive || isExploding) return;
-
-    time += bombSpeed * GetFrameTime();
-    if (time >= 1.0f) {
-        time = 1.0f;
-        bombPos = targetPos;
-        isActive = false;
-        isExploding = true;
-
-        checkSound(radius);
-        Explode(radius);
-        return;
+void Bombs::Render() {
+    for (SingleBomb &b: allBombs) {
+        DrawCircleV(b.bombPos, 10, RED);
     }
-
-    bombPos = Vector2Lerp(originPos, targetPos, time);
-
-    DrawCircleV(bombPos, 10, RED);
 }
 
-void Bombs::Explode(const int radius)
-{
-    for (int y = -radius; y <= radius; y++) {
-        for (int x = -radius; x <= radius; x++) {
-            int px = (int) targetPos.x + x;
-            int py = (int) targetPos.y + y;
 
-            float distance = sqrtf((float) (x * x + y * y)) / radius;
+void Bombs::Explode(SingleBomb &b) {
+    for (int y = -b.radius; y <= b.radius; y++) {
+        for (int x = -b.radius; x <= b.radius; x++) {
+            int px = (int) b.targetPos.x + x;
+            int py = (int) b.targetPos.y + y;
+
+            float distance = sqrtf((float) (x * x + y * y)) / b.radius;
             float noise = GetRandomValue(50, 100) / 100.0f;
 
             if (distance <= 1.0f && noise > distance) {
@@ -99,15 +104,14 @@ void Bombs::Explode(const int radius)
     UpdateTexture(G::explosionTexture, G::explosionImage.data);
 }
 
-void Bombs::checkSound(const int radiusComparison)
-{
+void Bombs::checkSound(SingleBomb &bomb) {
     // Satz des Pythagoras kein Problem
 
-    int a = playerPos.y - targetPos.y;
-    int b = playerPos.x - targetPos.x;
+    int a = playerPos.y - bomb.targetPos.y;
+    int b = playerPos.x - bomb.targetPos.x;
     int c = sqrt(a * a + b * b);
 
-    if (radiusComparison == 50) {
+    if (bomb.radius == 50) {
         if (c >= 1000) {
             mySounds.Play(mySounds.distantExplosionSound);
         } else if (c >= 500) {

@@ -5,24 +5,30 @@
 #ifndef BOMBS_H
 #define BOMBS_H
 
+#include <vector>
+
 #include "raylib.h"
 
+struct SingleBomb {
+    Vector2 targetPos;
+    Vector2 originPos;
+    Vector2 bombPos;
+    float time;
+    float bombSpeed;
+    float radius;
+
+    bool operator==(const SingleBomb& other) const;
+};
 
 class Bombs {
-    public:
-    static Vector2 targetPos;
-    static Vector2 originPos;
-    float bombSpeed = 0.2f;
-    float time = 0.0f;
-    float radius = 0.0f;
-    bool isActive = false;
-    bool isExploding = false;
-    Vector2 bombPos;
+    static std::vector<SingleBomb> allBombs;
+    static void checkExplosion();
+    static void Explode(SingleBomb& bomb);
+    static void checkSound(SingleBomb& bomb);
 
-    void checkExplosion();
-    void Explode(int radius);
-    void checkSound(int radiusComparison);
-    void Update();
+public:
+    static void Update();
+    static void Render();
 };
 
 extern Bombs activeBomb;
