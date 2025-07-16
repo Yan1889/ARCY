@@ -12,6 +12,7 @@ public:
     Sound farExplosionSound;
     Sound distantExplosionSound;
     Sound cityBuildSound;
+    Sound missleSound;
 
     Music oceanSound;
     Music beachSound;
@@ -23,6 +24,7 @@ public:
     Sounds();
     ~Sounds();
     static void Play(Sound sound);
+    static void Stop(Sound sound);
     void LoadAll();
     void checkAtmosphere();
 };

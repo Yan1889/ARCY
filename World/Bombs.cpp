@@ -34,6 +34,7 @@ void Bombs::Update() {
         SingleBomb& b = *it;
 
         b.time += b.bombSpeed * GetFrameTime();
+
         if (b.time >= 1.0f) {
             b.time = 1.0f;
             b.bombPos = b.targetPos;
@@ -55,6 +56,8 @@ void Bombs::Update() {
     const int cost = IsKeyPressed(KEY_ONE) ? 10000 : 100000;
 
     if (MAIN_PLAYER._money.moneyBalance - cost < 0) return;
+
+    mySounds.Play(mySounds.missleSound);
 
     Pixel* startPixel = MAIN_PLAYER.GetNearestCityFromPixel(&G::territoryMap[targetPos.x][targetPos.y]);
 
@@ -79,6 +82,8 @@ void Bombs::Render() {
 
 
 void Bombs::Explode(SingleBomb &b) {
+    mySounds.Stop(mySounds.missleSound);
+
     for (int y = -b.radius; y <= b.radius; y++) {
         for (int x = -b.radius; x <= b.radius; x++) {
             const int px = Clamp((int) b.targetPos.x + x, 0, G::MAP_WIDTH - 1);

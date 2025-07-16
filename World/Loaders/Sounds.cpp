@@ -17,6 +17,7 @@ Sounds::~Sounds()
     UnloadSound(cityBuildSound);
     UnloadSound(farExplosionSound);
     UnloadSound(distantExplosionSound);
+    UnloadSound(missleSound);
 
     UnloadMusicStream(oceanSound);
     UnloadMusicStream(beachSound);
@@ -33,6 +34,7 @@ void Sounds::LoadAll()
     cityBuildSound = LoadSound("assets/sounds/citybuilding.mp3");
     farExplosionSound = LoadSound("assets/sounds/nearnukeexplosion.mp3");
     distantExplosionSound = LoadSound("assets/sounds/distantnukeexplosion.mp3");
+    missleSound = LoadSound("assets/sounds/nukeflyby.mp3");
 
     oceanSound = LoadMusicStream("assets/sounds/ocean.mp3");
     beachSound = LoadMusicStream("assets/sounds/beach.mp3");
@@ -52,6 +54,11 @@ void Sounds::LoadAll()
 void Sounds::Play(Sound sound)
 {
     PlaySound(sound);
+}
+
+void Sounds::Stop(Sound sound)
+{
+    StopSound(sound);
 }
 
 void Sounds::checkAtmosphere()
