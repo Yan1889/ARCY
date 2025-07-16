@@ -20,7 +20,6 @@ extern Sounds mySounds;
 
 std::vector<SingleBomb> Bombs::allBombs = {};
 
-
 bool SingleBomb::operator==(const SingleBomb &other) const {
     return bombPos.x == other.bombPos.x && bombPos.y == other.bombPos.y;
 }
@@ -57,13 +56,14 @@ void Bombs::Update() {
 
     if (MAIN_PLAYER._money.moneyBalance - cost < 0) return;
 
-    mySounds.Play(mySounds.missleSound);
-
     Pixel* startPixel = MAIN_PLAYER.GetNearestCityFromPixel(&G::territoryMap[targetPos.x][targetPos.y]);
 
     if (startPixel == nullptr) return;
 
     MAIN_PLAYER._money.spendMoney(cost);
+    
+    mySounds.Play(mySounds.missleSound);
+
     allBombs.push_back({
         .targetPos = targetPos,
         .originPos = startPixel->ToVector2(),
