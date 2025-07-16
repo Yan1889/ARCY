@@ -80,7 +80,9 @@ void Player::IncreaseMoney() {
     if (currentTime - _lastActionTime >= _cooldownTime) {
         int peopleAddition = 2;
         int totalAddition = peopleAddition * _population;
-        _money.moneyBalance += totalAddition;
+
+        if (_money.moneyBalance + totalAddition > 100000000) _money.moneyBalance = 100000000;
+        else _money.moneyBalance += totalAddition;
 
         _lastActionTime = currentTime;
     }

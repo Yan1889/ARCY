@@ -13,5 +13,6 @@ void Money::spendMoney(int cost)
 
 void Money::getMoney(int amount)
 {
+    if (moneyBalance + amount > 100000000) return;
     moneyBalance += amount;
 }

@@ -3,10 +3,6 @@
 //
 
 #include "Sounds.h"
-
-#include <iostream>
-#include <ostream>
-
 #include "TextureCollection.h"
 #include "../Globals.h"
 
@@ -68,6 +64,9 @@ void Sounds::checkAtmosphere()
     UpdateMusicStream(radiationSound);
 
     Color pixelColor = GetImageColor(G::perlin, static_cast<int>(playerPos.x), static_cast<int>(playerPos.y));
+    Color radiationPixel = GetImageColor(G::explosionImage, static_cast<int>(playerPos.x), static_cast<int>(playerPos.y));
+
+    bool isContaminated = ColorToInt(radiationPixel) != ColorToInt(Color{0, 0, 0, 0});
 
     std::vector<Color> mapColors = {
         Color{90, 90, 255, 255},
@@ -81,6 +80,20 @@ void Sounds::checkAtmosphere()
         Color{153, 153, 153, 255},
         Color{255, 255, 255, 255}
     };
+
+    // Contaminated zone
+    if (isContaminated)
+    {
+        ResumeMusicStream(radiationSound);
+        PauseMusicStream(oceanSound);
+        PauseMusicStream(beachSound);
+        PauseMusicStream(fieldSound);
+        PauseMusicStream(forestSound);
+        PauseMusicStream(mountainSound);
+    }
+    else PauseMusicStream(radiationSound);
+
+    if (isContaminated) return;
 
     // Ocean
     if (ColorToInt(pixelColor) == ColorToInt(mapColors[0]) ||
@@ -106,19 +119,5 @@ void Sounds::checkAtmosphere()
     if (ColorToInt(pixelColor) == ColorToInt(mapColors[7]) ||
         ColorToInt(pixelColor) == ColorToInt(mapColors[8])) ResumeMusicStream(mountainSound);
     else PauseMusicStream(mountainSound);
-
-    for (int i = 0; i < mapColors.size(); i++)
-    {
-        if (ColorToInt(pixelColor) == ColorToInt(mapColors[i]))
-        {
-            PauseMusicStream(radiationSound);
-            break;
-        }
-
-        if (i == mapColors.size() - 1)
-        {
-            ResumeMusicStream(radiationSound);
-        }
-    }
 }
 
