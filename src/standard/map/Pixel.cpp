@@ -47,8 +47,7 @@ Vector2 Pixel::ToVector2() const {
 
 bool Pixel::acceptRandomly() const {
     // radiation = 3x harder
-    const bool radiated = GetImageColor(G::explosionImage, x, y).a > 0;
-    return invasionAcceptProbability > static_cast<float>(rand()) / RAND_MAX * (radiated ? 3 : 1);
+    return invasionAcceptProbability > static_cast<float>(rand()) / RAND_MAX * (contaminated ? 3.f : 1.f);
 }
 
 bool Pixel::operator<(const Pixel &other) const {

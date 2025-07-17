@@ -36,8 +36,16 @@ Player::Player(Pixel *startPos, const int startRadius): _id(G::players.size()) {
 
 void Player::Update() {
     // expand
-    for (auto& attackQueue : _targetToAttackMap) {
-        ProcessAttackQueue(attackQueue.second);
+    for (auto it = _targetToAttackMap.begin(); it != _targetToAttackMap.end();) {
+        ProcessAttackQueue(it->second);
+        if (it->second.troops <= 0) {
+            it = _targetToAttackMap.erase(it);
+        } else if (it->second.set.empty()) {
+            _population += it->second.troops;
+            it = _targetToAttackMap.erase(it);
+        } else {
+            ++it;
+        }
     }
     UpdateAllDirty();
 
@@ -130,13 +138,13 @@ void Player::RemovePixelFromCenter(Pixel *newP) {
 
 
 void Player::AddCity(const Vector2 &pos) {
-    _cities.push_back(City(
+    _cities.emplace_back(
         &G::territoryMap[static_cast<int>(pos.x)][static_cast<int>(pos.y)]
-    ));
+    );
 }
 
 void Player::AddCity(Pixel *pos) {
-    _cities.push_back(City(pos));
+    _cities.emplace_back(pos);
 }
 
 Pixel* Player::GetNearestCityFromPixel(Pixel* target) const {

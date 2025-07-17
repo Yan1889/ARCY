@@ -16,16 +16,17 @@
 #include "buildings/MissileSilo.h"
 
 
-struct AttackQueue {
+struct Attack {
     int targetPlayerId;
     int troops;
     std::queue<Pixel *> queue;
+    std::unordered_set<Pixel *> set;
 };
 
 class Player {
 public:
     int _id;
-    Color _color;
+    Color _color{};
 
     bool _dead{};
 
@@ -53,7 +54,7 @@ public:
     std::unordered_set<Pixel *> _dirtyPixels;
 
     // attack
-    std::unordered_map<int, AttackQueue> _targetToAttackMap;
+    std::unordered_map<int, Attack> _targetToAttackMap;
 
     int _allPixelsSummed_x{};
     int _allPixelsSummed_y{};
@@ -65,8 +66,8 @@ public:
     void Update();
     void Expand(int target, float percentage);
 
-    std::unordered_set<Pixel *> ReFillAttackQueueFromScratch(AttackQueue& attackQueue);
-    void ProcessAttackQueue(AttackQueue& attackQueue);
+    void ReFillAttackQueueFromScratch(Attack& attack);
+    void ProcessAttackQueue(Attack& attack);
     void GetOwnershipOfPixel(Pixel* newP);
     void LoseOwnershipOfPixel(Pixel * pixel, bool updateTextureToo);
 
