@@ -70,6 +70,7 @@ int main() {
 
     mySounds.LoadAll();
     TextureCollection::LoadAll();
+    mySounds.LoadAllExplosion();
 
     // we dont need 4000 fps - Yes we need 4000+ fps to ditch Python! Sincerely Colin
     SetTargetFPS(10000);

@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "raylib.h"
+#include "loaders/Sounds.h"
 
 enum BombType {
     ATOM,

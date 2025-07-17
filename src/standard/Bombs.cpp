@@ -204,7 +204,8 @@ void Bombs::checkSound(SingleBomb &bomb) {
         } else if (c >= 500) {
             mySounds.Play(mySounds.farExplosionSound);
         } else {
-            mySounds.Play(mySounds.explosionSound);
+            //mySounds.Play(mySounds.explosionSound);
+            mySounds.PlayExplosion();
         }
     } else {
         if (c >= 1000) {

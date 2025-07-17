@@ -19,6 +19,8 @@ Sounds::~Sounds()
     UnloadSound(distantExplosionSound);
     UnloadSound(missleSound);
 
+    delete explosionPool;
+
     UnloadMusicStream(oceanSound);
     UnloadMusicStream(beachSound);
     UnloadMusicStream(mountainSound);
@@ -26,6 +28,14 @@ Sounds::~Sounds()
     UnloadMusicStream(fieldSound);
     UnloadMusicStream(radiationSound);
     CloseAudioDevice();
+}
+
+void Sounds::LoadAllExplosion() {
+    explosionPool = new SoundPool("assets/sounds/nukeexplosion.wav", 8);
+}
+
+void Sounds::PlayExplosion() {
+    explosionPool->Play();
 }
 
 void Sounds::LoadAll()
