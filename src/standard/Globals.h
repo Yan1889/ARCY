@@ -6,8 +6,8 @@
 #define GLOBALS_H
 #include <vector>
 
-#include "Map/PerlinNoise.h"
-#include "Map/Pixel.h"
+#include "map/PerlinNoise.h"
+#include "map/Pixel.h"
 #include "raylib.h"
 #include "Player.h"
 

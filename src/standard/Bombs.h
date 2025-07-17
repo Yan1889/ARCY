@@ -17,9 +17,9 @@ enum BombType {
 struct SingleBomb {
     Vector2 targetPos;
     Vector2 originPos;
-    Vector2 bombPos;
+    Vector2 pos;
     float time;
-    float bombSpeed;
+    float speed;
     float radius;
     BombType type;
 

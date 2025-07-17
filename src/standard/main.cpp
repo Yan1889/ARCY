@@ -4,12 +4,12 @@
 #include <vector>
 
 #include "raylib.h"
-#include "World/Loaders/TextureCollection.h"
-#include "World/Player.h"
-#include "World/Globals.h"
-#include "World/Loaders/Sounds.h"
-#include "World/Map/PerlinNoise.h"
-#include "World/Bombs.h"
+#include "loaders/TextureCollection.h"
+#include "Player.h"
+#include "Globals.h"
+#include "loaders/Sounds.h"
+#include "map/PerlinNoise.h"
+#include "Bombs.h"
 
 #define SCREEN_WIDTH 1366 // Default 980
 #define SCREEN_HEIGHT 768 // Default 650
@@ -52,6 +52,8 @@ void handleControls();
 void displayInfoTexts();
 
 void displayAllPlayerTags();
+
+void displayBGTextures();
 
 void checkExplosion();
 
@@ -108,14 +110,7 @@ void renderGame() {
 
     BeginMode2D(camera);
 
-    // terrain bg texture
-    DrawTextureV(G::perlinTexture, Vector2{0, 0}, WHITE);
-    // nuke bg texture
-    if (G::explosionTextureDirty) {
-        UpdateTexture(G::explosionTexture, G::explosionImage.data);
-        G::explosionTextureDirty = false;
-    }
-    DrawTextureV(G::explosionTexture, Vector2{0, 0}, WHITE);
+    displayBGTextures();
 
     for (const Player &p: G::players) {
         for (Pixel *pixel: p._borderPixels) {
@@ -125,10 +120,10 @@ void renderGame() {
 
     // display every city for each player
     for (const Player &p: G::players) {
-        for (Pixel *cityPos: p._cityPositions) {
+        for (const City& c: p._cities) {
             DrawTextureEx(
                 TextureCollection::city,
-                Vector2(cityPos->x - cityRadius, cityPos->y - cityRadius),
+                Vector2(c.pos->x - cityRadius, c.pos->y - cityRadius),
                 0,
                 2 * cityRadius / TextureCollection::city.width,
                 WHITE
@@ -319,7 +314,7 @@ void checkCity() {
                 [static_cast<int>(GetScreenToWorld2D(GetMousePosition(), camera).y)];
 
         if (MAIN_PLAYER._allPixels.contains(pixelClicked)) {
-            int cost = 10000 * (MAIN_PLAYER._cityPositions.size() + 1);
+            int cost = 10000 * (MAIN_PLAYER._cities.size() + 1);
 
             if (MAIN_PLAYER._money.moneyBalance - cost >= 0) {
                 MAIN_PLAYER._money.spendMoney(cost);
@@ -330,7 +325,7 @@ void checkCity() {
                 for (int i = 1; i < G::players.size(); i++) {
                     if (G::players[i]._dead) continue;
 
-                    cost = 10000 * (G::players[i]._cityPositions.size() + 1);
+                    cost = 10000 * (G::players[i]._cities.size() + 1);
                     if (G::players[i]._money.moneyBalance - cost >= 0) {
                         auto iter = G::players[i]._allPixels.begin();
                         std::advance(iter, rand() % G::players[i]._allPixels.size());
@@ -341,6 +336,17 @@ void checkCity() {
             }
         }
     }
+}
+
+void displayBGTextures() {
+    // terrain bg texture
+    DrawTextureV(G::perlinTexture, Vector2{0, 0}, WHITE);
+    // nuke bg texture
+    if (G::explosionTextureDirty) {
+        UpdateTexture(G::explosionTexture, G::explosionImage.data);
+        G::explosionTextureDirty = false;
+    }
+    DrawTextureV(G::explosionTexture, Vector2{0, 0}, WHITE);
 }
 
 void initPlayers() {

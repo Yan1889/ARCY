@@ -5,13 +5,12 @@
 #include "Bombs.h"
 
 #include <iostream>
-#include <ostream>
 
 #include "raylib.h"
 #include "raymath.h"
 #include "Globals.h"
-#include "Loaders/Sounds.h"
-#include "Loaders/TextureCollection.h"
+#include "loaders/Sounds.h"
+#include "loaders/TextureCollection.h"
 
 #define MAIN_PLAYER G::players[0]
 
@@ -23,29 +22,29 @@ std::vector<SingleBomb> Bombs::allBombs = {};
 std::vector<EffectAfterDetonation> Bombs::allEffects = {};
 
 bool SingleBomb::operator==(const SingleBomb &other) const {
-    return bombPos.x == other.bombPos.x && bombPos.y == other.bombPos.y;
+    return pos.x == other.pos.x && pos.y == other.pos.y;
 }
 
 void Bombs::Update() {
     for (auto it = allBombs.begin(); it != allBombs.end(); ++it) {
         SingleBomb& b = *it;
 
-        b.time += b.bombSpeed * GetFrameTime();
+        b.time += b.speed * GetFrameTime();
 
         if (b.time >= 1.0f) {
             b.time = 1.0f;
-            b.bombPos = b.targetPos;
+            b.pos = b.targetPos;
 
             checkSound(b);
             Explode(b);
             allEffects.push_back({
-                .pos = b.bombPos,
+                .pos = b.pos,
                 .radius = b.radius,
             });
             it = allBombs.erase(it);
             --it;
         } else {
-            b.bombPos = Vector2Lerp(b.originPos, b.targetPos, b.time);
+            b.pos = Vector2Lerp(b.originPos, b.targetPos, b.time);
         }
     }
 
@@ -69,9 +68,9 @@ void Bombs::Update() {
     allBombs.push_back({
         .targetPos = targetPos,
         .originPos = startPixel->ToVector2(),
-        .bombPos =  startPixel->ToVector2(),
+        .pos =  startPixel->ToVector2(),
         .time = 0,
-        .bombSpeed = 1,
+        .speed = 1,
         .radius = IsKeyPressed(KEY_ONE) ? 50.f : 300.f,
         .type = IsKeyPressed(KEY_ONE)? ATOM : HYDROGEN
     });
@@ -79,8 +78,8 @@ void Bombs::Update() {
 
 void Bombs::Render() {
     for (SingleBomb &b: allBombs) {
-        const float dx = b.targetPos.x - b.bombPos.x;
-        const float dy = b.targetPos.y - b.bombPos.y;
+        const float dx = b.targetPos.x - b.pos.x;
+        const float dy = b.targetPos.y - b.pos.y;
         const float rotation = std::atan2(dy, dx);
 
         Texture2D& t = b.type == ATOM? TextureCollection::atomBomb : TextureCollection::hydrogenBomb;
@@ -90,8 +89,8 @@ void Bombs::Render() {
             t,
             Rectangle{0, 0, (float) t.width, (float) t.height},
             Rectangle{
-                b.bombPos.x,
-                b.bombPos.y,
+                b.pos.x,
+                b.pos.y,
                 t.width * scale,
                 t.height * scale,
             },

@@ -11,7 +11,9 @@
 
 #include "Money.h"
 #include "raylib.h"
-#include "Map/Pixel.h"
+#include "buildings/City.h"
+#include "map/Pixel.h"
+#include "buildings/MissileSilo.h"
 
 
 struct AttackQueue {
@@ -32,10 +34,12 @@ public:
     int _maxPopulation{};
     float _growthCooldown = 100;
     float _growthRate = 100;
-    int _cityCount{};
-    std::vector<Pixel*> _cityPositions;
     float _growth{};
     float _growthFactor = 0.0085f;
+
+    // buildings
+    std::vector<City> _cities;
+    std::vector<MissileSilo> _silos;
 
     // money
     float _cooldownTime = 1.0f;

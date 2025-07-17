@@ -26,23 +26,31 @@ if (NOT raylib_FOUND)
     endif()
 endif()
 
-add_executable(ARCY main.cpp
-        World/Map/PerlinNoise.cpp
-        World/Map/PerlinNoise.h
-        World/Loaders/TextureCollection.cpp
-        World/Loaders/TextureCollection.h
-        World/Player.cpp
-        World/Player.h
-        World/Globals.h
-        World/Money.cpp
-        World/Money.h
-        World/Map/Pixel.h
-        World/Map/Pixel.cpp
-        World/Loaders/Sounds.cpp
-        World/Loaders/Sounds.h
-        World/PlayerCore.cpp
-        World/Bombs.cpp
-        World/Bombs.h
+add_executable(ARCY src/standard/main.cpp
+        src/standard/Map/PerlinNoise.cpp
+        src/standard/Map/PerlinNoise.h
+        src/standard/Loaders/TextureCollection.cpp
+        src/standard/Loaders/TextureCollection.h
+        src/standard/Player.cpp
+        src/standard/Player.h
+        src/standard/Globals.h
+        src/standard/Money.cpp
+        src/standard/Money.h
+        src/standard/Map/Pixel.h
+        src/standard/Map/Pixel.cpp
+        src/standard/Loaders/Sounds.cpp
+        src/standard/Loaders/Sounds.h
+        src/standard/PlayerCore.cpp
+        src/standard/Bombs.cpp
+        src/standard/Bombs.h
+        src/standard/buildings/Building.cpp
+        src/standard/buildings/Building.h
+        src/standard/buildings/City.cpp
+        src/standard/buildings/City.h
+        src/standard/buildings/MissleSilo.cpp
+        src/standard/buildings/MissileSilo.h
+        src/backend-test/main.cpp
+        src/frontend-test/main.cpp
 )
 
 file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})

@@ -1,6 +1,6 @@
 #include "Player.h"
 #include "Globals.h"
-#include "Map/Pixel.h"
+#include "map/Pixel.h"
 
 #include <cassert>
 #include <iostream>
@@ -45,7 +45,7 @@ void Player::Update() {
     IncreaseMoney();
 
     _growthCooldown -= GetTime();
-    _maxPopulation = 1000 + 1000 * _cityCount;
+    _maxPopulation = 1000 + 1000 * _cities.size();
 
     _growth = _growthFactor * (1.0f - exp(-_population / 10.f));
 
@@ -130,30 +130,28 @@ void Player::RemovePixelFromCenter(Pixel *newP) {
 
 
 void Player::AddCity(const Vector2 &pos) {
-    _cityCount++;
-    _cityPositions.push_back(
+    _cities.push_back(City(
         &G::territoryMap[static_cast<int>(pos.x)][static_cast<int>(pos.y)]
-    );
+    ));
 }
 
 void Player::AddCity(Pixel *pos) {
-    _cityCount++;
-    _cityPositions.push_back(pos);
+    _cities.push_back(City(pos));
 }
 
 Pixel* Player::GetNearestCityFromPixel(Pixel* target) const {
-    if (_cityPositions.empty()) return nullptr;
+    if (_cities.empty()) return nullptr;
 
     Pixel* bestP = nullptr;
     float bestDistSquared = G::MAP_WIDTH * G::MAP_WIDTH + G::MAP_HEIGHT * G::MAP_HEIGHT;
 
-    for (Pixel* p : _cityPositions) {
-        const double dx = target->x - p->x;
-        const double dy = target->y - p->y;
+    for (const City& c : _cities) {
+        const double dx = target->x - c.pos->x;
+        const double dy = target->y - c.pos->y;
         const double distSquared = dx * dx + dy * dy;
         if (distSquared < bestDistSquared) {
             bestDistSquared = distSquared;
-            bestP = p;
+            bestP = c.pos;
         }
     }
     return bestP;
