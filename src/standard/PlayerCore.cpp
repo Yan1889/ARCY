@@ -24,62 +24,54 @@ void Player::Expand(const int target, const float percentage) {
 }
 
 
-void Player::ProcessAttackQueue(AttackQueue& attackQueue) {
-
-    // refilling it from scratch
-    std::unordered_set<Pixel *> pixelsAlreadyInTheQueue = ReFillAttackQueueFromScratch(attackQueue);
-
+void Player::ProcessAttackQueue(Attack& attack) {
     // 60fps => ~10 border expansions / 1s
-    const int maxPixelsPerFrame = 100;
+    constexpr int maxPixelsPerFrame = 100;
 
-    for (int i = 0; i < maxPixelsPerFrame && !attackQueue.queue.empty() && attackQueue.troops > 0; i++) {
-        Pixel *newP = attackQueue.queue.front();
+    for (int i = 0; i < maxPixelsPerFrame && !attack.set.empty() && attack.troops > 0; i++) {
+        Pixel *newP = attack.queue.front();
 
-        if (newP->playerId != attackQueue.targetPlayerId) continue;
+        if (newP->playerId != attack.targetPlayerId) {
+            attack.queue.pop();
+            attack.set.erase(newP);
+            continue;
+        }
 
-        attackQueue.troops--;
+        attack.troops--;
 
         // randomly don't get the pixel even though lost troops for it
         if (!newP->acceptRandomly()) continue;
 
-        attackQueue.queue.pop();
-        pixelsAlreadyInTheQueue.erase(newP);
+        attack.queue.pop();
+        attack.set.erase(newP);
         GetOwnershipOfPixel(newP);
+    }
 
-        // update attack queue
-        for (Pixel *neighbor: newP->GetNeighbors()) {
-            if (attackQueue.troops <= 0) break; // no new Pixels
-            if (neighbor->playerId == _id
-                || pixelsAlreadyInTheQueue.contains(neighbor)
-                || neighbor->invasionAcceptProbability == 0)
-                continue;
-
-            pixelsAlreadyInTheQueue.insert(neighbor);
-            attackQueue.queue.push(neighbor);
-        }
+    // only update queue when empty
+    if (attack.set.empty()) {
+        UpdateAllDirty();
+        ReFillAttackQueueFromScratch(attack);
     }
 }
 
-std::unordered_set<Pixel *> Player::ReFillAttackQueueFromScratch(AttackQueue& attackQueue) {
-    // clear the old one
-    attackQueue.queue = {};
-
-    std::unordered_set<Pixel *> pixelsAlreadyInTheQueue = {};
+void Player::ReFillAttackQueueFromScratch(Attack& attack) {
+    // clear
+    attack.queue = {};
+    attack.set.clear();
 
     // refill
-    const int target = attackQueue.targetPlayerId;
+    const int target = attack.targetPlayerId;
     for (Pixel *borderPixel: _borderPixels) {
         for (Pixel *p: borderPixel->GetNeighbors()) {
-            if (pixelsAlreadyInTheQueue.contains(p) ||
+            if (attack.set.contains(p) ||
                 p->playerId != target ||
                 p->invasionAcceptProbability == 0)
                 continue;
 
-            attackQueue.queue.push(p);
-            pixelsAlreadyInTheQueue.insert(p);
+            attack.queue.push(p);
+            attack.set.insert(p);
         }
     }
-    return std::move(pixelsAlreadyInTheQueue);
 }
 
 void Player::GetOwnershipOfPixel(Pixel *newP) {
