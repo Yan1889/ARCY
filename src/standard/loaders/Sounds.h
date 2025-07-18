@@ -13,14 +13,8 @@ public:
     Sounds();
     ~Sounds();
 
-    void LoadAllExplosion();
-    void PlayExplosion();
-
-    Sound explosionSound;
-    Sound farExplosionSound;
-    Sound distantExplosionSound;
-    Sound cityBuildSound;
-    Sound missleSound;
+    void LoadAll();
+    void Play(SoundPool* pool);
 
     static std::vector<Sound> explosionSounds;
     static int currentIndex;
@@ -32,13 +26,13 @@ public:
     Music mountainSound;
     Music radiationSound;
 
-    static void Play(Sound sound);
-    static void Stop(Sound sound);
-    void LoadAll();
     void checkAtmosphere();
 
-private:
     SoundPool* explosionPool = nullptr;
+    SoundPool* nearExplosionPool = nullptr;
+    SoundPool* distantExplosionPool = nullptr;
+    SoundPool* cityBuildPool = nullptr;
+    SoundPool* misslePool = nullptr;
 };
 
 #endif //SOUNDS_H

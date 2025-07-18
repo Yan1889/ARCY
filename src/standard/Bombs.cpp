@@ -63,7 +63,7 @@ void Bombs::Update() {
 
     MAIN_PLAYER._money.spendMoney(cost);
     
-    mySounds.Play(mySounds.missleSound);
+    mySounds.Play(mySounds.misslePool);
 
     allBombs.push_back({
         .targetPos = targetPos,
@@ -155,8 +155,6 @@ void Bombs::Render() {
 
 
 void Bombs::Explode(SingleBomb &b) {
-    mySounds.Stop(mySounds.missleSound);
-
     for (int y = -b.radius; y <= b.radius; y++) {
         for (int x = -b.radius; x <= b.radius; x++) {
             const int px = Clamp((int) b.targetPos.x + x, 0, G::MAP_WIDTH - 1);
@@ -200,18 +198,17 @@ void Bombs::checkSound(SingleBomb &bomb) {
 
     if (bomb.radius == 50) {
         if (c >= 1000) {
-            mySounds.Play(mySounds.distantExplosionSound);
+            mySounds.Play(mySounds.distantExplosionPool);
         } else if (c >= 500) {
-            mySounds.Play(mySounds.farExplosionSound);
+            mySounds.Play(mySounds.nearExplosionPool);
         } else {
-            //mySounds.Play(mySounds.explosionSound);
-            mySounds.PlayExplosion();
+            mySounds.Play(mySounds.explosionPool);
         }
     } else {
         if (c >= 1000) {
-            mySounds.Play(mySounds.farExplosionSound);
+            mySounds.Play(mySounds.nearExplosionPool);
         } else {
-            mySounds.Play(mySounds.explosionSound);
+            mySounds.Play(mySounds.explosionPool);
         }
     }
 }

@@ -13,13 +13,11 @@ Sounds::Sounds()
 
 Sounds::~Sounds()
 {
-    UnloadSound(explosionSound);
-    UnloadSound(cityBuildSound);
-    UnloadSound(farExplosionSound);
-    UnloadSound(distantExplosionSound);
-    UnloadSound(missleSound);
-
     delete explosionPool;
+    delete cityBuildPool;
+    delete misslePool;
+    delete nearExplosionPool;
+    delete distantExplosionPool;
 
     UnloadMusicStream(oceanSound);
     UnloadMusicStream(beachSound);
@@ -30,21 +28,18 @@ Sounds::~Sounds()
     CloseAudioDevice();
 }
 
-void Sounds::LoadAllExplosion() {
-    explosionPool = new SoundPool("assets/sounds/nukeexplosion.wav", 8);
-}
-
-void Sounds::PlayExplosion() {
-    explosionPool->Play();
+void Sounds::Play(SoundPool* pool)
+{
+    pool->Play();
 }
 
 void Sounds::LoadAll()
 {
-    explosionSound = LoadSound("assets/sounds/nukeexplosion.mp3");
-    cityBuildSound = LoadSound("assets/sounds/citybuilding.mp3");
-    farExplosionSound = LoadSound("assets/sounds/nearnukeexplosion.mp3");
-    distantExplosionSound = LoadSound("assets/sounds/distantnukeexplosion.mp3");
-    missleSound = LoadSound("assets/sounds/nukeflyby.mp3");
+    explosionPool = new SoundPool("assets/sounds/nukeexplosion.mp3", 8);
+    nearExplosionPool = new SoundPool("assets/sounds/nearnukeexplosion.mp3", 8);
+    distantExplosionPool = new SoundPool("assets/sounds/distantnukeexplosion.mp3", 8);
+    cityBuildPool = new SoundPool("assets/sounds/citybuilding.mp3", 8);
+    misslePool = new SoundPool("assets/sounds/nukeflyby.mp3", 8);
 
     oceanSound = LoadMusicStream("assets/sounds/ocean.mp3");
     beachSound = LoadMusicStream("assets/sounds/beach.mp3");
@@ -59,16 +54,6 @@ void Sounds::LoadAll()
     PlayMusicStream(fieldSound);
     PlayMusicStream(forestSound);
     PlayMusicStream(radiationSound);
-}
-
-void Sounds::Play(Sound sound)
-{
-    PlaySound(sound);
-}
-
-void Sounds::Stop(Sound sound)
-{
-    StopSound(sound);
 }
 
 void Sounds::checkAtmosphere()

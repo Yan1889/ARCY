@@ -70,7 +70,6 @@ int main() {
 
     mySounds.LoadAll();
     TextureCollection::LoadAll();
-    mySounds.LoadAllExplosion();
 
     // we dont need 4000 fps - Yes we need 4000+ fps to ditch Python! Sincerely Colin
     SetTargetFPS(10000);
@@ -319,7 +318,7 @@ void checkCity() {
 
             if (MAIN_PLAYER._money.moneyBalance - cost >= 0) {
                 MAIN_PLAYER._money.spendMoney(cost);
-                mySounds.Play(mySounds.cityBuildSound);
+                mySounds.Play(mySounds.cityBuildPool);
                 MAIN_PLAYER.AddCity(GetScreenToWorld2D(GetMousePosition(), camera));
 
                 // bots also make a random city when main player makes city
