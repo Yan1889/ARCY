@@ -82,8 +82,8 @@ public:
     void IncreaseMoney();
     void RemovePixelFromCenter(Pixel* newP);
     void AddPixelToCenter(Pixel* newP);
-    void AddCity(Pixel* pos);
-    void AddSilo(Pixel* pos);
+    bool TryAddCity(Pixel* pos);
+    bool TryAddSilo(Pixel* pos);
     Pixel* GetNearestSiloFromPixel(Pixel* point) const;
 };
 

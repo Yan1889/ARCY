@@ -13,9 +13,6 @@
 
 #define MAIN_PLAYER G::players[0]
 
-extern Camera2D camera;
-extern Vector2 playerPos;
-extern Sounds mySounds;
 
 std::vector<SingleBomb> Bombs::allBombs = {};
 std::vector<EffectAfterDetonation> Bombs::allEffects = {};

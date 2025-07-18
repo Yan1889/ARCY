@@ -6,6 +6,8 @@
 #include "TextureCollection.h"
 #include "../Globals.h"
 
+using namespace G;
+
 Sounds::Sounds()
 {
     InitAudioDevice();

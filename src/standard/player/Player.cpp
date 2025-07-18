@@ -120,11 +120,23 @@ void Player::RemovePixelFromCenter(Pixel *newP) {
     _centerPixel_y = _allPixelsSummed_y / static_cast<int>(_allPixels.size());
 }
 
-void Player::AddCity(Pixel *pos) {
+bool Player::TryAddCity(Pixel *pos) {
+    const int cost = 10000 * (_cities.size() + 1);
+
+    if (_money.moneyBalance < cost || !_allPixels.contains(pos)) return false;
+    _money.spendMoney(cost);
+
     _cities.emplace_back(pos);
+    return true;
 }
-void Player::AddSilo(Pixel *pos) {
+bool Player::TryAddSilo(Pixel *pos) {
+    const int cost = 10000 * (_silos.size() + 1);
+
+    if (_money.moneyBalance < cost || !_allPixels.contains(pos)) return false;
+    _money.spendMoney(cost);
+
     _silos.emplace_back(pos);
+    return true;
 }
 
 Pixel* Player::GetNearestSiloFromPixel(Pixel* target) const {

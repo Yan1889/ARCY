@@ -7,23 +7,25 @@
 
 #define MAIN_PLAYER G::players[0]
 #define MAIN_PLAYER_COLOR G::players[0]._color
-#include "raylib.h"
+
+enum BuildingTypeDragging {
+    NONE,
+    CITY,
+    SILO
+};
 
 
-inline Camera2D camera{};
-inline Vector2 playerPos;
+inline bool buildMenuShown{};
+inline BuildingTypeDragging buildingTypeDragging = NONE;
+
 
 void displayGame();
-
 void displayInfoTexts();
-
 void displayPlayers();
-
 void displayPlayerTags();
-
 void displayBGTextures();
-
 void displayCrossHair();
+void displayBuildMenu();
 
 
 #endif //DISPLAY_H

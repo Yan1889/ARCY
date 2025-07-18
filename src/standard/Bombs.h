@@ -8,7 +8,9 @@
 #include <vector>
 
 #include "raylib.h"
-#include "loaders/Sounds.h"
+#include "Globals.h"
+
+using namespace G;
 
 enum BombType {
     ATOM,

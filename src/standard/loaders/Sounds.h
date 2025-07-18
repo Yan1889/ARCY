@@ -1,11 +1,9 @@
-#include "raylib.h"
-#include "SoundPool.h"
-#include <vector>
-
 #ifndef SOUNDS_H
 #define SOUNDS_H
 
-extern Vector2 playerPos;
+#include "raylib.h"
+#include "SoundPool.h"
+#include <vector>
 
 class Sounds {
 

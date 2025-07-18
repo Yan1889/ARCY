@@ -10,6 +10,7 @@
 #include "map/Pixel.h"
 #include "raylib.h"
 #include "player/Player.h"
+#include "loaders/Sounds.h"
 
 struct Gradient;
 
@@ -21,8 +22,9 @@ namespace G {
 
     inline int targetFPS = 60;
 
+    inline Camera2D camera{};
     inline Image perlin;
-    inline Texture2D perlinTexture{0};
+    inline Texture2D perlinTexture{};
     inline std::vector<Gradient> mapParts = {
         Gradient{32 * 1 + 10, {90, 90, 255, 255}, 0.f}, // Deep Water
         Gradient{32 * 2 + 10, {125, 125, 255, 255}, 0.f}, // Low Water
@@ -35,10 +37,12 @@ namespace G {
         Gradient{32 * 8, {255, 255, 255, 255}, 0.f}, // Snow
     };
 
+    inline Sounds mySounds;
 
     inline float maxDifficulty = 30;
 
     inline std::vector<Player> players;
+    inline Vector2 playerPos;
 
     inline Image explosionImage;
     inline Texture2D explosionTexture;
@@ -59,6 +63,12 @@ namespace G {
     }
     inline Pixel* PixelAt(Vector2 v) {
         return &territoryMap[static_cast<int>(v.x)][static_cast<int>(v.y)];
+    }
+    inline Pixel *GetPixelOnMouse() {
+        return PixelAt(
+            static_cast<int>(GetScreenToWorld2D(GetMousePosition(), camera).x),
+            static_cast<int>(GetScreenToWorld2D(GetMousePosition(), camera).y)
+        );
     }
 }
 

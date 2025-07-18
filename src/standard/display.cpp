@@ -23,17 +23,15 @@ void displayGame() {
     BeginMode2D(camera);
 
     displayBGTextures();
-
     displayPlayers();
     displayPlayerTags();
-
     displayCrossHair();
-
     Bombs::Render();
 
     EndMode2D();
 
     displayInfoTexts();
+    displayBuildMenu();
 
     EndDrawing();
 }
@@ -115,14 +113,14 @@ void displayInfoTexts() {
 }
 
 void displayPlayers() {
-    for (const Player &p: G::players) {
+    for (const Player &p: players) {
         for (Pixel *pixel: p._border_vec) {
             DrawPixel(pixel->x, pixel->y, p._color);
         }
     }
 
     // display every city for each player
-    for (const Player &p: G::players) {
+    for (const Player &p: players) {
         for (const City &c: p._cities) {
             DrawTextureEx(
                 TextureCollection::city,
@@ -134,7 +132,7 @@ void displayPlayers() {
         }
     }
     // display every city for each player
-    for (const Player &p: G::players) {
+    for (const Player &p: players) {
         for (const MissileSilo &s: p._silos) {
             DrawTextureEx(
                 TextureCollection::silo,
@@ -147,18 +145,18 @@ void displayPlayers() {
     }
 
     // territory texture
-    if (G::territoryTextureDirty) {
-        UpdateTexture(G::territoryTexture, G::territoryImage.data);
-        G::territoryTextureDirty = false;
+    if (territoryTextureDirty) {
+        UpdateTexture(territoryTexture, territoryImage.data);
+        territoryTextureDirty = false;
     }
-    DrawTexture(G::territoryTexture, 0, 0, Fade(WHITE, 0.5));
+    DrawTexture(territoryTexture, 0, 0, Fade(WHITE, 0.5));
 }
 
 void displayPlayerTags() {
-    for (int i = 0; i < G::players.size(); i++) {
-        if (G::players[i]._dead) continue;
+    for (int i = 0; i < players.size(); i++) {
+        if (players[i]._dead) continue;
 
-        const float diameter = 2 * std::sqrt(G::players[i]._allPixels.size() / PI); // A = π * r^2 => r = sqrt(A / π)
+        const float diameter = 2 * std::sqrt(players[i]._allPixels.size() / PI); // A = π * r^2 => r = sqrt(A / π)
         // Shows who you are
         const char *name = i == 0 ? "You" : ("NPC " + std::to_string(i)).c_str();
         const int charCount = strlen(name);
@@ -170,8 +168,8 @@ void displayPlayerTags() {
 
         Vector2 textSize = MeasureTextEx(GetFontDefault(), name, fontSize, 1);
         Vector2 textPos = {
-            G::players[i]._centerPixel_x - textSize.x / 2,
-            G::players[i]._centerPixel_y - textSize.y / 2
+            players[i]._centerPixel_x - textSize.x / 2,
+            players[i]._centerPixel_y - textSize.y / 2
         };
         DrawTextEx(GetFontDefault(), name, textPos, fontSize, spacing, WHITE);
     }
@@ -186,11 +184,108 @@ void displayCrossHair() {
 
 void displayBGTextures() {
     // terrain bg texture
-    DrawTextureV(G::perlinTexture, Vector2{0, 0}, WHITE);
+    DrawTextureV(perlinTexture, Vector2{0, 0}, WHITE);
     // nuke bg texture
-    if (G::explosionTextureDirty) {
-        UpdateTexture(G::explosionTexture, G::explosionImage.data);
-        G::explosionTextureDirty = false;
+    if (explosionTextureDirty) {
+        UpdateTexture(explosionTexture, explosionImage.data);
+        explosionTextureDirty = false;
     }
-    DrawTextureV(G::explosionTexture, Vector2{0, 0}, WHITE);
+    DrawTextureV(explosionTexture, Vector2{0, 0}, WHITE);
+}
+
+void displayBuildMenu() {
+    if (IsKeyPressed(KEY_M)) {
+        // menu state is changed when 'm' is pressed
+        // not shown -> shown -> not shown -> ...;
+        buildMenuShown = !buildMenuShown;
+    }
+    if (!buildMenuShown) return;
+
+    const Rectangle menuRect{
+        0.f,
+        GetScreenHeight() * 0.9f,
+        (float) GetScreenWidth(),
+        GetScreenHeight() * 0.1f
+    };
+    // white bg
+    DrawRectangleRec(menuRect, WHITE);
+
+    const Rectangle cityButtonRect{
+        menuRect.x,
+        menuRect.y + menuRect.height * 0.1f,
+        menuRect.width * 0.2f,
+        menuRect.height * 0.8f,
+    };
+    const Rectangle siloButtonRect{
+        menuRect.x + menuRect.width * 0.3f,
+        menuRect.y + menuRect.height * 0.1f,
+        menuRect.width * 0.2f,
+        menuRect.height * 0.8f,
+    };
+    DrawRectangleRec(cityButtonRect, DARKBLUE);
+    DrawText("Build city", cityButtonRect.x, cityButtonRect.y, 50, WHITE);
+    DrawRectangleRec(siloButtonRect, DARKBLUE);
+    DrawText("Build silo", siloButtonRect.x, siloButtonRect.y, 50, WHITE);
+
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        if (CheckCollisionPointRec(GetMousePosition(), cityButtonRect)) {
+            buildingTypeDragging = CITY;
+        } else if (CheckCollisionPointRec(GetMousePosition(), siloButtonRect)) {
+            buildingTypeDragging = SILO;
+        }
+    }
+    if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && buildingTypeDragging != NONE) {
+        switch (buildingTypeDragging) {
+            case CITY:
+                if (MAIN_PLAYER.TryAddCity(GetPixelOnMouse())) {
+                    mySounds.Play(mySounds.cityBuildPool);
+
+                    // bots also make a random city when main player makes city
+                    for (int i = 1; i < players.size(); i++) {
+                        if (players[i]._dead) continue;
+
+                        auto iter = players[i]._allPixels.begin();
+                        std::advance(iter, rand() % players[i]._allPixels.size());
+                        players[i].TryAddCity(*iter);
+                    }
+                }
+                break;
+            case SILO:
+                if (MAIN_PLAYER.TryAddSilo(GetPixelOnMouse())) {
+                    mySounds.Play(mySounds.cityBuildPool);
+
+                    // bots also make a random silo when main player makes silo
+                    for (int i = 1; i < players.size(); i++) {
+                        if (players[i]._dead) continue;
+
+                        auto iter = players[i]._allPixels.begin();
+                        std::advance(iter, rand() % players[i]._allPixels.size());
+                        players[i].TryAddSilo(*iter);
+                    }
+                }
+                break;
+        }
+        buildingTypeDragging = NONE;
+    }
+
+
+    // displaying the dragged object
+    if (buildingTypeDragging != NONE) {
+        Texture2D *t = nullptr;
+        switch (buildingTypeDragging) {
+            case CITY:
+                t = &TextureCollection::city;
+                break;
+            case SILO:
+                t = &TextureCollection::silo;
+                break;
+        }
+        DrawTextureEx(
+            *t,
+            Vector2(GetMousePosition().x - buildingRadius, GetMousePosition().y - buildingRadius),
+            0,
+            2 * buildingRadius / t->width,
+            Fade(WHITE, 0.5)
+        );
+    }
 }
