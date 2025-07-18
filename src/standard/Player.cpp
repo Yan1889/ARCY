@@ -132,16 +132,16 @@ void Player::AddSilo(Pixel *pos) {
     _silos.emplace_back(pos);
 }
 
-Pixel* Player::GetNearestCityFromPixel(Pixel* target) const {
-    if (_cities.empty()) return nullptr;
+Pixel* Player::GetNearestSiloFromPixel(Pixel* target) const {
+    if (_silos.empty()) return nullptr;
 
     Pixel* bestP = nullptr;
     float bestDistSquared = G::MAP_WIDTH * G::MAP_WIDTH + G::MAP_HEIGHT * G::MAP_HEIGHT;
 
-    for (const City& c : _cities) {
-        const double dx = target->x - c.pos->x;
-        const double dy = target->y - c.pos->y;
-        const double distSquared = dx * dx + dy * dy;
+    for (const MissileSilo& c : _silos) {
+        const float dx = target->x - c.pos->x;
+        const float dy = target->y - c.pos->y;
+        const float distSquared = dx * dx + dy * dy;
         if (distSquared < bestDistSquared) {
             bestDistSquared = distSquared;
             bestP = c.pos;

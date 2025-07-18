@@ -84,7 +84,7 @@ public:
     void AddPixelToCenter(Pixel* newP);
     void AddCity(Pixel* pos);
     void AddSilo(Pixel* pos);
-    Pixel* GetNearestCityFromPixel(Pixel* point) const;
+    Pixel* GetNearestSiloFromPixel(Pixel* point) const;
 };
 
 

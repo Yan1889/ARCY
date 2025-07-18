@@ -56,7 +56,7 @@ void Bombs::Update() {
 
     if (MAIN_PLAYER._money.moneyBalance - cost < 0) return;
 
-    Pixel* startPixel = MAIN_PLAYER.GetNearestCityFromPixel(&G::territoryMap[targetPos.x][targetPos.y]);
+    Pixel* startPixel = MAIN_PLAYER.GetNearestSiloFromPixel(G::PixelAt(targetPos));
 
     if (startPixel == nullptr) return;
 
@@ -173,7 +173,7 @@ void Bombs::Explode(SingleBomb &b) {
 
                     ImageDrawPixel(&G::explosionImage, px, py, explosionColor);
 
-                    Pixel *nukedPixel = &G::territoryMap[px][py];
+                    Pixel *nukedPixel = G::PixelAt(px, py);
                     nukedPixel->contaminated = true;
 
                     // remove from player
