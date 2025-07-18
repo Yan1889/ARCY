@@ -11,11 +11,6 @@
 #include "raylib.h"
 
 Player::Player(Pixel *startPos, const int startRadius): _id(static_cast<int>(G::players.size())) {
-    _centerPixel_x = startPos->x;
-    _centerPixel_y = startPos->y;
-    _allPixelsSummed_x = _centerPixel_x;
-    _allPixelsSummed_y = _centerPixel_y;
-
     do {
         _color = Color{
             static_cast<unsigned char>(GetRandomValue(0, 255)), // Red
@@ -28,7 +23,7 @@ Player::Player(Pixel *startPos, const int startRadius): _id(static_cast<int>(G::
     _money = Money();
     _lastActionTime = GetTime();
 
-    GetOwnershipOfPixel(&G::territoryMap[_centerPixel_x][_centerPixel_y]);
+    GetOwnershipOfPixel(startPos);
     Expand(-1, 0.5);
 }
 

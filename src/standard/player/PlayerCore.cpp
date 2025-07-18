@@ -79,19 +79,17 @@ void Player::ReFillAttackQueueFromScratch(Attack& attack) {
 }
 
 void Player::GetOwnershipOfPixel(Pixel *newP) {
-    Player &attacker = *this;
-    attacker._allPixels.insert(newP);
+    _allPixels.insert(newP);
 
     if (newP->playerId >= 0) {
-        Player &defender = G::players[newP->playerId];
-        defender.LoseOwnershipOfPixel(newP, false);
+        G::players[newP->playerId].LoseOwnershipOfPixel(newP, false);
     } else if (newP->playerId == -2) {
         // reclaim contaminated pixel
         G::RemoveExplosionPixel(newP);
     }
     newP->playerId = _id;
 
-    attacker.MarkAsDirty(newP);
+    MarkAsDirty(newP);
 
     ImageDrawPixel(&G::territoryImage, newP->x, newP->y, _color);
     G::territoryTextureDirty = true;
