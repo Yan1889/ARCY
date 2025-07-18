@@ -57,6 +57,9 @@ namespace G {
     inline Pixel* PixelAt(const int x, const int y) {
         return &territoryMap[x][y];
     }
+    inline Pixel* PixelAt(Vector2 v) {
+        return &territoryMap[static_cast<int>(v.x)][static_cast<int>(v.y)];
+    }
 }
 
 #endif //GLOBALS_H

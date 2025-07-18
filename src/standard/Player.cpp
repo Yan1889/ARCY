@@ -125,15 +125,11 @@ void Player::RemovePixelFromCenter(Pixel *newP) {
     _centerPixel_y = _allPixelsSummed_y / static_cast<int>(_allPixels.size());
 }
 
-
-void Player::AddCity(const Vector2 &pos) {
-    _cities.emplace_back(
-        &G::territoryMap[static_cast<int>(pos.x)][static_cast<int>(pos.y)]
-    );
-}
-
 void Player::AddCity(Pixel *pos) {
     _cities.emplace_back(pos);
+}
+void Player::AddSilo(Pixel *pos) {
+    _silos.emplace_back(pos);
 }
 
 Pixel* Player::GetNearestCityFromPixel(Pixel* target) const {

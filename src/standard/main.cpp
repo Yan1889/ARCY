@@ -36,7 +36,7 @@ Vector2 playerPos(G::MAP_WIDTH / 2, G::MAP_HEIGHT / 2);
 constexpr int botCount = 10;
 constexpr int botSpawnRadius = 100;
 
-constexpr float cityRadius = 20;
+constexpr float buildingRadius = 20;
 
 
 void initCamAndMap();
@@ -61,7 +61,7 @@ void displayCrossHair();
 
 void checkExplosion();
 
-void checkCity();
+void checkBuilding();
 
 void checkExpansionAndAttack();
 
@@ -100,7 +100,7 @@ int main() {
 
 void frameLogic() {
     handleControls();
-    checkCity();
+    checkBuilding();
     checkExpansionAndAttack();
     Bombs::Update();
 
@@ -220,10 +220,22 @@ void displayPlayers() {
         for (const City &c: p._cities) {
             DrawTextureEx(
                 TextureCollection::city,
-                Vector2(c.pos->x - cityRadius, c.pos->y - cityRadius),
+                Vector2(c.pos->x - buildingRadius, c.pos->y - buildingRadius),
                 0,
-                2 * cityRadius / TextureCollection::city.width,
-                p._color
+                2 * buildingRadius / TextureCollection::city.width,
+                WHITE // p._color
+            );
+        }
+    }
+    // display every city for each player
+    for (const Player &p: G::players) {
+        for (const MissileSilo &s: p._silos) {
+            DrawTextureEx(
+                TextureCollection::silo,
+                Vector2(s.pos->x - buildingRadius, s.pos->y - buildingRadius),
+                0,
+                2 * buildingRadius / TextureCollection::silo.width,
+                WHITE //p._color
             );
         }
     }
@@ -318,27 +330,53 @@ void checkExpansionAndAttack() {
     }
 }
 
-void checkCity() {
+void checkBuilding() {
     if (!IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) return;
     if (!MAIN_PLAYER._allPixels.contains(GetPixelOnMouse())) return;
 
-    int cost = 10000 * (MAIN_PLAYER._cities.size() + 1);
 
-    if (MAIN_PLAYER._money.moneyBalance < cost) return;
-    MAIN_PLAYER._money.spendMoney(cost);
-    MAIN_PLAYER.AddCity(GetScreenToWorld2D(GetMousePosition(), camera));
-    mySounds.Play(mySounds.cityBuildPool);
+    // 50% chance city; 50% chance silo
+    if (rand() < RAND_MAX / 2) {
+        // city
+        int cost = 10000 * (MAIN_PLAYER._cities.size() + 1);
 
-    // bots also make a random city when main player makes city
-    for (int i = 1; i < G::players.size(); i++) {
-        if (G::players[i]._dead) continue;
+        if (MAIN_PLAYER._money.moneyBalance < cost) return;
+        MAIN_PLAYER._money.spendMoney(cost);
+        MAIN_PLAYER.AddCity(GetPixelOnMouse());
+        mySounds.Play(mySounds.cityBuildPool);
 
-        cost = 10000 * (G::players[i]._cities.size() + 1);
-        if (G::players[i]._money.moneyBalance - cost >= 0) {
-            auto iter = G::players[i]._allPixels.begin();
-            std::advance(iter, rand() % G::players[i]._allPixels.size());
-            G::players[i]._money.spendMoney(cost);
-            G::players[i].AddCity(*iter);
+        // bots also make a random city when main player makes city
+        for (int i = 1; i < G::players.size(); i++) {
+            if (G::players[i]._dead) continue;
+
+            cost = 10000 * (G::players[i]._cities.size() + 1);
+            if (G::players[i]._money.moneyBalance - cost >= 0) {
+                auto iter = G::players[i]._allPixels.begin();
+                std::advance(iter, rand() % G::players[i]._allPixels.size());
+                G::players[i]._money.spendMoney(cost);
+                G::players[i].AddCity(*iter);
+            }
+        }
+    } else {
+        // silo
+        int cost = 10000 * (MAIN_PLAYER._silos.size() + 1);
+
+        if (MAIN_PLAYER._money.moneyBalance < cost) return;
+        MAIN_PLAYER._money.spendMoney(cost);
+        MAIN_PLAYER.AddSilo(GetPixelOnMouse());
+        mySounds.Play(mySounds.cityBuildPool);
+
+        // bots also make a random city when main player makes city
+        for (int i = 1; i < G::players.size(); i++) {
+            if (G::players[i]._dead) continue;
+
+            cost = 10000 * (G::players[i]._silos.size() + 1);
+            if (G::players[i]._money.moneyBalance - cost >= 0) {
+                auto iter = G::players[i]._allPixels.begin();
+                std::advance(iter, rand() % G::players[i]._allPixels.size());
+                G::players[i]._money.spendMoney(cost);
+                G::players[i].AddSilo(*iter);
+            }
         }
     }
 }

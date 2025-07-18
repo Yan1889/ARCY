@@ -3,3 +3,5 @@
 //
 
 #include "MissileSilo.h"
+MissileSilo::MissileSilo(Pixel *pos): Building(pos) {
+}

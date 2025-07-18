@@ -11,11 +11,15 @@ void TextureCollection::LoadAll() {
     hydrogenBomb = LoadTexture("assets/images/hydrogenBomb.png");
     explosion = LoadTexture("assets/images/explosion.png");
     flash = LoadTexture("assets/images/flash.png");
+    silo = LoadTexture("assets/images/icbm.png");
 }
 
 void TextureCollection::UnloadAll() {
     UnloadTexture(city);
+    UnloadTexture(silo);
     UnloadTexture(atomBomb);
     UnloadTexture(hydrogenBomb);
+    UnloadTexture(explosion);
+    UnloadTexture(flash);
 }
 

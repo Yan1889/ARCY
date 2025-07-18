@@ -8,6 +8,7 @@
 
 
 class MissileSilo: public Building {
+public:
     explicit MissileSilo(Pixel* pos);
 };
 
