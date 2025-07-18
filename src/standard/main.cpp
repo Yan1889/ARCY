@@ -113,7 +113,7 @@ void renderGame() {
     displayBGTextures();
 
     for (const Player &p: G::players) {
-        for (Pixel *pixel: p._borderPixels) {
+        for (Pixel *pixel: p._border_vec) {
             DrawPixel(pixel->x, pixel->y, p._color);
         }
     }

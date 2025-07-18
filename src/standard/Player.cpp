@@ -10,7 +10,7 @@
 
 #include "raylib.h"
 
-Player::Player(Pixel *startPos, const int startRadius): _id(G::players.size()) {
+Player::Player(Pixel *startPos, const int startRadius): _id(static_cast<int>(G::players.size())) {
     _centerPixel_x = startPos->x;
     _centerPixel_y = startPos->y;
     _allPixelsSummed_x = _centerPixel_x;
@@ -29,8 +29,6 @@ Player::Player(Pixel *startPos, const int startRadius): _id(G::players.size()) {
     _lastActionTime = GetTime();
 
     GetOwnershipOfPixel(&G::territoryMap[_centerPixel_x][_centerPixel_y]);
-    UpdateAllDirty();
-
     Expand(-1, 0.5);
 }
 
@@ -47,7 +45,7 @@ void Player::Update() {
             ++it;
         }
     }
-    UpdateAllDirty();
+    UpdateAllDirtyBorder();
 
     // Add money depending on population
     IncreaseMoney();
@@ -96,25 +94,16 @@ void Player::IncreaseMoney() {
     }
 }
 
-void Player::UpdateAllDirty() {
-    for (Pixel *p: _dirtyPixels) {
-        UpdateSingleDirty(p);
-    }
-    _dirtyPixels.clear();
-}
 
 void Player::AddBorderPixel(Pixel *p) {
-    if (_borderSet.insert(p).second) {
-        _borderPixels.push_back(p);
+    if (_border_set.insert(p).second) {
+        _border_vec.push_back(p);
     }
 }
 
 void Player::RemoveBorderPixel(Pixel *p) {
-    if (_borderSet.erase(p)) {
-        auto it = std::ranges::find(_borderPixels, p);
-        if (it != _borderPixels.end()) {
-            _borderPixels.erase(it);
-        }
+    if (_border_set.erase(p)) {
+        _border_vec.erase(std::ranges::find(_border_vec, p));
     }
 }
 

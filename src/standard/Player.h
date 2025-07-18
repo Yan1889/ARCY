@@ -18,9 +18,9 @@
 
 struct Attack {
     int targetPlayerId;
-    int troops;
-    std::queue<Pixel *> queue;
-    std::unordered_set<Pixel *> set;
+    int troops{};
+    std::queue<Pixel *> queue{};
+    std::unordered_set<Pixel *> set{};
 };
 
 class Player {
@@ -49,9 +49,10 @@ public:
 
     // territory
     std::unordered_set<Pixel *> _allPixels;
-    std::deque<Pixel *> _borderPixels;
-    std::unordered_set<Pixel *> _borderSet;
-    std::unordered_set<Pixel *> _dirtyPixels;
+    std::vector<Pixel *> _border_vec;
+    std::unordered_set<Pixel *> _border_set;
+    std::vector<Pixel *> _dirtyBorderPixels_vec;
+    std::unordered_set<Pixel *> _dirtyBorderPixels_set;
 
     // attack
     std::unordered_map<int, Attack> _targetToAttackMap;
@@ -71,9 +72,9 @@ public:
     void GetOwnershipOfPixel(Pixel* newP);
     void LoseOwnershipOfPixel(Pixel * pixel, bool updateTextureToo);
 
-    void UpdateAllDirty();
-    void MarkPixelAsDirty(Pixel* pixel);
-    void UpdateSingleDirty(Pixel* pixel);
+    void MarkAsDirty(Pixel* p);
+    void UpdateAllDirtyBorder();
+    void UpdateBorderSingle(Pixel* pixel);
     void AddBorderPixel(Pixel* pixel);
     void RemoveBorderPixel(Pixel* pixel);
 

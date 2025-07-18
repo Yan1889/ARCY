@@ -9,7 +9,6 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "Globals.h"
-#include "loaders/Sounds.h"
 #include "loaders/TextureCollection.h"
 
 #define MAIN_PLAYER G::players[0]
@@ -165,7 +164,7 @@ void Bombs::Explode(SingleBomb &b) {
 
             if (distance <= 1.0f && noise > distance) {
                 if (px >= 0 && py >= 0 && px < G::MAP_WIDTH && py < G::MAP_HEIGHT) {
-                    Color explosionColor = Color{
+                    const Color explosionColor{
                         (unsigned char) GetRandomValue(0, 200),
                         (unsigned char) GetRandomValue(230, 255),
                         (unsigned char) GetRandomValue(0, 50),

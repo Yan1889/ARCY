@@ -11,21 +11,15 @@ void Player::Expand(const int target, const float percentage) {
     const int newPeopleLeaving = _population * percentage;
     _population -= newPeopleLeaving;
 
-    // insert if new target
-    if (!_targetToAttackMap.contains(target)) {
-        _targetToAttackMap[target] = {
-            target,
-            0,
-            {}
-        };
-    }
+    auto& attack = _targetToAttackMap[target];
+    attack.targetPlayerId = target;
     _targetToAttackMap[target].troops += newPeopleLeaving;
+
     ReFillAttackQueueFromScratch(_targetToAttackMap[target]);
 }
 
 
 void Player::ProcessAttackQueue(Attack& attack) {
-    // 60fps => ~10 border expansions / 1s
     constexpr int maxPixelsPerFrame = 100;
 
     for (int i = 0; i < maxPixelsPerFrame && !attack.set.empty() && attack.troops > 0; i++) {
@@ -45,23 +39,33 @@ void Player::ProcessAttackQueue(Attack& attack) {
         attack.queue.pop();
         attack.set.erase(newP);
         GetOwnershipOfPixel(newP);
+
+        // update attack queue
+        for (Pixel *neighbor: newP->GetNeighbors()) {
+            if (attack.troops <= 0) break; // no new Pixels
+            if (neighbor->playerId == _id
+                || attack.set.contains(neighbor)
+                || neighbor->invasionAcceptProbability == 0)
+                continue;
+
+            attack.set.insert(neighbor);
+            attack.queue.push(neighbor);
+        }
     }
 
     // only update queue when empty
     if (attack.set.empty()) {
-        UpdateAllDirty();
         ReFillAttackQueueFromScratch(attack);
     }
 }
 
 void Player::ReFillAttackQueueFromScratch(Attack& attack) {
-    // clear
+    UpdateAllDirtyBorder();
     attack.queue = {};
     attack.set.clear();
 
-    // refill
     const int target = attack.targetPlayerId;
-    for (Pixel *borderPixel: _borderPixels) {
+    for (Pixel *borderPixel: _border_vec) {
         for (Pixel *p: borderPixel->GetNeighbors()) {
             if (attack.set.contains(p) ||
                 p->playerId != target ||
@@ -87,7 +91,7 @@ void Player::GetOwnershipOfPixel(Pixel *newP) {
     }
     newP->playerId = _id;
 
-    attacker.MarkPixelAsDirty(newP);
+    attacker.MarkAsDirty(newP);
 
     ImageDrawPixel(&G::territoryImage, newP->x, newP->y, _color);
     G::territoryTextureDirty = true;
@@ -96,23 +100,34 @@ void Player::GetOwnershipOfPixel(Pixel *newP) {
     AddPixelToCenter(newP);
 }
 
-void Player::MarkPixelAsDirty(Pixel *pixel) {
-    _dirtyPixels.insert(pixel);
-
-    const std::vector<Pixel *> &affectedPixels = pixel->GetNeighbors();
-    for (Pixel *neighbor: affectedPixels) {
-        _dirtyPixels.insert(neighbor);
+void Player::MarkAsDirty(Pixel *pixel) {
+    if (_dirtyBorderPixels_set.insert(pixel).second) {
+        _dirtyBorderPixels_vec.push_back(pixel);
+    }
+    for (Pixel* p : pixel->GetNeighbors()) {
+        if (_dirtyBorderPixels_set.insert(p).second) {
+            _dirtyBorderPixels_vec.push_back(p);
+        }
     }
 }
 
-void Player::UpdateSingleDirty(Pixel *pixel) {
+void Player::UpdateAllDirtyBorder() {
+    for (Pixel* p : _dirtyBorderPixels_vec) {
+        UpdateBorderSingle(p);
+    }
+    _dirtyBorderPixels_vec.clear();
+    _dirtyBorderPixels_set.clear();
+}
+
+
+void Player::UpdateBorderSingle(Pixel *pixel) {
     if (!_allPixels.contains(pixel)) {
         // pixel isn't owned by player
         RemoveBorderPixel(pixel);
         return;
     }
 
-    const bool wasBorderPixel = _borderSet.contains(pixel);
+    const bool wasBorderPixel = _border_set.contains(pixel);
     bool nowBorderPixel = false;
     for (Pixel *nn: pixel->GetNeighbors()) {
         if (nn->playerId != _id) {
@@ -132,7 +147,7 @@ void Player::LoseOwnershipOfPixel(Pixel *pixel, const bool updateTextureToo) {
 
     pixel->playerId = -1;
 
-    MarkPixelAsDirty(pixel);
+    MarkAsDirty(pixel);
     RemovePixelFromCenter(pixel);
 
     if (updateTextureToo) {
@@ -142,7 +157,6 @@ void Player::LoseOwnershipOfPixel(Pixel *pixel, const bool updateTextureToo) {
 
     // die if too small
     if (_allPixels.empty()) {
-        UpdateAllDirty();
         _dead = true;
     }
 }
