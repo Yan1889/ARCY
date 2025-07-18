@@ -54,6 +54,8 @@ add_executable(ARCY src/standard/main.cpp
         src/frontend-test/main.cpp
         src/standard/loaders/SoundPool.cpp
         src/standard/loaders/SoundPool.h
+        src/standard/display.cpp
+        src/standard/display.h
 )
 
 file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
