@@ -53,6 +53,10 @@ namespace G {
     inline Texture2D territoryTexture;
     inline Image territoryImage;
     inline bool territoryTextureDirty{};
+
+    inline Pixel* PixelAt(const int x, const int y) {
+        return &territoryMap[x][y];
+    }
 }
 
 #endif //GLOBALS_H

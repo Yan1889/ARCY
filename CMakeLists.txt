@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.31)
 project(ARCY)
 
 set(CMAKE_CXX_STANDARD 20)
+# set(CMAKE_BUILD_TYPE Debug)
 
 # Detect if we're using Emscripten
 if("${CMAKE_CXX_COMPILER}" MATCHES "em\\+\\+")

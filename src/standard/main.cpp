@@ -51,15 +51,21 @@ void handleControls();
 
 void displayInfoTexts();
 
-void displayAllPlayerTags();
+void displayPlayers();
+
+void displayPlayerTags();
 
 void displayBGTextures();
+
+void displayCrossHair();
 
 void checkExplosion();
 
 void checkCity();
 
 void checkExpansionAndAttack();
+
+Pixel *GetPixelOnMouse();
 
 Sounds mySounds; // Activate audio
 
@@ -98,9 +104,10 @@ void frameLogic() {
     checkExpansionAndAttack();
     Bombs::Update();
 
-    for (int i = 0; i < G::players.size(); i++) {
-        if (G::players[i]._dead) continue;
-        G::players[i].Update();
+    for (auto & p : G::players) {
+        if (!p._dead) {
+            p.Update();
+        }
     }
 }
 
@@ -112,42 +119,12 @@ void renderGame() {
 
     displayBGTextures();
 
-    for (const Player &p: G::players) {
-        for (Pixel *pixel: p._border_vec) {
-            DrawPixel(pixel->x, pixel->y, p._color);
-        }
-    }
-
-    // display every city for each player
-    for (const Player &p: G::players) {
-        for (const City& c: p._cities) {
-            DrawTextureEx(
-                TextureCollection::city,
-                Vector2(c.pos->x - cityRadius, c.pos->y - cityRadius),
-                0,
-                2 * cityRadius / TextureCollection::city.width,
-                WHITE
-            );
-        }
-    }
-
-    // territory texture
-    if (G::territoryTextureDirty) {
-        UpdateTexture(G::territoryTexture, G::territoryImage.data);
-        G::territoryTextureDirty = false;
-    }
-    DrawTexture(G::territoryTexture, 0, 0, Fade(WHITE, 0.5));
+    displayPlayers();
 
     // """""Crosshair""""
-    int size = 6;
-    int thickness = 1;
-    DrawRectangle((int) playerPos.x - size, (int) playerPos.y - thickness / 2, size * 2 + 1, thickness, WHITE);
-    DrawRectangle((int) playerPos.x - thickness / 2, (int) playerPos.y - size, thickness, size * 2 + 1, WHITE);
+    displayCrossHair();
 
-    // Bomb test
     Bombs::Render();
-
-    displayAllPlayerTags();
 
     EndMode2D();
 
@@ -202,7 +179,7 @@ void displayInfoTexts() {
 
     const char *sendText = TextFormat(
         "People exploring neutral land: %d",
-        MAIN_PLAYER._targetToAttackMap.contains(-1)? MAIN_PLAYER._targetToAttackMap[-1].troops : 0
+        MAIN_PLAYER._targetToAttackMap.contains(-1) ? MAIN_PLAYER._targetToAttackMap[-1].troops : 0
     );
     DrawText(sendText, 0 + 25, GetScreenHeight() - 25, 20, MAIN_PLAYER_COLOR);
 
@@ -231,7 +208,37 @@ void displayInfoTexts() {
     DrawText(territorySizeText, 0 + 25, GetScreenHeight() - 100, 20, MAIN_PLAYER_COLOR);
 }
 
-void displayAllPlayerTags() {
+void displayPlayers() {
+    for (const Player &p: G::players) {
+        for (Pixel *pixel: p._border_vec) {
+            DrawPixel(pixel->x, pixel->y, p._color);
+        }
+    }
+
+    // display every city for each player
+    for (const Player &p: G::players) {
+        for (const City &c: p._cities) {
+            DrawTextureEx(
+                TextureCollection::city,
+                Vector2(c.pos->x - cityRadius, c.pos->y - cityRadius),
+                0,
+                2 * cityRadius / TextureCollection::city.width,
+                p._color
+            );
+        }
+    }
+
+    // territory texture
+    if (G::territoryTextureDirty) {
+        UpdateTexture(G::territoryTexture, G::territoryImage.data);
+        G::territoryTextureDirty = false;
+    }
+    DrawTexture(G::territoryTexture, 0, 0, Fade(WHITE, 0.5));
+
+    displayPlayerTags();
+}
+
+void displayPlayerTags() {
     for (int i = 0; i < G::players.size(); i++) {
         if (G::players[i]._dead) continue;
 
@@ -253,6 +260,14 @@ void displayAllPlayerTags() {
         DrawTextEx(GetFontDefault(), name, textPos, fontSize, spacing, WHITE);
     }
 }
+
+void displayCrossHair() {
+    int size = 6;
+    int thickness = 1;
+    DrawRectangle((int) playerPos.x - size, (int) playerPos.y - thickness / 2, size * 2 + 1, thickness, WHITE);
+    DrawRectangle((int) playerPos.x - thickness / 2, (int) playerPos.y - size, thickness, size * 2 + 1, WHITE);
+}
+
 
 void handleControls() {
     if (IsKeyDown(KEY_W)) playerPos.y -= moveSpeed * GetFrameTime() * 1 / camera.zoom;
@@ -288,10 +303,7 @@ void checkExpansionAndAttack() {
 
     // attack player if left-click
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        Pixel *pixelClicked = &G::territoryMap
-                [static_cast<int>(GetScreenToWorld2D(GetMousePosition(), camera).x)]
-                [static_cast<int>(GetScreenToWorld2D(GetMousePosition(), camera).y)];
-        const int playerIdClickd = pixelClicked->playerId;
+        const int playerIdClickd = GetPixelOnMouse()->playerId;
         if (playerIdClickd == 0) return; // clicked on himself
 
         MAIN_PLAYER.Expand(playerIdClickd, 0.5);
@@ -307,33 +319,26 @@ void checkExpansionAndAttack() {
 }
 
 void checkCity() {
-    // Create cities when right-clicking
-    if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) {
-        Pixel *pixelClicked = &G::territoryMap
-                [static_cast<int>(GetScreenToWorld2D(GetMousePosition(), camera).x)]
-                [static_cast<int>(GetScreenToWorld2D(GetMousePosition(), camera).y)];
+    if (!IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) return;
+    if (!MAIN_PLAYER._allPixels.contains(GetPixelOnMouse())) return;
 
-        if (MAIN_PLAYER._allPixels.contains(pixelClicked)) {
-            int cost = 10000 * (MAIN_PLAYER._cities.size() + 1);
+    int cost = 10000 * (MAIN_PLAYER._cities.size() + 1);
 
-            if (MAIN_PLAYER._money.moneyBalance - cost >= 0) {
-                MAIN_PLAYER._money.spendMoney(cost);
-                mySounds.Play(mySounds.cityBuildPool);
-                MAIN_PLAYER.AddCity(GetScreenToWorld2D(GetMousePosition(), camera));
+    if (MAIN_PLAYER._money.moneyBalance < cost) return;
+    MAIN_PLAYER._money.spendMoney(cost);
+    MAIN_PLAYER.AddCity(GetScreenToWorld2D(GetMousePosition(), camera));
+    mySounds.Play(mySounds.cityBuildPool);
 
-                // bots also make a random city when main player makes city
-                for (int i = 1; i < G::players.size(); i++) {
-                    if (G::players[i]._dead) continue;
+    // bots also make a random city when main player makes city
+    for (int i = 1; i < G::players.size(); i++) {
+        if (G::players[i]._dead) continue;
 
-                    cost = 10000 * (G::players[i]._cities.size() + 1);
-                    if (G::players[i]._money.moneyBalance - cost >= 0) {
-                        auto iter = G::players[i]._allPixels.begin();
-                        std::advance(iter, rand() % G::players[i]._allPixels.size());
-                        G::players[i]._money.spendMoney(cost);
-                        G::players[i].AddCity(*iter);
-                    }
-                }
-            }
+        cost = 10000 * (G::players[i]._cities.size() + 1);
+        if (G::players[i]._money.moneyBalance - cost >= 0) {
+            auto iter = G::players[i]._allPixels.begin();
+            std::advance(iter, rand() % G::players[i]._allPixels.size());
+            G::players[i]._money.spendMoney(cost);
+            G::players[i].AddCity(*iter);
         }
     }
 }
@@ -351,18 +356,19 @@ void displayBGTextures() {
 
 void initPlayers() {
     // main character
-    G::players.emplace_back(Player(
-        &G::territoryMap[static_cast<int>(playerPos.x)][static_cast<int>(playerPos.y)],
+    G::players.emplace_back(
+        G::PixelAt(playerPos.x, playerPos.y),
         10
-    ));
+    );
 
     // bots
     for (int i = 0; i < botCount; i++) {
         const float angle = 2 * PI * i / botCount;
         G::players.emplace_back(
-            &G::territoryMap
-            [playerPos.x + std::cos(angle) * botSpawnRadius]
-            [playerPos.y + std::sin(angle) * botSpawnRadius],
+            G::PixelAt(
+                playerPos.x + std::cos(angle) * botSpawnRadius,
+                playerPos.y + std::sin(angle) * botSpawnRadius
+            ),
             5
         );
     }
@@ -371,7 +377,7 @@ void initPlayers() {
 void initCamAndMap() {
     // Camera
     camera.target = playerPos;
-    camera.offset = (Vector2){SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f};
+    camera.offset = Vector2{SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f};
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
 
@@ -403,4 +409,11 @@ void initCamAndMap() {
             G::territoryMap[x][y].LoadNeighbors();
         }
     }
+}
+
+Pixel *GetPixelOnMouse() {
+    return G::PixelAt(
+        static_cast<int>(GetScreenToWorld2D(GetMousePosition(), camera).x),
+        static_cast<int>(GetScreenToWorld2D(GetMousePosition(), camera).y)
+    );
 }

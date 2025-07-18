@@ -157,6 +157,7 @@ void Player::LoseOwnershipOfPixel(Pixel *pixel, const bool updateTextureToo) {
 
     // die if too small
     if (_allPixels.empty()) {
+        UpdateAllDirtyBorder();
         _dead = true;
     }
 }
