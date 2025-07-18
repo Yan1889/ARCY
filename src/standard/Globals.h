@@ -9,7 +9,7 @@
 #include "map/PerlinNoise.h"
 #include "map/Pixel.h"
 #include "raylib.h"
-#include "Player.h"
+#include "player/Player.h"
 
 struct Gradient;
 

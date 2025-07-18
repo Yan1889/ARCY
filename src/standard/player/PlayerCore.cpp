@@ -2,7 +2,7 @@
 // Created by yanam on 14.07.2025.
 //
 
-#include "Globals.h"
+#include "../Globals.h"
 #include "Player.h"
 
 void Player::Expand(const int target, const float percentage) {

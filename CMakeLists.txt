@@ -32,16 +32,16 @@ add_executable(ARCY src/standard/main.cpp
         src/standard/Map/PerlinNoise.h
         src/standard/Loaders/TextureCollection.cpp
         src/standard/Loaders/TextureCollection.h
-        src/standard/Player.cpp
-        src/standard/Player.h
+        src/standard/player/Player.cpp
+        src/standard/player/Player.h
         src/standard/Globals.h
-        src/standard/Money.cpp
-        src/standard/Money.h
+        src/standard/player/Money.cpp
+        src/standard/player/Money.h
         src/standard/Map/Pixel.h
         src/standard/Map/Pixel.cpp
         src/standard/Loaders/Sounds.cpp
         src/standard/Loaders/Sounds.h
-        src/standard/PlayerCore.cpp
+        src/standard/player/PlayerCore.cpp
         src/standard/Bombs.cpp
         src/standard/Bombs.h
         src/standard/buildings/Building.cpp

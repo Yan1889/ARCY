@@ -11,9 +11,9 @@
 
 #include "Money.h"
 #include "raylib.h"
-#include "buildings/City.h"
-#include "map/Pixel.h"
-#include "buildings/MissileSilo.h"
+#include "../buildings/City.h"
+#include "../map/Pixel.h"
+#include "../buildings/MissileSilo.h"
 
 
 struct Attack {

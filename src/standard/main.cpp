@@ -5,7 +5,7 @@
 
 #include "raylib.h"
 #include "loaders/TextureCollection.h"
-#include "Player.h"
+#include "player/Player.h"
 #include "Globals.h"
 #include "loaders/Sounds.h"
 #include "map/PerlinNoise.h"
@@ -62,8 +62,6 @@ int main() {
 
     initCamAndMap();
     initPlayers();
-
-    playerPos = Vector2{G::MAP_WIDTH / 2, G::MAP_HEIGHT / 2};
 
     while (!WindowShouldClose()) {
         frameLogic();
@@ -207,8 +205,8 @@ void initPlayers() {
         const float angle = 2 * PI * i / botCount;
         G::players.emplace_back(
             G::PixelAt(
-                playerPos.x + std::cos(angle) * botSpawnRadius,
-                playerPos.y + std::sin(angle) * botSpawnRadius
+                static_cast<int>(playerPos.x + std::cos(angle) * botSpawnRadius),
+                static_cast<int>(playerPos.y + std::sin(angle) * botSpawnRadius)
             ),
             5
         );
@@ -250,6 +248,7 @@ void initCamAndMap() {
             G::territoryMap[x][y].LoadNeighbors();
         }
     }
+    playerPos = Vector2{G::MAP_WIDTH / 2, G::MAP_HEIGHT / 2};
 }
 
 Pixel *GetPixelOnMouse() {

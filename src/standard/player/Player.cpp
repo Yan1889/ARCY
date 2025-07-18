@@ -1,6 +1,6 @@
 #include "Player.h"
-#include "Globals.h"
-#include "map/Pixel.h"
+#include "../Globals.h"
+#include "../map/Pixel.h"
 
 #include <cassert>
 #include <iostream>
