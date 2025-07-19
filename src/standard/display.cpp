@@ -207,8 +207,8 @@ void displayBuildMenu() {
         (float) GetScreenWidth(),
         GetScreenHeight() * 0.1f
     };
-    // white bg
-    DrawRectangleRec(menuRect, WHITE);
+    // black transparent bg
+    DrawRectangleRec(menuRect, Color{0 ,0 ,0, 150});
 
     const Rectangle cityButtonRect{
         menuRect.x,
@@ -223,9 +223,9 @@ void displayBuildMenu() {
         menuRect.height * 0.8f,
     };
     DrawRectangleRec(cityButtonRect, DARKBLUE);
-    DrawText("Build city", cityButtonRect.x, cityButtonRect.y, 50, WHITE);
+    DrawText("Build city", cityButtonRect.x + 20, cityButtonRect.y + 10, 50, WHITE);
     DrawRectangleRec(siloButtonRect, DARKBLUE);
-    DrawText("Build silo", siloButtonRect.x, siloButtonRect.y, 50, WHITE);
+    DrawText("Build silo", siloButtonRect.x + 20, siloButtonRect.y + 10, 50, WHITE);
 
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         if (CheckCollisionPointRec(GetMousePosition(), cityButtonRect)) {
@@ -285,7 +285,8 @@ void displayBuildMenu() {
             Vector2(GetMousePosition().x - buildingRadius, GetMousePosition().y - buildingRadius),
             0,
             2 * buildingRadius / t->width,
-            Fade(WHITE, 0.5)
+            MAIN_PLAYER.canBuildCity(GetPixelOnMouse()) || MAIN_PLAYER.canBuildSilo(GetPixelOnMouse())
+            ? Fade(GREEN, 0.5) : Fade(RED, 0.5)
         );
     }
 }

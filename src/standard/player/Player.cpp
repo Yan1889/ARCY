@@ -139,6 +139,24 @@ bool Player::TryAddSilo(Pixel *pos) {
     return true;
 }
 
+bool Player::canBuildCity(Pixel* pos)
+{
+    const int cost = 10000 * (_cities.size() + 1);
+
+    if (_money.moneyBalance < cost || !_allPixels.contains(pos)) return false;
+
+    return true;
+}
+
+bool Player::canBuildSilo(Pixel* pos)
+{
+    const int cost = 10000 * (_silos.size() + 1);
+
+    if (_money.moneyBalance < cost || !_allPixels.contains(pos)) return false;
+
+    return true;
+}
+
 Pixel* Player::GetNearestSiloFromPixel(Pixel* target) const {
     if (_silos.empty()) return nullptr;
 

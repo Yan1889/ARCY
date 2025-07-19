@@ -27,5 +27,4 @@ void displayBGTextures();
 void displayCrossHair();
 void displayBuildMenu();
 
-
 #endif //DISPLAY_H
