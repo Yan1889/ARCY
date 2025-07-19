@@ -271,7 +271,7 @@ void displayBuildMenu() {
 
     // displaying the dragged object
     if (buildingTypeDragging != NONE) {
-        Texture2D *t = nullptr;
+        const Texture2D *t = nullptr;
         switch (buildingTypeDragging) {
             case CITY:
                 t = &TextureCollection::city;

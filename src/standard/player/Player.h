@@ -84,8 +84,8 @@ public:
     void AddPixelToCenter(Pixel* newP);
     bool TryAddCity(Pixel* pos);
     bool TryAddSilo(Pixel* pos);
-    bool canBuildCity(Pixel* pos);
-    bool canBuildSilo(Pixel* pos);
+    bool canBuildCity(Pixel* pos) const;
+    bool canBuildSilo(Pixel* pos) const;
     Pixel* GetNearestSiloFromPixel(Pixel* point) const;
 };
 

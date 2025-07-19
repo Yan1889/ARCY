@@ -44,12 +44,12 @@ void Bombs::Update() {
         }
     }
 
-    if (!IsKeyPressed(KEY_ONE) && !IsKeyPressed(KEY_TWO)) return;
+    if (!IsKeyDown(KEY_ONE) && !IsKeyDown(KEY_TWO)) return;
 
     Vector2 targetPos = GetScreenToWorld2D(GetMousePosition(), camera);
     if (targetPos.x < 0 || targetPos.x > G::MAP_WIDTH - 1 || targetPos.y < 0 || targetPos.y > G::MAP_HEIGHT - 1) return;
 
-    const int cost = IsKeyPressed(KEY_ONE) ? 10000 : 100000;
+    const int cost = IsKeyDown(KEY_ONE) ? 10000 : 100000;
 
     if (MAIN_PLAYER._money.moneyBalance - cost < 0) return;
 
@@ -67,8 +67,8 @@ void Bombs::Update() {
         .pos =  startPixel->ToVector2(),
         .time = 0,
         .speed = 1,
-        .radius = IsKeyPressed(KEY_ONE) ? 50.f : 300.f,
-        .type = IsKeyPressed(KEY_ONE)? ATOM : HYDROGEN
+        .radius = IsKeyDown(KEY_ONE) ? 50.f : 300.f,
+        .type = IsKeyDown(KEY_ONE)? ATOM : HYDROGEN
     });
 }
 

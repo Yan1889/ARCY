@@ -11,7 +11,7 @@
 
 class SoundPool {
 public:
-    SoundPool(const std::string& soundFilePath, int poolSize = 8);
+    SoundPool(const std::string& soundFilePath, int poolSize = 20);
     ~SoundPool();
 
     void Play();

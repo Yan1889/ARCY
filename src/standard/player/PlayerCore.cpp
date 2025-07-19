@@ -6,16 +6,15 @@
 #include "Player.h"
 
 void Player::Expand(const int target, const float percentage) {
-    if (_population / 2 < 100) return; // not enough troops
+    if (_population * (1 - percentage) < 100) return; // not enough troops
 
     const int newPeopleLeaving = _population * percentage;
     _population -= newPeopleLeaving;
 
     auto& attack = _targetToAttackMap[target];
     attack.targetPlayerId = target;
-    _targetToAttackMap[target].troops += newPeopleLeaving;
-
-    ReFillAttackQueueFromScratch(_targetToAttackMap[target]);
+    attack.troops += newPeopleLeaving;
+    ReFillAttackQueueFromScratch(attack);
 }
 
 

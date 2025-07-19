@@ -37,11 +37,11 @@ void Sounds::Play(SoundPool* pool)
 
 void Sounds::LoadAll()
 {
-    explosionPool = new SoundPool("assets/sounds/nukeexplosion.mp3", 8);
-    nearExplosionPool = new SoundPool("assets/sounds/nearnukeexplosion.mp3", 8);
-    distantExplosionPool = new SoundPool("assets/sounds/distantnukeexplosion.mp3", 8);
-    cityBuildPool = new SoundPool("assets/sounds/citybuilding.mp3", 8);
-    misslePool = new SoundPool("assets/sounds/nukeflyby.mp3", 8);
+    explosionPool = new SoundPool("assets/sounds/nukeexplosion.mp3");
+    nearExplosionPool = new SoundPool("assets/sounds/nearnukeexplosion.mp3");
+    distantExplosionPool = new SoundPool("assets/sounds/distantnukeexplosion.mp3");
+    cityBuildPool = new SoundPool("assets/sounds/citybuilding.mp3");
+    misslePool = new SoundPool("assets/sounds/nukeflyby.mp3");
 
     oceanSound = LoadMusicStream("assets/sounds/ocean.mp3");
     beachSound = LoadMusicStream("assets/sounds/beach.mp3");

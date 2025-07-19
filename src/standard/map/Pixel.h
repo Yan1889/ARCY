@@ -25,24 +25,11 @@ struct Pixel {
 
     void LoadNeighbors();
 
-    const std::vector<Pixel *>& GetNeighbors();
-
-    bool acceptRandomly() const;
-    Color GetColor() const;
-    float GetColorProbability() const;
-
-    Vector2 ToVector2() const;
-
-
-    bool operator<(const Pixel &other) const;
-    bool operator==(const Pixel &other) const;
-    struct Hasher {
-        std::size_t operator()(const Pixel &p) const {
-            std::size_t seed = std::hash<int>()(p.x);
-            seed ^= std::hash<int>()(p.y) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-            return seed;
-        }
-    };
+    [[nodiscard]] const std::vector<Pixel *>& GetNeighbors() const;
+    [[nodiscard]] bool acceptRandomly() const;
+    [[nodiscard]] Color GetColor() const;
+    [[nodiscard]] float GetColorProbability() const;
+    [[nodiscard]] Vector2 ToVector2() const;
 };
 
 #endif //PIXEL_H

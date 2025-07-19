@@ -13,13 +13,13 @@ Pixel::Pixel(const int x, const int y, const int id): x(x), y(y), playerId(id),
 }
 
 void Pixel::LoadNeighbors() {
-    if (x > 0) neighborsCached.emplace_back(&G::territoryMap[x - 1][y]); // Up
-    if (x + 1 < G::MAP_WIDTH) neighborsCached.emplace_back(&G::territoryMap[x + 1][y]); // Down
-    if (y > 0) neighborsCached.emplace_back(&G::territoryMap[x][y - 1]); // Left
-    if (y + 1 < G::MAP_HEIGHT) neighborsCached.emplace_back(&G::territoryMap[x][y + 1]); // Right
+    if (x > 0) neighborsCached.emplace_back(&G::territoryMap[x - 1][y]); // Left
+    if (x + 1 < G::MAP_WIDTH) neighborsCached.emplace_back(&G::territoryMap[x + 1][y]); // Right
+    if (y > 0) neighborsCached.emplace_back(&G::territoryMap[x][y - 1]); // Up
+    if (y + 1 < G::MAP_HEIGHT) neighborsCached.emplace_back(&G::territoryMap[x][y + 1]); // Down
 }
 
-const std::vector<Pixel *> &Pixel::GetNeighbors() {
+const std::vector<Pixel *> &Pixel::GetNeighbors() const {
     return neighborsCached;
 }
 
@@ -29,12 +29,16 @@ Color Pixel::GetColor() const {
 }
 
 float Pixel::GetColorProbability() const {
-    Color terrainColor = GetColor();
-    for (auto &mapPart: G::mapParts) {
-        if (terrainColor.r == mapPart.color.r) {
+    const Color terrainColor = GetColor();
+    for (const Gradient &mapPart: G::mapParts) {
+        if (terrainColor.r == mapPart.color.r &&
+            terrainColor.g == mapPart.color.g &&
+            terrainColor.b == mapPart.color.b &&
+            terrainColor.a == mapPart.color.a) {
             return mapPart.difficulty;
         }
     }
+    std::cerr << "Map not correct!" << std::endl;
     return -1;
 }
 
@@ -48,12 +52,4 @@ Vector2 Pixel::ToVector2() const {
 bool Pixel::acceptRandomly() const {
     // radiation = 3x harder
     return invasionAcceptProbability > static_cast<float>(rand()) / RAND_MAX * (contaminated ? 3.f : 1.f);
-}
-
-bool Pixel::operator<(const Pixel &other) const {
-    return std::tie(x, y) < std::tie(other.x, other.y);
-}
-
-bool Pixel::operator==(const Pixel &other) const {
-    return x == other.x && y == other.y;
 }
