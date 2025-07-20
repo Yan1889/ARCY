@@ -11,7 +11,7 @@
 #include "Globals.h"
 #include "loaders/TextureCollection.h"
 
-#define MAIN_PLAYER G::players[0]
+#define MAIN_PLAYER players[0]
 
 
 std::vector<SingleBomb> Bombs::allBombs = {};
@@ -47,13 +47,13 @@ void Bombs::Update() {
     if (!IsKeyDown(KEY_ONE) && !IsKeyDown(KEY_TWO)) return;
 
     Vector2 targetPos = GetScreenToWorld2D(GetMousePosition(), camera);
-    if (targetPos.x < 0 || targetPos.x > G::MAP_WIDTH - 1 || targetPos.y < 0 || targetPos.y > G::MAP_HEIGHT - 1) return;
+    if (targetPos.x < 0 || targetPos.x > MAP_WIDTH - 1 || targetPos.y < 0 || targetPos.y > MAP_HEIGHT - 1) return;
 
     const int cost = IsKeyDown(KEY_ONE) ? 10000 : 100000;
 
     if (MAIN_PLAYER._money.moneyBalance - cost < 0) return;
 
-    Pixel* startPixel = MAIN_PLAYER.GetNearestSiloFromPixel(G::PixelAt(targetPos));
+    Pixel* startPixel = MAIN_PLAYER.GetNearestSiloFromPixel(PixelAt(targetPos));
 
     if (startPixel == nullptr) return;
 
@@ -153,14 +153,14 @@ void Bombs::Render() {
 void Bombs::Explode(SingleBomb &b) {
     for (int y = -b.radius; y <= b.radius; y++) {
         for (int x = -b.radius; x <= b.radius; x++) {
-            const int px = Clamp((int) b.targetPos.x + x, 0, G::MAP_WIDTH - 1);
-            const int py = Clamp((int) b.targetPos.y + y, 0, G::MAP_HEIGHT - 1);
+            const int px = Clamp((int) b.targetPos.x + x, 0, MAP_WIDTH - 1);
+            const int py = Clamp((int) b.targetPos.y + y, 0, MAP_HEIGHT - 1);
 
             const float distance = sqrtf((float) (x * x + y * y)) / b.radius;
             const float noise = GetRandomValue(50, 100) / 100.0f;
 
             if (distance <= 1.0f && noise > distance) {
-                if (px >= 0 && py >= 0 && px < G::MAP_WIDTH && py < G::MAP_HEIGHT) {
+                if (px >= 0 && py >= 0 && px < MAP_WIDTH && py < MAP_HEIGHT) {
                     const Color explosionColor{
                         (unsigned char) GetRandomValue(0, 200),
                         (unsigned char) GetRandomValue(230, 255),
@@ -168,21 +168,21 @@ void Bombs::Explode(SingleBomb &b) {
                         255
                     };
 
-                    ImageDrawPixel(&G::explosionImage, px, py, explosionColor);
+                    ImageDrawPixel(&explosionImage, px, py, explosionColor);
 
-                    Pixel *nukedPixel = G::PixelAt(px, py);
+                    Pixel *nukedPixel = PixelAt(px, py);
                     nukedPixel->contaminated = true;
 
                     // remove from player
                     if (nukedPixel->playerId >= 0) {
-                        G::players[nukedPixel->playerId].LoseOwnershipOfPixel(nukedPixel, true);
+                        players[nukedPixel->playerId].LoseOwnershipOfPixel(nukedPixel, true);
                     }
                     nukedPixel->playerId = -2;
                 }
             }
         }
     }
-    G::explosionTextureDirty = true;
+    explosionTextureDirty = true;
 }
 
 void Bombs::checkSound(SingleBomb &bomb) {

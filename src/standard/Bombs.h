@@ -38,12 +38,12 @@ struct EffectAfterDetonation {
 };
 
 class Bombs {
-    static std::vector<SingleBomb> allBombs;
     static std::vector<EffectAfterDetonation> allEffects;
     static void Explode(SingleBomb& bomb);
     static void checkSound(SingleBomb& bomb);
 
 public:
+    static std::vector<SingleBomb> allBombs;
     static void Update();
     static void Render();
 };

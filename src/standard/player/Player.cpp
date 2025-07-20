@@ -8,6 +8,7 @@
 #include <variant>
 #include <algorithm>
 
+#include "../Bombs.h"
 #include "raylib.h"
 
 using namespace G;
@@ -84,6 +85,33 @@ void Player::BotLogic() {
     // add a random silo with 1% chance
     if (rand() < RAND_MAX / 100) {
         TryAddSilo(randomPixel);
+    }
+
+    // randomly bomb something with a 1% chance
+    if (rand() < RAND_MAX / 100) {
+        Pixel *target = PixelAt(rand() % MAP_WIDTH, rand() % MAP_HEIGHT);
+        if (!_allPixels.contains(target)) {
+            // don't bomb yourself
+            Pixel *startPixel = GetNearestSiloFromPixel(target);
+            if (startPixel != nullptr) {
+                const int cost = 10000; // only atom bombs for now
+                if (_money.moneyBalance > cost) {
+                    _money.spendMoney(cost);
+
+                    mySounds.Play(mySounds.misslePool);
+
+                    Bombs::allBombs.push_back(SingleBomb{
+                        .targetPos = target->ToVector2(),
+                        .originPos = startPixel->ToVector2(),
+                        .pos = startPixel->ToVector2(),
+                        .time = 0,
+                        .speed = 1,
+                        .radius = 50.f,
+                        .type = ATOM
+                    });
+                }
+            }
+        }
     }
 }
 
