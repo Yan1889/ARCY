@@ -63,16 +63,38 @@ void Player::Update() {
 }
 
 void Player::BotLogic() {
-    if (_maxPopulation == 0) return;
+    BotLogic_Expanding();
+    BotLogic_Building();
+    BotLogic_Bombing();
+}
 
-    // do a random attack if bot has enough troops
-    const float popPercentage = _population / _maxPopulation;
-    if (popPercentage >= 0.75) {
-        // expand with 20% strength and random target (radiation or neutral or other player)
-        const int target = rand() % (players.size() + 2) - 2;
-        Expand(target, 0.2f);
-    }
+void Player::BotLogic_Bombing() {
+    // randomly bomb something with a 1% chance
+    if (rand() > RAND_MAX / 100) return;
 
+    Pixel *target = PixelAt(rand() % MAP_WIDTH, rand() % MAP_HEIGHT);
+    if (_allPixels.contains(target)) return; // don't bomb yourself
+
+    Pixel *startPixel = GetNearestSiloFromPixel(target);
+    if (startPixel == nullptr) return;
+
+    const int cost = 10000; // only atom bombs for now
+    if (_money.moneyBalance < cost) return;
+
+    _money.spendMoney(cost);
+    mySounds.Play(mySounds.misslePool);
+    Bombs::allBombs.push_back(SingleBomb{
+        .targetPos = target->ToVector2(),
+        .originPos = startPixel->ToVector2(),
+        .pos = startPixel->ToVector2(),
+        .time = 0,
+        .speed = 1,
+        .radius = 50.f,
+        .type = ATOM
+    });
+}
+
+void Player::BotLogic_Building() {
     // get a random pixel
     auto iter = _allPixels.begin();
     std::advance(iter, rand() % _allPixels.size());
@@ -86,34 +108,20 @@ void Player::BotLogic() {
     if (rand() < RAND_MAX / 100) {
         TryAddSilo(randomPixel);
     }
-
-    // randomly bomb something with a 1% chance
-    if (rand() < RAND_MAX / 100) {
-        Pixel *target = PixelAt(rand() % MAP_WIDTH, rand() % MAP_HEIGHT);
-        if (!_allPixels.contains(target)) {
-            // don't bomb yourself
-            Pixel *startPixel = GetNearestSiloFromPixel(target);
-            if (startPixel != nullptr) {
-                const int cost = 10000; // only atom bombs for now
-                if (_money.moneyBalance > cost) {
-                    _money.spendMoney(cost);
-
-                    mySounds.Play(mySounds.misslePool);
-
-                    Bombs::allBombs.push_back(SingleBomb{
-                        .targetPos = target->ToVector2(),
-                        .originPos = startPixel->ToVector2(),
-                        .pos = startPixel->ToVector2(),
-                        .time = 0,
-                        .speed = 1,
-                        .radius = 50.f,
-                        .type = ATOM
-                    });
-                }
-            }
-        }
-    }
 }
+
+void Player::BotLogic_Expanding() {
+    if (_maxPopulation == 0) return;
+
+    // do a random attack if bot has enough troops
+    const float popPercentage = _population / _maxPopulation;
+    if (popPercentage < 0.75) return;
+
+    // expand with 20% strength and random target (radiation or neutral or other player)
+    const int target = rand() % (players.size() + 2) - 2;
+    Expand(target, 0.2f);
+}
+
 
 void Player::GrowPopulation() {
     // Todo: calculate with respect to _allPixels.size() too

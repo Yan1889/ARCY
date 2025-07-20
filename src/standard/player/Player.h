@@ -79,6 +79,9 @@ public:
     void RemoveBorderPixel(Pixel* pixel);
 
     void BotLogic();
+    void BotLogic_Bombing();
+    void BotLogic_Building();
+    void BotLogic_Expanding();
     void GrowPopulation();
     void IncreaseMoney();
     void RemovePixelFromCenter(Pixel* newP);
