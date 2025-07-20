@@ -2,23 +2,27 @@
 // Created by yanam on 14.07.2025.
 //
 
-#include "../Globals.h"
+#include <iostream>
+#include <ostream>
+
 #include "Player.h"
+#include "../Globals.h"
+
+using namespace G;
 
 void Player::Expand(const int target, const float percentage) {
-    if (_population * (1 - percentage) < 100) return; // not enough troops
-
     const int newPeopleLeaving = _population * percentage;
+    if (_population - newPeopleLeaving < 100) return; // not enough troops
     _population -= newPeopleLeaving;
 
-    auto& attack = _targetToAttackMap[target];
+    auto &attack = _targetToAttackMap[target];
     attack.targetPlayerId = target;
     attack.troops += newPeopleLeaving;
     ReFillAttackQueueFromScratch(attack);
 }
 
 
-void Player::ProcessAttackQueue(Attack& attack) {
+void Player::ProcessAttackQueue(Attack &attack) {
     constexpr int maxPixelsPerFrame = 100;
 
     for (int i = 0; i < maxPixelsPerFrame && !attack.set.empty() && attack.troops > 0; i++) {
@@ -61,7 +65,7 @@ void Player::ProcessAttackQueue(Attack& attack) {
     }
 }
 
-void Player::ReFillAttackQueueFromScratch(Attack& attack) {
+void Player::ReFillAttackQueueFromScratch(Attack &attack) {
     UpdateAllDirtyBorder();
     attack.queue = {};
     attack.set.clear();
@@ -80,31 +84,88 @@ void Player::ReFillAttackQueueFromScratch(Attack& attack) {
     }
 }
 
+
 void Player::GetOwnershipOfPixel(Pixel *newP) {
     _allPixels.insert(newP);
 
     if (newP->playerId >= 0) {
-        G::players[newP->playerId].LoseOwnershipOfPixel(newP, false);
+        const std::vector<Building> collectedBuildings = players[newP->playerId].LoseOwnershipOfPixel(newP, false);
+        for (const Building building: collectedBuildings) {
+            switch (building.type) {
+                case CITY:
+                    _cities.push_back(building.pos);
+                    break;
+                case SILO:
+                    _silos.push_back(building.pos);
+                    break;
+                case UNKNOWN:
+                    std::cerr << "Unknown Building" << std::endl;
+            }
+        }
     } else if (newP->playerId == -2) {
         // reclaim contaminated pixel
-        G::RemoveExplosionPixel(newP);
+        RemoveExplosionPixel(newP);
     }
     newP->playerId = _id;
 
     MarkAsDirty(newP);
 
-    ImageDrawPixel(&G::territoryImage, newP->x, newP->y, _color);
-    G::territoryTextureDirty = true;
+    ImageDrawPixel(&territoryImage, newP->x, newP->y, _color);
+    territoryTextureDirty = true;
 
     // center
     AddPixelToCenter(newP);
 }
 
+std::vector<Building> Player::LoseOwnershipOfPixel(Pixel *pixel, const bool updateTextureToo) {
+    _allPixels.erase(pixel);
+
+    pixel->playerId = -1;
+
+    MarkAsDirty(pixel);
+    RemovePixelFromCenter(pixel);
+
+    if (updateTextureToo) {
+        ImageDrawPixel(&territoryImage, pixel->x, pixel->y, BLANK);
+        territoryTextureDirty = true;
+    }
+
+    // die if too small
+    if (_allPixels.empty()) {
+        UpdateAllDirtyBorder();
+        _dead = true;
+    }
+
+    std::vector<Building> buildingsLost{};
+    for (auto iter = _cities.begin(); iter != _cities.end();) {
+        const Pixel *c = *iter;
+        if (c == pixel) {
+            iter = _cities.erase(iter);
+            buildingsLost.push_back(Building{pixel, CITY});
+        } else {
+            ++iter;
+        }
+    }
+    for (auto iter = _silos.begin(); iter != _silos.end();) {
+        const Pixel *s = *iter;
+        if (s == pixel) {
+            iter = _silos.erase(iter);
+            buildingsLost.push_back(Building{pixel, SILO});
+        } else {
+            ++iter;
+        }
+    }
+    return buildingsLost;
+}
+
+
+// ----- Helper methods -----
+
 void Player::MarkAsDirty(Pixel *pixel) {
     if (_dirtyBorderPixels_set.insert(pixel).second) {
         _dirtyBorderPixels_vec.push_back(pixel);
     }
-    for (Pixel* p : pixel->GetNeighbors()) {
+    for (Pixel *p: pixel->GetNeighbors()) {
         if (_dirtyBorderPixels_set.insert(p).second) {
             _dirtyBorderPixels_vec.push_back(p);
         }
@@ -112,7 +173,7 @@ void Player::MarkAsDirty(Pixel *pixel) {
 }
 
 void Player::UpdateAllDirtyBorder() {
-    for (Pixel* p : _dirtyBorderPixels_vec) {
+    for (Pixel *p: _dirtyBorderPixels_vec) {
         UpdateBorderSingle(p);
     }
     _dirtyBorderPixels_vec.clear();
@@ -142,22 +203,14 @@ void Player::UpdateBorderSingle(Pixel *pixel) {
     }
 }
 
-void Player::LoseOwnershipOfPixel(Pixel *pixel, const bool updateTextureToo) {
-    _allPixels.erase(pixel);
-
-    pixel->playerId = -1;
-
-    MarkAsDirty(pixel);
-    RemovePixelFromCenter(pixel);
-
-    if (updateTextureToo) {
-        ImageDrawPixel(&G::territoryImage, pixel->x, pixel->y, BLANK);
-        G::territoryTextureDirty = true;
+void Player::AddBorderPixel(Pixel *p) {
+    if (_border_set.insert(p).second) {
+        _border_vec.push_back(p);
     }
+}
 
-    // die if too small
-    if (_allPixels.empty()) {
-        UpdateAllDirtyBorder();
-        _dead = true;
+void Player::RemoveBorderPixel(Pixel *p) {
+    if (_border_set.erase(p)) {
+        _border_vec.erase(std::ranges::find(_border_vec, p));
     }
 }

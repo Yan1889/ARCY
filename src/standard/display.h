@@ -7,16 +7,11 @@
 
 #define MAIN_PLAYER G::players[0]
 #define MAIN_PLAYER_COLOR G::players[0]._color
-
-enum BuildingTypeDragging {
-    NONE,
-    CITY,
-    SILO
-};
+#include "Building.h"
 
 
 inline bool buildMenuShown{};
-inline BuildingTypeDragging buildingTypeDragging = NONE;
+inline BUILDING_TYPE buildingTypeDragging = UNKNOWN;
 
 
 void displayGame();

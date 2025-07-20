@@ -11,9 +11,8 @@
 
 #include "Money.h"
 #include "raylib.h"
-#include "../buildings/City.h"
 #include "../map/Pixel.h"
-#include "../buildings/MissileSilo.h"
+#include "../Building.h"
 
 
 struct Attack {
@@ -39,8 +38,9 @@ public:
     float _growthFactor = 0.0085f;
 
     // buildings
-    std::vector<City> _cities;
-    std::vector<MissileSilo> _silos;
+    std::vector<Pixel *> _cities;
+    std::vector<Pixel *> _silos;
+
 
     // money
     float _cooldownTime = 1.0f;
@@ -70,7 +70,7 @@ public:
     void ReFillAttackQueueFromScratch(Attack& attack);
     void ProcessAttackQueue(Attack& attack);
     void GetOwnershipOfPixel(Pixel* newP);
-    void LoseOwnershipOfPixel(Pixel * pixel, bool updateTextureToo);
+    std::vector<Building> LoseOwnershipOfPixel(Pixel * pixel, bool updateTextureToo);
 
     void MarkAsDirty(Pixel* p);
     void UpdateAllDirtyBorder();
@@ -84,8 +84,8 @@ public:
     void AddPixelToCenter(Pixel* newP);
     bool TryAddCity(Pixel* pos);
     bool TryAddSilo(Pixel* pos);
-    bool canBuildCity(Pixel* pos) const;
-    bool canBuildSilo(Pixel* pos) const;
+    bool CanBuildCity(Pixel* pos) const;
+    bool CanBuildSilo(Pixel* pos) const;
     Pixel* GetNearestSiloFromPixel(Pixel* point) const;
 };
 

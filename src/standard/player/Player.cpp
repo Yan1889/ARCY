@@ -89,19 +89,6 @@ void Player::IncreaseMoney() {
     }
 }
 
-
-void Player::AddBorderPixel(Pixel *p) {
-    if (_border_set.insert(p).second) {
-        _border_vec.push_back(p);
-    }
-}
-
-void Player::RemoveBorderPixel(Pixel *p) {
-    if (_border_set.erase(p)) {
-        _border_vec.erase(std::ranges::find(_border_vec, p));
-    }
-}
-
 void Player::AddPixelToCenter(Pixel *newP) {
     if (_allPixels.empty()) return;
 
@@ -132,20 +119,20 @@ bool Player::TryAddCity(Pixel *pos) {
 bool Player::TryAddSilo(Pixel *pos) {
     const int cost = 10000 * (_silos.size() + 1);
 
-    if (_money.moneyBalance < cost || !_allPixels.contains(pos)) return false;
+    if (!CanBuildCity(pos)) return false;
     _money.spendMoney(cost);
 
     _silos.emplace_back(pos);
     return true;
 }
 
-bool Player::canBuildCity(Pixel* pos) const {
+bool Player::CanBuildCity(Pixel* pos) const {
     const int cost = 10000 * (_cities.size() + 1);
     if (_money.moneyBalance < cost || !_allPixels.contains(pos)) return false;
     return true;
 }
 
-bool Player::canBuildSilo(Pixel* pos) const {
+bool Player::CanBuildSilo(Pixel* pos) const {
     const int cost = 10000 * (_silos.size() + 1);
     if (_money.moneyBalance < cost || !_allPixels.contains(pos)) return false;
     return true;
@@ -157,13 +144,13 @@ Pixel* Player::GetNearestSiloFromPixel(Pixel* target) const {
     Pixel* bestP = nullptr;
     float bestDistSquared = G::MAP_WIDTH * G::MAP_WIDTH + G::MAP_HEIGHT * G::MAP_HEIGHT;
 
-    for (const MissileSilo& c : _silos) {
-        const float dx = target->x - c.pos->x;
-        const float dy = target->y - c.pos->y;
+    for (Pixel *c : _silos) {
+        const float dx = target->x - c->x;
+        const float dy = target->y - c->y;
         const float distSquared = dx * dx + dy * dy;
         if (distSquared < bestDistSquared) {
             bestDistSquared = distSquared;
-            bestP = c.pos;
+            bestP = c;
         }
     }
     return bestP;

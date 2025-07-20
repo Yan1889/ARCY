@@ -44,18 +44,13 @@ add_executable(ARCY src/standard/main.cpp
         src/standard/player/PlayerCore.cpp
         src/standard/Bombs.cpp
         src/standard/Bombs.h
-        src/standard/buildings/Building.cpp
-        src/standard/buildings/Building.h
-        src/standard/buildings/City.cpp
-        src/standard/buildings/City.h
-        src/standard/buildings/MissleSilo.cpp
-        src/standard/buildings/MissileSilo.h
         src/backend-test/main.cpp
         src/frontend-test/main.cpp
         src/standard/loaders/SoundPool.cpp
         src/standard/loaders/SoundPool.h
         src/standard/display.cpp
         src/standard/display.h
+        src/standard/Building.h
 )
 
 file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})

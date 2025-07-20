@@ -121,10 +121,10 @@ void displayPlayers() {
 
     // display every city for each player
     for (const Player &p: players) {
-        for (const City &c: p._cities) {
+        for (const Pixel *c: p._cities) {
             DrawTextureEx(
                 TextureCollection::city,
-                Vector2(c.pos->x - buildingRadius, c.pos->y - buildingRadius),
+                Vector2(c->x - buildingRadius, c->y - buildingRadius),
                 0,
                 2 * buildingRadius / TextureCollection::city.width,
                 WHITE // p._color
@@ -133,10 +133,10 @@ void displayPlayers() {
     }
     // display every city for each player
     for (const Player &p: players) {
-        for (const MissileSilo &s: p._silos) {
+        for (const Pixel *s: p._silos) {
             DrawTextureEx(
                 TextureCollection::silo,
-                Vector2(s.pos->x - buildingRadius, s.pos->y - buildingRadius),
+                Vector2(s->x - buildingRadius, s->y - buildingRadius),
                 0,
                 2 * buildingRadius / TextureCollection::silo.width,
                 WHITE //p._color
@@ -234,7 +234,7 @@ void displayBuildMenu() {
             buildingTypeDragging = SILO;
         }
     }
-    if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && buildingTypeDragging != NONE) {
+    if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && buildingTypeDragging != UNKNOWN) {
         switch (buildingTypeDragging) {
             case CITY:
                 if (MAIN_PLAYER.TryAddCity(GetPixelOnMouse())) {
@@ -265,12 +265,12 @@ void displayBuildMenu() {
                 }
                 break;
         }
-        buildingTypeDragging = NONE;
+        buildingTypeDragging = UNKNOWN;
     }
 
 
     // displaying the dragged object
-    if (buildingTypeDragging != NONE) {
+    if (buildingTypeDragging != UNKNOWN) {
         const Texture2D *t = nullptr;
         switch (buildingTypeDragging) {
             case CITY:
@@ -285,7 +285,7 @@ void displayBuildMenu() {
             Vector2(GetMousePosition().x - buildingRadius, GetMousePosition().y - buildingRadius),
             0,
             2 * buildingRadius / t->width,
-            MAIN_PLAYER.canBuildCity(GetPixelOnMouse()) || MAIN_PLAYER.canBuildSilo(GetPixelOnMouse())
+            MAIN_PLAYER.CanBuildCity(GetPixelOnMouse()) || MAIN_PLAYER.CanBuildSilo(GetPixelOnMouse())
             ? Fade(GREEN, 0.5) : Fade(RED, 0.5)
         );
     }
