@@ -23,20 +23,23 @@ void Player::ProcessAttackQueue(Attack& attack) {
 
     for (int i = 0; i < maxPixelsPerFrame && !attack.set.empty() && attack.troops > 0; i++) {
         Pixel *newP = attack.queue.front();
+        attack.queue.pop();
+        attack.set.erase(newP);
 
         if (newP->playerId != attack.targetPlayerId) {
-            attack.queue.pop();
-            attack.set.erase(newP);
+            // invalid pixel
             continue;
         }
 
         attack.troops--;
 
         // randomly don't get the pixel even though lost troops for it
-        if (!newP->acceptRandomly()) continue;
-
-        attack.queue.pop();
-        attack.set.erase(newP);
+        if (!newP->acceptRandomly()) {
+            // add the pixel to the queue in the back
+            attack.set.insert(newP);
+            attack.queue.push(newP);
+            continue;
+        }
         GetOwnershipOfPixel(newP);
 
         // update attack queue

@@ -51,5 +51,7 @@ Vector2 Pixel::ToVector2() const {
 
 bool Pixel::acceptRandomly() const {
     // radiation = 3x harder
-    return invasionAcceptProbability > static_cast<float>(rand()) / RAND_MAX * (contaminated ? 3.f : 1.f);
+    const float multiplier = contaminated ? 3.f : 1.f;
+    const float randomValue = static_cast<float>(rand()) / RAND_MAX;
+    return invasionAcceptProbability > randomValue * multiplier;
 }
