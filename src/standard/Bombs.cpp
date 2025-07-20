@@ -15,7 +15,8 @@
 
 
 std::vector<SingleBomb> Bombs::allBombs = {};
-std::vector<EffectAfterDetonation> Bombs::allEffects = {};
+std::vector<RadiationZone> Bombs::allZones = {};
+std::vector<VisualEffectAfterDetonation> Bombs::allEffects = {};
 
 bool SingleBomb::operator==(const SingleBomb &other) const {
     return pos.x == other.pos.x && pos.y == other.pos.y;
@@ -37,10 +38,37 @@ void Bombs::Update() {
                 .pos = b.pos,
                 .radius = b.radius,
             });
+            allZones.push_back(RadiationZone{
+                .centerPos = PixelAt(b.pos),
+                .radius = (int) b.radius,
+            });
             it = allBombs.erase(it);
             --it;
         } else {
             b.pos = Vector2Lerp(b.originPos, b.targetPos, b.time);
+        }
+    }
+    for (auto it = allZones.begin(); it != allZones.end(); ++it) {
+        RadiationZone& z = *it;
+
+        z.timeLeft -= GetFrameTime();
+
+        if (z.timeLeft < 0.0f) {
+            // remove radiation
+            for (int y = -z.radius; y <= z.radius; y++) {
+                for (int x = -z.radius; x <= z.radius; x++) {
+                    const int px = Clamp(z.centerPos->x + x, 0, MAP_WIDTH - 1);
+                    const int py = Clamp(z.centerPos->y + y, 0, MAP_HEIGHT - 1);
+
+                    Pixel *p = PixelAt(px, py);
+                    if (p->playerId == -2) {
+                        ImageDrawPixel(&explosionImage, px, py, BLANK);
+                        p->playerId = -1;
+                    }
+                }
+            }
+            it = allZones.erase(it);
+            --it;
         }
     }
 
@@ -65,7 +93,6 @@ void Bombs::Update() {
         .targetPos = targetPos,
         .originPos = startPixel->ToVector2(),
         .pos =  startPixel->ToVector2(),
-        .time = 0,
         .speed = 1,
         .radius = IsKeyDown(KEY_ONE) ? 50.f : 300.f,
         .type = IsKeyDown(KEY_ONE)? ATOM : HYDROGEN
@@ -99,7 +126,7 @@ void Bombs::Render() {
         );
     }
     for (auto it = allEffects.begin(); it != allEffects.end(); ++it) {
-        EffectAfterDetonation& e = *it;
+        VisualEffectAfterDetonation& e = *it;
         e.timeLeft -= GetFrameTime();
 
         if (e.timeLeft < 0) {

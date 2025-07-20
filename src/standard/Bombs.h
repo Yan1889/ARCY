@@ -21,15 +21,21 @@ struct SingleBomb {
     Vector2 targetPos;
     Vector2 originPos;
     Vector2 pos;
-    float time;
     float speed;
     float radius;
     BombType type;
 
+    float time{};
     bool operator==(const SingleBomb& other) const;
 };
 
-struct EffectAfterDetonation {
+struct RadiationZone {
+    Pixel *centerPos;
+    int radius;
+    float timeLeft = 10; // 20s
+};
+
+struct VisualEffectAfterDetonation {
     Vector2 pos;
     float radius;
     float timeLeft = 0.5;
@@ -38,7 +44,8 @@ struct EffectAfterDetonation {
 };
 
 class Bombs {
-    static std::vector<EffectAfterDetonation> allEffects;
+    static std::vector<VisualEffectAfterDetonation> allEffects;
+    static std::vector<RadiationZone> allZones;
     static void Explode(SingleBomb& bomb);
     static void checkSound(SingleBomb& bomb);
 

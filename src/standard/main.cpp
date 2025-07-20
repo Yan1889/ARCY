@@ -29,7 +29,7 @@ constexpr float zoomMin = 0.25f;
 constexpr float zoomMax = 10.0f;
 
 constexpr int botCount = 5;
-constexpr int botSpawnRadius = 200;
+constexpr int botSpawnRadius = 400;
 
 
 void initCamAndMap();

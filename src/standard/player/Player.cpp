@@ -87,7 +87,6 @@ void Player::BotLogic_Bombing() {
         .targetPos = target->ToVector2(),
         .originPos = startPixel->ToVector2(),
         .pos = startPixel->ToVector2(),
-        .time = 0,
         .speed = 1,
         .radius = 50.f,
         .type = ATOM
