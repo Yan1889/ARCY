@@ -12,7 +12,10 @@ using namespace G;
 
 void Player::Expand(const int target, const float percentage) {
     const int newPeopleLeaving = _population * percentage;
-    if (_population - newPeopleLeaving < 100) return; // not enough troops
+
+    // not enough troops or target is self
+    if (target == _id || _population - newPeopleLeaving < 100) return;
+
     _population -= newPeopleLeaving;
 
     auto &attack = _targetToAttackMap[target];
@@ -87,6 +90,7 @@ void Player::ReFillAttackQueueFromScratch(Attack &attack) {
 
 void Player::GetOwnershipOfPixel(Pixel *newP) {
     _allPixels.insert(newP);
+    AddPixelToCenter(newP);
 
     if (newP->playerId >= 0) {
         const std::vector<Building> collectedBuildings = players[newP->playerId].LoseOwnershipOfPixel(newP, false);
@@ -112,18 +116,15 @@ void Player::GetOwnershipOfPixel(Pixel *newP) {
 
     ImageDrawPixel(&territoryImage, newP->x, newP->y, _color);
     territoryTextureDirty = true;
-
-    // center
-    AddPixelToCenter(newP);
 }
 
 std::vector<Building> Player::LoseOwnershipOfPixel(Pixel *pixel, const bool updateTextureToo) {
     _allPixels.erase(pixel);
+    RemovePixelFromCenter(pixel);
 
     pixel->playerId = -1;
 
     MarkAsDirty(pixel);
-    RemovePixelFromCenter(pixel);
 
     if (updateTextureToo) {
         ImageDrawPixel(&territoryImage, pixel->x, pixel->y, BLANK);

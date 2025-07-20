@@ -29,7 +29,7 @@ constexpr float zoomMin = 0.25f;
 constexpr float zoomMax = 10.0f;
 
 constexpr int botCount = 10;
-constexpr int botSpawnRadius = 100;
+constexpr int botSpawnRadius = 300;
 
 
 void initCamAndMap();
@@ -79,9 +79,12 @@ void frameLogic() {
     checkExpansionAndAttack();
     Bombs::Update();
 
-    for (auto & p : players) {
-        if (!p._dead) {
-            p.Update();
+    players[0].Update();
+    for (int i = 1; i < players.size(); i++) {
+        Player &bot = players[i];
+        if (!bot._dead) {
+            bot.BotLogic();
+            bot.Update();
         }
     }
 }
@@ -110,14 +113,6 @@ void handleControls() {
 }
 
 void checkExpansionAndAttack() {
-    // expand with space is clicked
-    if (IsKeyPressed(KEY_SPACE)) {
-        for (auto & player : players) {
-            if (player._dead) continue;
-            player.Expand(-1, 0.5);
-        }
-    }
-
     // attack player if left-click
     const bool mouseOverBuildMenu = buildMenuShown && GetMousePosition().y > GetScreenHeight() * 0.9;
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !mouseOverBuildMenu) {
@@ -125,14 +120,6 @@ void checkExpansionAndAttack() {
         if (playerIdClickd == 0) return; // clicked on himself
 
         MAIN_PLAYER.Expand(playerIdClickd, 0.5);
-    }
-
-
-    // for testing: every bot attacks you
-    if (IsKeyDown(KEY_ENTER)) {
-        for (int i = 1; i < players.size(); i++) {
-            players[i].Expand(0, 0.5);
-        }
     }
 }
 

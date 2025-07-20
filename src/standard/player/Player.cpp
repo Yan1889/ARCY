@@ -10,7 +10,9 @@
 
 #include "raylib.h"
 
-Player::Player(Pixel *startPos, const int startRadius): _id(static_cast<int>(G::players.size())) {
+using namespace G;
+
+Player::Player(Pixel *startPos, const int startRadius): _id(static_cast<int>(players.size())) {
     do {
         _color = Color{
             static_cast<unsigned char>(GetRandomValue(0, 255)), // Red
@@ -59,6 +61,17 @@ void Player::Update() {
     GrowPopulation();
 }
 
+void Player::BotLogic() {
+    if (_maxPopulation == 0) return;
+
+    const float popPercentage = _population / _maxPopulation;
+    // do a random attack if bot has enough troops
+    if (popPercentage >= 0.75) {
+        // expand with 20% strength and random target (radiation or neutral or other player)
+        const int target = rand() % (players.size() + 2) - 2;
+        Expand(target, 0.2f);
+    }
+}
 
 void Player::GrowPopulation() {
     // Todo: calculate with respect to _allPixels.size() too
@@ -94,8 +107,8 @@ void Player::AddPixelToCenter(Pixel *newP) {
 
     _allPixelsSummed_x += newP->x;
     _allPixelsSummed_y += newP->y;
-    _centerPixel_x = _allPixelsSummed_x / static_cast<int>(_allPixels.size());
-    _centerPixel_y = _allPixelsSummed_y / static_cast<int>(_allPixels.size());
+    _centerPixel_x = _allPixelsSummed_x / _allPixels.size();
+    _centerPixel_y = _allPixelsSummed_y / _allPixels.size();
 }
 
 void Player::RemovePixelFromCenter(Pixel *newP) {
@@ -103,8 +116,8 @@ void Player::RemovePixelFromCenter(Pixel *newP) {
 
     _allPixelsSummed_x -= newP->x;
     _allPixelsSummed_y -= newP->y;
-    _centerPixel_x = _allPixelsSummed_x / static_cast<int>(_allPixels.size());
-    _centerPixel_y = _allPixelsSummed_y / static_cast<int>(_allPixels.size());
+    _centerPixel_x = _allPixelsSummed_x / _allPixels.size();
+    _centerPixel_y = _allPixelsSummed_y / _allPixels.size();
 }
 
 bool Player::TryAddCity(Pixel *pos) {
@@ -116,6 +129,7 @@ bool Player::TryAddCity(Pixel *pos) {
     _cities.emplace_back(pos);
     return true;
 }
+
 bool Player::TryAddSilo(Pixel *pos) {
     const int cost = 10000 * (_silos.size() + 1);
 
@@ -126,25 +140,25 @@ bool Player::TryAddSilo(Pixel *pos) {
     return true;
 }
 
-bool Player::CanBuildCity(Pixel* pos) const {
+bool Player::CanBuildCity(Pixel *pos) const {
     const int cost = 10000 * (_cities.size() + 1);
     if (_money.moneyBalance < cost || !_allPixels.contains(pos)) return false;
     return true;
 }
 
-bool Player::CanBuildSilo(Pixel* pos) const {
+bool Player::CanBuildSilo(Pixel *pos) const {
     const int cost = 10000 * (_silos.size() + 1);
     if (_money.moneyBalance < cost || !_allPixels.contains(pos)) return false;
     return true;
 }
 
-Pixel* Player::GetNearestSiloFromPixel(Pixel* target) const {
+Pixel *Player::GetNearestSiloFromPixel(Pixel *target) const {
     if (_silos.empty()) return nullptr;
 
-    Pixel* bestP = nullptr;
-    float bestDistSquared = G::MAP_WIDTH * G::MAP_WIDTH + G::MAP_HEIGHT * G::MAP_HEIGHT;
+    Pixel *bestP = nullptr;
+    float bestDistSquared = MAP_WIDTH * MAP_WIDTH + MAP_HEIGHT * MAP_HEIGHT;
 
-    for (Pixel *c : _silos) {
+    for (Pixel *c: _silos) {
         const float dx = target->x - c->x;
         const float dy = target->y - c->y;
         const float distSquared = dx * dx + dy * dy;
