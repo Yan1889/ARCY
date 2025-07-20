@@ -64,12 +64,26 @@ void Player::Update() {
 void Player::BotLogic() {
     if (_maxPopulation == 0) return;
 
-    const float popPercentage = _population / _maxPopulation;
     // do a random attack if bot has enough troops
+    const float popPercentage = _population / _maxPopulation;
     if (popPercentage >= 0.75) {
         // expand with 20% strength and random target (radiation or neutral or other player)
         const int target = rand() % (players.size() + 2) - 2;
         Expand(target, 0.2f);
+    }
+
+    // get a random pixel
+    auto iter = _allPixels.begin();
+    std::advance(iter, rand() % _allPixels.size());
+    Pixel *randomPixel = *iter;
+
+    // add a random city with 1% chance
+    if (rand() < RAND_MAX / 100) {
+        TryAddCity(randomPixel);
+    }
+    // add a random silo with 1% chance
+    if (rand() < RAND_MAX / 100) {
+        TryAddSilo(randomPixel);
     }
 }
 

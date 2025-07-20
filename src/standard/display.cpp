@@ -239,29 +239,11 @@ void displayBuildMenu() {
             case CITY:
                 if (MAIN_PLAYER.TryAddCity(GetPixelOnMouse())) {
                     mySounds.Play(mySounds.cityBuildPool);
-
-                    // bots also make a random city when main player makes city
-                    for (int i = 1; i < players.size(); i++) {
-                        if (players[i]._dead) continue;
-
-                        auto iter = players[i]._allPixels.begin();
-                        std::advance(iter, rand() % players[i]._allPixels.size());
-                        players[i].TryAddCity(*iter);
-                    }
                 }
                 break;
             case SILO:
                 if (MAIN_PLAYER.TryAddSilo(GetPixelOnMouse())) {
                     mySounds.Play(mySounds.cityBuildPool);
-
-                    // bots also make a random silo when main player makes silo
-                    for (int i = 1; i < players.size(); i++) {
-                        if (players[i]._dead) continue;
-
-                        auto iter = players[i]._allPixels.begin();
-                        std::advance(iter, rand() % players[i]._allPixels.size());
-                        players[i].TryAddSilo(*iter);
-                    }
                 }
                 break;
         }
