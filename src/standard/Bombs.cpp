@@ -60,10 +60,14 @@ void Bombs::Update() {
                     const int px = Clamp(z.centerPos->x + x, 0, MAP_WIDTH - 1);
                     const int py = Clamp(z.centerPos->y + y, 0, MAP_HEIGHT - 1);
 
-                    Pixel *p = PixelAt(px, py);
-                    if (p->playerId == -2) {
-                        ImageDrawPixel(&explosionImage, px, py, BLANK);
-                        p->playerId = -1;
+                    const float distance = sqrtf((float) (x * x + y * y)) / z.radius;
+
+                    if (distance <= 1) {
+                        Pixel *p = PixelAt(px, py);
+                        if (p->playerId == -2) {
+                            ImageDrawPixel(&explosionImage, px, py, BLANK);
+                            p->playerId = -1;
+                        }
                     }
                 }
             }
