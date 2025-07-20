@@ -72,13 +72,20 @@ void Player::BotLogic_Bombing() {
     // randomly bomb something with a 1% chance
     if (rand() > RAND_MAX / 100) return;
 
-    Pixel *target = PixelAt(rand() % MAP_WIDTH, rand() % MAP_HEIGHT);
-    if (_allPixels.contains(target)) return; // don't bomb yourself
+    // chose a target that is not yourself
+    int targetId{};
+    do {
+        targetId = rand() % players.size();
+    } while (targetId == _id || players[targetId]._dead);
+
+    auto iter = players[targetId]._allPixels.begin();
+    std::advance(iter, rand() % players[targetId]._allPixels.size());
+    Pixel *target = *iter;
 
     Pixel *startPixel = GetNearestSiloFromPixel(target);
-    if (startPixel == nullptr) return;
+    if (startPixel == nullptr) return; // doesnt have a silo yet
 
-    const int cost = 10000; // only atom bombs for now
+    constexpr int cost = 10000; // only atom bombs for now
     if (_money.moneyBalance < cost) return;
 
     _money.spendMoney(cost);
