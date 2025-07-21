@@ -275,7 +275,12 @@ void displayGameOver() {
     if (gameOver) {
         constexpr int fontSize = 200;
 
-        const std::string winnerText = winnerId == 0 ? "You won" : std::format("NPC {} won", winnerId);
+        std::string winnerText = "Y'all lost!";
+        if (winnerId == 0) {
+            winnerText = "You won!";
+        } else if (winnerId > 0) {
+            winnerText = std::format("NPC{} won!", winnerId);
+        }
         const int textWidth = MeasureText(winnerText.c_str(), fontSize);
         DrawText(winnerText.c_str(), GetScreenWidth() / 2 - textWidth / 2, GetScreenHeight() / 2, fontSize, WHITE);
     }
@@ -286,7 +291,7 @@ std::string formatNumber(const int number) {
         return std::format("{}", number);
     }
     if (number < 1'000'000) {
-        return std::format("{:.1f}K", number / 1000.f);
+        return std::format("{:.1f}K", number / 1'000.f);
     }
     if (number < 1'000'000'000) {
         return std::format("{:.1f}M", number / 1'000'000.f);
