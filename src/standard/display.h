@@ -21,5 +21,6 @@ void displayPlayerTags();
 void displayBGTextures();
 void displayCrossHair();
 void displayBuildMenu();
+void displayGameOver();
 
 #endif //DISPLAY_H

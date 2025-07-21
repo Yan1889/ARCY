@@ -4,8 +4,13 @@
 
 #include "display.h"
 
+#include <cmath>
+
 #include "loaders/TextureCollection.h"
 #include <cstring>
+#include <format>
+#include <iostream>
+#include <ostream>
 #include <string>
 
 #include "Bombs.h"
@@ -34,6 +39,7 @@ void displayGame() {
     DayNightCycle::Update();
     displayInfoTexts();
     displayBuildMenu();
+    displayGameOver();
 
     EndDrawing();
 }
@@ -126,7 +132,7 @@ void displayPlayers() {
         for (const Pixel *c: p._cities) {
             DrawTextureEx(
                 TextureCollection::city,
-                Vector2(c->x - buildingRadius, c->y - buildingRadius),
+                Vector2{c->x - buildingRadius, c->y - buildingRadius},
                 0,
                 2 * buildingRadius / TextureCollection::city.width,
                 WHITE // p._color
@@ -210,7 +216,7 @@ void displayBuildMenu() {
         GetScreenHeight() * 0.1f
     };
     // black transparent bg
-    DrawRectangleRec(menuRect, Color{0 ,0 ,0, 150});
+    DrawRectangleRec(menuRect, Color{0, 0, 0, 150});
 
     const Rectangle cityButtonRect{
         menuRect.x,
@@ -239,15 +245,12 @@ void displayBuildMenu() {
     if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && buildingTypeDragging != UNKNOWN) {
         switch (buildingTypeDragging) {
             case CITY:
-                if (MAIN_PLAYER.TryAddCity(GetPixelOnMouse())) {
-                    mySounds.Play(mySounds.cityBuildPool);
-                }
-                break;
+                MAIN_PLAYER.TryAddCity(GetPixelOnMouse());
             case SILO:
-                if (MAIN_PLAYER.TryAddSilo(GetPixelOnMouse())) {
-                    mySounds.Play(mySounds.cityBuildPool);
-                }
+                MAIN_PLAYER.TryAddSilo(GetPixelOnMouse());
                 break;
+            case UNKNOWN:
+                std::cerr << "Unknown building type" << std::endl;
         }
         buildingTypeDragging = UNKNOWN;
     }
@@ -263,6 +266,8 @@ void displayBuildMenu() {
             case SILO:
                 t = &TextureCollection::silo;
                 break;
+            case UNKNOWN:
+                std::cerr << "Unknown building type" << std::endl;
         }
         DrawTextureEx(
             *t,
@@ -270,7 +275,18 @@ void displayBuildMenu() {
             0,
             2 * buildingRadius / t->width,
             MAIN_PLAYER.CanBuildCity(GetPixelOnMouse()) || MAIN_PLAYER.CanBuildSilo(GetPixelOnMouse())
-            ? Fade(GREEN, 0.5) : Fade(RED, 0.5)
+                ? Fade(GREEN, 0.5)
+                : Fade(RED, 0.5)
         );
+    }
+}
+
+void displayGameOver() {
+    if (gameOver) {
+        constexpr int fontSize = 200;
+
+        const std::string winnerText = winnerId == 0 ? "You won" : std::format("NPC {} won", winnerId);
+        const int textWidth = MeasureText(winnerText.c_str(), fontSize);
+        DrawText(winnerText.c_str(), GetScreenWidth() / 2 - textWidth / 2, GetScreenHeight() / 2, fontSize, WHITE);
     }
 }

@@ -44,6 +44,9 @@ namespace G {
     inline std::vector<Player> players;
     inline Vector2 playerPos;
 
+    inline bool gameOver{};
+    inline int winnerId = -1;
+
     inline Image explosionImage;
     inline Texture2D explosionTexture;
     inline bool explosionTextureDirty{};

@@ -1,3 +1,4 @@
+#include <cmath>
 #include <iostream>
 #include <cstring>
 #include <thread>
@@ -28,7 +29,7 @@ constexpr int zoomSpeed = 5;
 constexpr float zoomMin = 0.25f;
 constexpr float zoomMax = 10.0f;
 
-constexpr int botCount = 5;
+constexpr int botCount = 2;
 constexpr int botSpawnRadius = 400;
 
 
@@ -42,8 +43,10 @@ void handleControls();
 
 void checkExplosion();
 
+void checkGameOver();
 
 void checkExpansionAndAttack();
+
 
 int main() {
     srand(time(nullptr));
@@ -60,7 +63,9 @@ int main() {
     initPlayers();
 
     while (!WindowShouldClose()) {
-        frameLogic();
+        if (!gameOver) {
+            frameLogic();
+        }
         displayGame();
         mySounds.checkAtmosphere();
         MAIN_PLAYER._money.getMoney(100000);
@@ -77,6 +82,7 @@ int main() {
 void frameLogic() {
     handleControls();
     checkExpansionAndAttack();
+    checkGameOver();
     Bombs::Update();
 
     players[0].Update();
@@ -120,6 +126,28 @@ void checkExpansionAndAttack() {
         if (playerIdClickd == 0) return; // clicked on himself
 
         MAIN_PLAYER.Expand(playerIdClickd, 0.5);
+    }
+}
+
+void checkGameOver() {
+    int playersAlive{};
+    for (const Player &p: players) {
+        if (p._dead) continue;
+
+        playersAlive++;
+        if (playersAlive >= 2) {
+            // 2 or more players alive => game still going on
+            return;
+        }
+    }
+    gameOver = true;
+
+    // set winner
+    for (int i = 0; i < players.size(); i++) {
+        if (players[i]._dead) continue;
+
+        winnerId = i;
+        return;
     }
 }
 
