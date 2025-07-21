@@ -51,6 +51,7 @@ add_executable(ARCY src/standard/main.cpp
         src/standard/display.cpp
         src/standard/display.h
         src/standard/Building.h
+        src/standard/player/PlayerAI.cpp
 )
 
 file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
