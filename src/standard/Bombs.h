@@ -18,11 +18,11 @@ enum BombType {
 };
 
 struct SingleBomb {
-    Vector2 targetPos;
-    Vector2 originPos;
-    Vector2 pos;
-    float speed;
-    float radius;
+    Vector2 targetPos{};
+    Vector2 originPos{};
+    Vector2 pos{};
+    float speed{};
+    float radius{};
     BombType type;
 
     float time{};

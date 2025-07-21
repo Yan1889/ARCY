@@ -29,6 +29,8 @@ void Player::BotLogic_Bombing() {
     std::advance(iter, rand() % players[targetId]._allPixels.size());
     Pixel *target = *iter;
 
+    // Pixel *target = PixelAt(rand() % MAP_WIDTH, rand() % MAP_HEIGHT); // alternative: random firing
+
     Pixel *startPixel = GetNearestSiloFromPixel(target);
     if (startPixel == nullptr) return; // doesnt have a silo yet
 
