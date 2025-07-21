@@ -70,24 +70,14 @@ void displayInfoTexts() {
     const int textY = GetScreenHeight() - 25;
     DrawText(fpsText, textX, textY, 20, MAIN_PLAYER_COLOR);
 
+
     // population
-    float populationDisplay = static_cast<float>(MAIN_PLAYER._population);
-    float maxPopulationDisplay = static_cast<float>(MAIN_PLAYER._maxPopulation);
-    const char *populationText;
+    std::string populationText = formatNumber(MAIN_PLAYER._population);
+    std::string maxPopulationText = formatNumber(MAIN_PLAYER._maxPopulation);
 
-    if (maxPopulationDisplay >= 1000) {
-        maxPopulationDisplay /= 1000;
+    const std::string totalPopStr = std::format("{} / {}", populationText, maxPopulationText);
 
-        if (populationDisplay >= 1000) {
-            populationDisplay /= 1000;
-
-            populationText = TextFormat("Population: %.2fK / %.2fK", populationDisplay, maxPopulationDisplay);
-        } else {
-            populationText = TextFormat("Population: %.0f / %.2fK", populationDisplay, maxPopulationDisplay);
-        }
-    }
-
-    DrawText(populationText, 0 + 25, GetScreenHeight() - 50, 20, MAIN_PLAYER_COLOR);
+    DrawText(totalPopStr.c_str(), 0 + 25, GetScreenHeight() - 50, 20, MAIN_PLAYER_COLOR);
 
     const char *sendText = TextFormat(
         "People exploring neutral land: %d",
@@ -289,4 +279,17 @@ void displayGameOver() {
         const int textWidth = MeasureText(winnerText.c_str(), fontSize);
         DrawText(winnerText.c_str(), GetScreenWidth() / 2 - textWidth / 2, GetScreenHeight() / 2, fontSize, WHITE);
     }
+}
+
+std::string formatNumber(const int number) {
+    if (number < 1'000) {
+        return std::format("{}", number);
+    }
+    if (number < 1'000'000) {
+        return std::format("{:.1f}K", number / 1000.f);
+    }
+    if (number < 1'000'000'000) {
+        return std::format("{:.1f}M", number / 1'000'000.f) + "M";
+    }
+    return std::format("{:.1f}B", number / 1'000'000'000.f) + "B";
 }

@@ -155,7 +155,7 @@ void initPlayers() {
     // main character
     players.emplace_back(
         PixelAt(playerPos.x, playerPos.y),
-        10
+        1000
     );
 
     // bots
@@ -166,7 +166,7 @@ void initPlayers() {
                 static_cast<int>(playerPos.x + std::cos(angle) * botSpawnRadius),
                 static_cast<int>(playerPos.y + std::sin(angle) * botSpawnRadius)
             ),
-            5
+            300
         );
     }
 }

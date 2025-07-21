@@ -30,17 +30,16 @@ public:
     bool _dead{};
 
     // population
-    int _population = 1000;
-    int _maxPopulation{};
+    int _population;
+    int _maxPopulation;
     float _growthCooldown = 100;
     float _growthRate = 100;
     float _growth{};
     float _growthFactor = 0.0085f;
 
     // buildings
-    std::vector<Pixel *> _cities;
-    std::vector<Pixel *> _silos;
-
+    std::vector<Pixel *> _cities{};
+    std::vector<Pixel *> _silos{};
 
     // money
     float _cooldownTime = 1.0f;
@@ -62,7 +61,7 @@ public:
     int _centerPixel_x{};
     int _centerPixel_y{};
 
-    Player(Pixel* startPos, int startRadius);
+    Player(Pixel* startPos, int startPop);
 
     void Update();
     void Expand(int target, float percentage);

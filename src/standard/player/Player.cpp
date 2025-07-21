@@ -13,7 +13,10 @@
 
 using namespace G;
 
-Player::Player(Pixel *startPos, const int startRadius): _id(static_cast<int>(players.size())) {
+Player::Player(Pixel *startPos, const int startPop): _id(static_cast<int>(players.size())),
+                                                     _population(startPop),
+                                                     _maxPopulation(_population) {
+
     do {
         _color = Color{
             static_cast<unsigned char>(GetRandomValue(0, 255)), // Red
@@ -48,9 +51,16 @@ void Player::Update() {
     // Add money depending on population
     IncreaseMoney();
 
-    _growthCooldown -= GetTime();
-    _maxPopulation = 1000 + 1000 * _cities.size();
+    GrowPopulation();
+}
 
+
+void Player::GrowPopulation() {
+    _maxPopulation = 50; // min maxPopulation is 50 (wie die 3 in risiko lol)
+    _maxPopulation += _allPixels.size(); // +1 for each pixel
+    _maxPopulation += 1000 * _cities.size(); // +1000 for each city
+
+    _growthCooldown -= GetTime();
     _growth = _growthFactor * (1.0f - exp(-_population / 10.f));
 
     if (_population < 50000) {
@@ -59,21 +69,12 @@ void Player::Update() {
         _growthFactor = 0.000085f;
     }
 
-    GrowPopulation();
-}
-
-
-void Player::GrowPopulation() {
-    // Todo: calculate with respect to _allPixels.size() too
-
     if (_growthCooldown <= 0) {
         const float totalGrowth = _population * _growth;
-        if (_population < _maxPopulation) {
-            _population += static_cast<int>(ceil(totalGrowth));
-        }
-        if (_population > _maxPopulation) {
-            _population = _maxPopulation;
-        }
+
+        const int newPopulation = _population + static_cast<int>(ceil(totalGrowth));
+        _population = std::min(newPopulation, _maxPopulation);
+
         _growthCooldown = _growthRate;
     }
 }

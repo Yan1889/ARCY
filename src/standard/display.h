@@ -7,6 +7,8 @@
 
 #define MAIN_PLAYER G::players[0]
 #define MAIN_PLAYER_COLOR G::players[0]._color
+#include <string>
+
 #include "Building.h"
 
 
@@ -22,5 +24,7 @@ void displayBGTextures();
 void displayCrossHair();
 void displayBuildMenu();
 void displayGameOver();
+
+std::string formatNumber(int number);
 
 #endif //DISPLAY_H
