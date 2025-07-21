@@ -182,6 +182,8 @@ bool Player::TryAddCity(Pixel *pos) {
     if (_money.moneyBalance < cost || !_allPixels.contains(pos)) return false;
     _money.spendMoney(cost);
 
+    mySounds.Play(mySounds.cityBuildPool);
+
     _cities.emplace_back(pos);
     return true;
 }
@@ -191,6 +193,8 @@ bool Player::TryAddSilo(Pixel *pos) {
 
     if (!CanBuildCity(pos)) return false;
     _money.spendMoney(cost);
+
+    mySounds.Play(mySounds.cityBuildPool);
 
     _silos.emplace_back(pos);
     return true;

@@ -6,17 +6,16 @@
 #define PIXEL_H
 
 #include <vector>
-#include <cmath>
 
 #include "raylib.h"
 
 
 struct Pixel {
-    int x;
-    int y;
-    int playerId;
+    int x{};
+    int y{};
+    int playerId{};
 
-    float invasionAcceptProbability;
+    float invasionAcceptProbability{};
     bool contaminated{};
     std::vector<Pixel *> neighborsCached;
 
