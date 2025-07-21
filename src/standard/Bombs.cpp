@@ -67,21 +67,24 @@ void Bombs::Update() {
                         if (p->playerId == -2) {
                             ImageDrawPixel(&explosionImage, px, py, BLANK);
                             p->playerId = -1;
+                            p->contaminated = false;
                         }
                     }
                 }
             }
             it = allZones.erase(it);
             --it;
+
+            explosionTextureDirty = true;
         }
     }
 
-    if (!IsKeyDown(KEY_ONE) && !IsKeyDown(KEY_TWO)) return;
+    if (!IsKeyPressed(KEY_ONE) && !IsKeyPressed(KEY_TWO)) return;
 
     Vector2 targetPos = GetScreenToWorld2D(GetMousePosition(), camera);
     if (targetPos.x < 0 || targetPos.x > MAP_WIDTH - 1 || targetPos.y < 0 || targetPos.y > MAP_HEIGHT - 1) return;
 
-    const int cost = IsKeyDown(KEY_ONE) ? 10000 : 100000;
+    const int cost = IsKeyPressed(KEY_ONE) ? 10000 : 100000;
 
     if (MAIN_PLAYER._money.moneyBalance - cost < 0) return;
 
@@ -98,8 +101,8 @@ void Bombs::Update() {
         .originPos = startPixel->ToVector2(),
         .pos =  startPixel->ToVector2(),
         .speed = 1,
-        .radius = IsKeyDown(KEY_ONE) ? 50.f : 300.f,
-        .type = IsKeyDown(KEY_ONE)? ATOM : HYDROGEN
+        .radius = IsKeyPressed(KEY_ONE) ? 50.f : 300.f,
+        .type = IsKeyPressed(KEY_ONE)? ATOM : HYDROGEN
     });
 }
 

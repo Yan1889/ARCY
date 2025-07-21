@@ -5,6 +5,7 @@
 #include "Sounds.h"
 #include "TextureCollection.h"
 #include "../Globals.h"
+#include "../DayNightCycle.h"
 
 using namespace G;
 
@@ -104,16 +105,19 @@ void Sounds::checkAtmosphere()
     else PauseMusicStream(oceanSound);
 
     // Beach
-    if (ColorToInt(pixelColor) == ColorToInt(mapColors[2])) ResumeMusicStream(beachSound);
+    if (!(DayNightCycle::time > 0.25f && DayNightCycle::time < 0.75f) &&
+        ColorToInt(pixelColor) == ColorToInt(mapColors[2])) ResumeMusicStream(beachSound);
     else PauseMusicStream(beachSound);
 
     // Field
-    if (ColorToInt(pixelColor) == ColorToInt(mapColors[3]) ||
-        ColorToInt(pixelColor) == ColorToInt(mapColors[4])) ResumeMusicStream(fieldSound);
+    if (!(DayNightCycle::time > 0.25f && DayNightCycle::time < 0.75f) &&
+        (ColorToInt(pixelColor) == ColorToInt(mapColors[3]) ||
+        ColorToInt(pixelColor) == ColorToInt(mapColors[4]))) ResumeMusicStream(fieldSound);
     else PauseMusicStream(fieldSound);
 
     // Forest
-    if (ColorToInt(pixelColor) == ColorToInt(mapColors[5]) ||
+    if (!(DayNightCycle::time > 0.25f && DayNightCycle::time < 0.75f) &&
+        ColorToInt(pixelColor) == ColorToInt(mapColors[5]) ||
         ColorToInt(pixelColor) == ColorToInt(mapColors[6])) ResumeMusicStream(forestSound);
     else PauseMusicStream(forestSound);
 

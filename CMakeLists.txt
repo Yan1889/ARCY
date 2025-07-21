@@ -51,6 +51,8 @@ add_executable(ARCY src/standard/main.cpp
         src/standard/display.cpp
         src/standard/display.h
         src/standard/Building.h
+        src/standard/DayNightCycle.cpp
+        src/standard/DayNightCycle.h
 )
 
 file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})

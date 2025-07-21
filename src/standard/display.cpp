@@ -11,6 +11,7 @@
 #include "Bombs.h"
 #include "Globals.h"
 #include "raylib.h"
+#include "DayNightCycle.h"
 
 
 constexpr float buildingRadius = 20;
@@ -24,12 +25,13 @@ void displayGame() {
 
     displayBGTextures();
     displayPlayers();
+    Bombs::Render();
     displayPlayerTags();
     displayCrossHair();
-    Bombs::Render();
 
     EndMode2D();
 
+    DayNightCycle::Update();
     displayInfoTexts();
     displayBuildMenu();
 
