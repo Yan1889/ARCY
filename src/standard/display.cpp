@@ -289,7 +289,7 @@ std::string formatNumber(const int number) {
         return std::format("{:.1f}K", number / 1000.f);
     }
     if (number < 1'000'000'000) {
-        return std::format("{:.1f}M", number / 1'000'000.f) + "M";
+        return std::format("{:.1f}M", number / 1'000'000.f);
     }
-    return std::format("{:.1f}B", number / 1'000'000'000.f) + "B";
+    return std::format("{:.1f}B", number / 1'000'000'000.f);
 }
