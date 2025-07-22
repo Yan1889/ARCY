@@ -168,7 +168,7 @@ void initPlayers() {
                 static_cast<int>(playerPos.y + std::sin(angle) * botSpawnRadius)
             ),
             300,
-            std::string("NPC") + std::to_string(i)
+            std::string("NPC ") + std::to_string(i)
         );
     }
 }

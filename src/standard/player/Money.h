@@ -13,7 +13,7 @@ public:
 
     void spendMoney(int cost);
     void getMoney(int amount);
-    int returnMoney();
+    int returnMoney() const;
     void setMoney(int amount);
 };
 

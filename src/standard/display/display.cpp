@@ -4,6 +4,7 @@
 
 #include "display.h"
 
+#include <algorithm>
 #include <cmath>
 
 #include "../loaders/TextureCollection.h"
@@ -122,11 +123,20 @@ void displayPlayers() {
 }
 
 void displayPlayersInfo() {
+    std::vector<int> playerIdxOrder(players.size());
     for (int i = 0; i < players.size(); i++) {
-        const std::string populationStr = "Population: " + formatNumber(players[i]._population) + " / " + formatNumber(players[i]._maxPopulation);
-        const std::string moneyStr = "Money: " + formatNumber(players[i]._money.returnMoney());
-        const std::string infoStr = players[i]._name + ": " + moneyStr + "; " + populationStr;
-        DrawText(infoStr.c_str(), 25, 20 + 30 * i, 20, players[i]._color);
+        playerIdxOrder[i] = i;
+    }
+    std::ranges::sort(playerIdxOrder, [](const int i1, const int i2) {
+        return players[i1]._allPixels.size() > players[i2]._allPixels.size();
+    });
+
+    for (int i = 0; i <  players.size(); i++) {
+        const Player& p = players[playerIdxOrder[i]];
+        const std::string populationStr = "Population: " + formatNumber(p._population) + " / " + formatNumber(p._maxPopulation);
+        const std::string moneyStr = "Money: " + formatNumber(p._money.returnMoney());
+        const std::string infoStr = p._name + ": " + moneyStr + "; " + populationStr;
+        DrawText(infoStr.c_str(), 25, 20 + 30 * i, 20, p._color);
     }
 }
 

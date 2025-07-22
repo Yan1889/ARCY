@@ -17,7 +17,7 @@ void Money::getMoney(int amount)
     moneyBalance += amount;
 }
 
-int Money::returnMoney()
+int Money::returnMoney() const
 {
     return moneyBalance;
 }
