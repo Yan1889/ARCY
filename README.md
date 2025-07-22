@@ -10,7 +10,7 @@ An epic game
 
 ### Files
 + `src/`
-+ + `standart/`
++ + `standard/`
 + + + `display/`
 + + + `loaders/`
 + + + `map/`
