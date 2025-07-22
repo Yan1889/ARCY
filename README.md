@@ -8,6 +8,15 @@ An epic game
 
 ## Project structure
 
+### Files
++ `src/`
++ + `standart/`
++ + + `display/`
++ + + `loaders/`
++ + + `map/`
++ + + `player/`
++ + + `main.cpp`
+
 ### Call stack each frame
 `while(!WindowShouldClose())`
 + `frameLogic()`
