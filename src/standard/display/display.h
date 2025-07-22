@@ -9,7 +9,7 @@
 #define MAIN_PLAYER_COLOR G::players[0]._color
 #include <string>
 
-#include "Building.h"
+#include "../Building.h"
 
 
 inline bool buildMenuShown{};

@@ -11,7 +11,7 @@
 #include "loaders/Sounds.h"
 #include "map/PerlinNoise.h"
 #include "Bombs.h"
-#include "display.h"
+#include "display/display.h"
 
 #define SCREEN_WIDTH 1366 // Default 980
 #define SCREEN_HEIGHT 768 // Default 650
@@ -30,7 +30,7 @@ constexpr float zoomMin = 0.25f;
 constexpr float zoomMax = 10.0f;
 
 constexpr int botCount = 2;
-constexpr int botSpawnRadius = 400;
+constexpr int botSpawnRadius = 500;
 
 
 void initCamAndMap();
@@ -155,7 +155,8 @@ void initPlayers() {
     // main character
     players.emplace_back(
         PixelAt(playerPos.x, playerPos.y),
-        1000
+        1000,
+        std::string("You")
     );
 
     // bots
@@ -166,7 +167,8 @@ void initPlayers() {
                 static_cast<int>(playerPos.x + std::cos(angle) * botSpawnRadius),
                 static_cast<int>(playerPos.y + std::sin(angle) * botSpawnRadius)
             ),
-            300
+            300,
+            std::string("NPC") + std::to_string(i)
         );
     }
 }

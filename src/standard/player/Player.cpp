@@ -13,10 +13,10 @@
 
 using namespace G;
 
-Player::Player(Pixel *startPos, const int startPop): _id(static_cast<int>(players.size())),
-                                                     _population(startPop),
-                                                     _maxPopulation(_population) {
-
+Player::Player(Pixel *startPos, const int startPop, const std::string &name): _id(static_cast<int>(players.size())),
+                                                                              _name(name),
+                                                                              _population(startPop),
+                                                                              _maxPopulation(_population) {
     do {
         _color = Color{
             static_cast<unsigned char>(GetRandomValue(0, 255)), // Red
@@ -48,15 +48,13 @@ void Player::Update() {
     }
     UpdateAllDirtyBorder();
 
-    // Add money depending on population
     IncreaseMoney();
-
     GrowPopulation();
 }
 
 
 void Player::GrowPopulation() {
-    _maxPopulation = 50; // min maxPopulation is 50 (wie die 3 in risiko lol)
+    _maxPopulation = 200; // min maxPopulation 200 (you are cooked if < 200)
     _maxPopulation += _allPixels.size(); // +1 for each pixel
     _maxPopulation += 1000 * _cities.size(); // +1000 for each city
 
@@ -80,7 +78,7 @@ void Player::GrowPopulation() {
 }
 
 void Player::IncreaseMoney() {
-    float currentTime = GetTime();
+    const float currentTime = GetTime();
 
     if (currentTime - _lastActionTime >= _cooldownTime) {
         int peopleAddition = 2;

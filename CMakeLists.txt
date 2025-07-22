@@ -48,11 +48,11 @@ add_executable(ARCY src/standard/main.cpp
         src/frontend-test/main.cpp
         src/standard/loaders/SoundPool.cpp
         src/standard/loaders/SoundPool.h
-        src/standard/display.cpp
-        src/standard/display.h
+        src/standard/display/display.cpp
+        src/standard/display/display.h
         src/standard/Building.h
-        src/standard/DayNightCycle.cpp
-        src/standard/DayNightCycle.h
+        src/standard/display/DayNightCycle.cpp
+        src/standard/display/DayNightCycle.h
         src/standard/player/PlayerAI.cpp
 )
 

@@ -2,7 +2,7 @@
 // Created by yanam on 21.07.2025.
 //
 
-#include <stdlib.h>
+#include <cstdlib>
 #include "../Globals.h"
 #include "Player.h"
 #include "../Bombs.h"
@@ -71,9 +71,10 @@ void Player::BotLogic_Expanding() {
 
     // do a random attack if bot has enough troops
     const float popPercentage = _population / _maxPopulation;
-    if (popPercentage < 0.75) return;
+    if (popPercentage < 0.50) return;
 
-    // expand with 20% strength and random target (radiation or neutral or other player)
+    // expand with 20% strength and random target:
+    // radiation (-2) or neutral land (-1) or other player (>=0)
     const int target = rand() % (players.size() + 2) - 2;
     Expand(target, 0.2f);
 }

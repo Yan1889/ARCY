@@ -5,7 +5,7 @@
 #include "Sounds.h"
 #include "TextureCollection.h"
 #include "../Globals.h"
-#include "../DayNightCycle.h"
+#include "../display/DayNightCycle.h"
 
 using namespace G;
 

@@ -23,7 +23,7 @@ void DayNightCycle::Draw()
 
 void DayNightCycle::Update()
 {
-    time += GetFrameTime() / 10.0f; // Default 300.0f
+    time += GetFrameTime() / 300.0f; // Default 300.0f
 
     if (time > 1.0f)
     {

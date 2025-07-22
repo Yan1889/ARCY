@@ -5,6 +5,7 @@
 #ifndef POPULATION_H
 #define POPULATION_H
 #include <queue>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -26,6 +27,7 @@ class Player {
 public:
     int _id;
     Color _color{};
+    std::string _name;
 
     bool _dead{};
 
@@ -63,7 +65,7 @@ public:
     int _centerPixel_x{};
     int _centerPixel_y{};
 
-    Player(Pixel* startPos, int startPop);
+    Player(Pixel* startPos, int startPop, const std::string& name);
 
     void Update();
     void Expand(int target, float percentage);

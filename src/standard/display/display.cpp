@@ -6,15 +6,15 @@
 
 #include <cmath>
 
-#include "loaders/TextureCollection.h"
+#include "../loaders/TextureCollection.h"
 #include <cstring>
 #include <format>
 #include <iostream>
 #include <ostream>
 #include <string>
 
-#include "Bombs.h"
-#include "Globals.h"
+#include "../Bombs.h"
+#include "../Globals.h"
 #include "raylib.h"
 #include "DayNightCycle.h"
 
@@ -47,40 +47,14 @@ void displayGame() {
 
 
 void displayInfoTexts() {
-    /* instructions
-    DrawText("Move with WASD", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20, 20, MAIN_PLAYER_COLOR);
-    DrawText("Up or Down Arrow to zoom", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 40, 20,
-             MAIN_PLAYER_COLOR);
-    DrawText("Right-click to build a city ($10K * city count)", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 80,
-             20, MAIN_PLAYER_COLOR);
-    DrawText("Esc to exit the game", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 120, 20, MAIN_PLAYER_COLOR);
-    DrawText("1 to drop a atom bomb ($10K), 2 a hydrogen bomb ($100K)", GetScreenWidth() / 20 - 25,
-             GetScreenHeight() / 20 + 160, 20, MAIN_PLAYER_COLOR);
-    DrawText("F11 to toggle fullscreen", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 200, 20,
-             MAIN_PLAYER_COLOR);
-    DrawText("Space to expand your territory", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 240, 20,
-             MAIN_PLAYER_COLOR);
-    DrawText("Left-Click to attack another player", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 280, 20,
-             MAIN_PLAYER_COLOR);
-             */
-
-    // fps
-    const int fps = GetFPS();
-    const char *fpsText = TextFormat("FPS: %d", fps);
-    const int textWidth = MeasureText(fpsText, 20);
-    const int textX = GetScreenWidth() - textWidth - 25;
-    const int textY = GetScreenHeight() - 25;
-    DrawText(fpsText, textX, textY, 20, MAIN_PLAYER_COLOR);
-
-
     // population
-    std::string populationText = formatNumber(MAIN_PLAYER._population);
-    std::string maxPopulationText = formatNumber(MAIN_PLAYER._maxPopulation);
-
-    const std::string totalPopStr = std::format("{} / {}", populationText, maxPopulationText);
-
+    const std::string populationStr = formatNumber(MAIN_PLAYER._population);
+    const std::string maxPopulationStr = formatNumber(MAIN_PLAYER._maxPopulation);
+    const std::string totalPopStr = "Population: " + populationStr + " / " + maxPopulationStr;
     DrawText(totalPopStr.c_str(), 0 + 25, GetScreenHeight() - 50, 20, MAIN_PLAYER_COLOR);
 
+
+    // neutral send
     const char *sendText = TextFormat(
         "People exploring neutral land: %d",
         MAIN_PLAYER._targetToAttackMap.contains(-1) ? MAIN_PLAYER._targetToAttackMap[-1].troops : 0
@@ -89,27 +63,22 @@ void displayInfoTexts() {
 
 
     // money
-    float moneyBalanceDisplay = static_cast<float>(MAIN_PLAYER._money.moneyBalance);
-    const char *moneyText;
+    const std::string moneyText = "Money: " + formatNumber(MAIN_PLAYER._money.moneyBalance);
+    DrawText(moneyText.c_str(), 25, GetScreenHeight() - 75, 20, MAIN_PLAYER_COLOR);
 
-    if (moneyBalanceDisplay >= 1000000) {
-        moneyBalanceDisplay /= 1000000;
-
-        moneyText = TextFormat("Money Balance: $%.2fM", moneyBalanceDisplay);
-    } else if (moneyBalanceDisplay >= 1000) {
-        moneyBalanceDisplay /= 1000;
-
-        moneyText = TextFormat("Money Balance: $%.2fK", moneyBalanceDisplay);
-    } else {
-        moneyText = TextFormat("Money Balance: $%.0f", moneyBalanceDisplay);
-    }
-
-    DrawText(moneyText, 25, GetScreenHeight() - 75, 20, MAIN_PLAYER_COLOR);
 
     // _pixelsOccupied
-    const char *territorySizeText = ("pixels occupied (your size): " + std::to_string(MAIN_PLAYER._allPixels.size())).
-            c_str();
-    DrawText(territorySizeText, 0 + 25, GetScreenHeight() - 100, 20, MAIN_PLAYER_COLOR);
+    const std::string territorySizeText = "Pixels occupied (your size): " + std::to_string(MAIN_PLAYER._allPixels.size());
+    DrawText(territorySizeText.c_str(), 0 + 25, GetScreenHeight() - 100, 20, MAIN_PLAYER_COLOR);
+
+
+    // fps
+    const int fps = GetFPS();
+    const char *fpsText = TextFormat("FPS: %d", fps);
+    const int textWidth = MeasureText(fpsText, 20);
+    const int textX = GetScreenWidth() - textWidth - 25;
+    const int textY = GetScreenHeight() - 25;
+    DrawText(fpsText, textX, textY, 20, MAIN_PLAYER_COLOR);
 }
 
 void displayPlayers() {
@@ -152,41 +121,40 @@ void displayPlayers() {
     DrawTexture(territoryTexture, 0, 0, Fade(WHITE, 0.5));
 }
 
-void displayPlayersInfo()
-{
-    for (int i = 0; i < players.size(); i++)
-    {
-        const char* playerInfo = TextFormat("Player %i: $%i ; Population: %i / %i", i, players[i]._money.returnMoney(), players[i]._population, players[i]._maxPopulation);
-        DrawText(playerInfo, 25, 20 + 30 * i, 20, players[i]._color);
+void displayPlayersInfo() {
+    for (int i = 0; i < players.size(); i++) {
+        const std::string populationStr = "Population: " + formatNumber(players[i]._population) + " / " + formatNumber(players[i]._maxPopulation);
+        const std::string moneyStr = "Money: " + formatNumber(players[i]._money.returnMoney());
+        const std::string infoStr = players[i]._name + ": " + moneyStr + "; " + populationStr;
+        DrawText(infoStr.c_str(), 25, 20 + 30 * i, 20, players[i]._color);
     }
 }
 
 void displayPlayerTags() {
-    for (int i = 0; i < players.size(); i++) {
-        if (players[i]._dead) continue;
+    for (auto & p : players) {
+        if (p._dead) continue;
 
-        const float diameter = 2 * std::sqrt(players[i]._allPixels.size() / PI); // A = π * r^2 => r = sqrt(A / π)
-        // Shows who you are
-        const char *name = i == 0 ? "You" : ("NPC " + std::to_string(i)).c_str();
-        const int charCount = strlen(name);
+        // A = π * r^2 => r = sqrt(A / π)
+        const float diameter = 2 * std::sqrt(p._allPixels.size() / PI);
+        const int charCount = p._name.length();
         const float pxWidthPerChar = diameter / charCount;
 
         const int fontSize = pxWidthPerChar;
-        const int spacing = 1;
+        constexpr int spacing = 1;
 
 
-        Vector2 textSize = MeasureTextEx(GetFontDefault(), name, fontSize, 1);
-        Vector2 textPos = {
-            players[i]._centerPixel_x - textSize.x / 2,
-            players[i]._centerPixel_y - textSize.y / 2
+        const Vector2 textSize = MeasureTextEx(GetFontDefault(), p._name.c_str(), fontSize, 1);
+        const Vector2 textPos = {
+            p._centerPixel_x - textSize.x / 2,
+            p._centerPixel_y - textSize.y / 2
         };
-        DrawTextEx(GetFontDefault(), name, textPos, fontSize, spacing, WHITE);
+        DrawTextEx(GetFontDefault(), p._name.c_str(), textPos, fontSize, spacing, WHITE);
     }
 }
 
 void displayCrossHair() {
-    int size = 6;
-    int thickness = 1;
+    constexpr int size = 6;
+    constexpr int thickness = 1;
     DrawRectangle((int) playerPos.x - size, (int) playerPos.y - thickness / 2, size * 2 + 1, thickness, WHITE);
     DrawRectangle((int) playerPos.x - thickness / 2, (int) playerPos.y - size, thickness, size * 2 + 1, WHITE);
 }
@@ -286,13 +254,7 @@ void displayBuildMenu() {
 void displayGameOver() {
     if (gameOver) {
         constexpr int fontSize = 200;
-
-        std::string winnerText = "Y'all lost!";
-        if (winnerId == 0) {
-            winnerText = "You won!";
-        } else if (winnerId > 0) {
-            winnerText = std::format("NPC{} won!", winnerId);
-        }
+        const std::string winnerText = winnerId == -1? std::string("Y'all lost!") : players[winnerId]._name;
         const int textWidth = MeasureText(winnerText.c_str(), fontSize);
         DrawText(winnerText.c_str(), GetScreenWidth() / 2 - textWidth / 2, GetScreenHeight() / 2, fontSize, WHITE);
     }
