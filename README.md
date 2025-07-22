@@ -69,6 +69,6 @@ In `Globals.h` lives a `std::vector<Player> players`
 ### Fixes
 + Bots randomly stop expanding
 
-## Features
+### Features
 + Boats
 + Alliances
