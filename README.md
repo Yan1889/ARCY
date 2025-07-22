@@ -52,3 +52,23 @@ Each player stores:
 + `std::vector<Pixel *> _border_vec`
 
 In `Globals.h` lives a `std::vector<Player> players`
+
+
+
+# Todo - for devs
+
+## UI
+### Sounds
++ Sound for attacking
++ Sound for night (owl, etc.)
+### Sprites
++ Icon for missile silo
++ Icon for boat (future)
+
+## Technical
+### Fixes
++ Bots randomly stop expanding
+
+## Features
++ Boats
++ Alliances
