@@ -40,6 +40,8 @@ public:
     // buildings
     std::vector<Pixel *> _cities{};
     std::vector<Pixel *> _silos{};
+    int cityCost = 10'000;
+    int siloCost = 1'000'000;
 
     // money
     float _cooldownTime = 1.0f;

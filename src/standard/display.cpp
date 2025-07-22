@@ -40,13 +40,14 @@ void displayGame() {
     displayInfoTexts();
     displayBuildMenu();
     displayGameOver();
+    displayPlayersInfo();
 
     EndDrawing();
 }
 
 
 void displayInfoTexts() {
-    // instructions
+    /* instructions
     DrawText("Move with WASD", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20, 20, MAIN_PLAYER_COLOR);
     DrawText("Up or Down Arrow to zoom", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 40, 20,
              MAIN_PLAYER_COLOR);
@@ -61,6 +62,7 @@ void displayInfoTexts() {
              MAIN_PLAYER_COLOR);
     DrawText("Left-Click to attack another player", GetScreenWidth() / 20 - 25, GetScreenHeight() / 20 + 280, 20,
              MAIN_PLAYER_COLOR);
+             */
 
     // fps
     const int fps = GetFPS();
@@ -148,6 +150,15 @@ void displayPlayers() {
         territoryTextureDirty = false;
     }
     DrawTexture(territoryTexture, 0, 0, Fade(WHITE, 0.5));
+}
+
+void displayPlayersInfo()
+{
+    for (int i = 0; i < players.size(); i++)
+    {
+        const char* playerInfo = TextFormat("Player %i: $%i ; Population: %i / %i", i, players[i]._money.returnMoney(), players[i]._population, players[i]._maxPopulation);
+        DrawText(playerInfo, 25, 20 + 30 * i, 20, players[i]._color);
+    }
 }
 
 void displayPlayerTags() {
@@ -249,12 +260,15 @@ void displayBuildMenu() {
     // displaying the dragged object
     if (buildingTypeDragging != UNKNOWN) {
         const Texture2D *t = nullptr;
+        Color color = Fade(RED, 0.5);
         switch (buildingTypeDragging) {
             case CITY:
                 t = &TextureCollection::city;
+                color = MAIN_PLAYER.CanBuildCity(GetPixelOnMouse()) ? Fade(GREEN, 0.5) : Fade(RED, 0.5);
                 break;
             case SILO:
                 t = &TextureCollection::silo;
+                color = MAIN_PLAYER.CanBuildSilo(GetPixelOnMouse()) ? Fade(GREEN, 0.5) : Fade(RED, 0.5);
                 break;
             case UNKNOWN:
                 std::cerr << "Unknown building type" << std::endl;
@@ -264,9 +278,7 @@ void displayBuildMenu() {
             Vector2(GetMousePosition().x - buildingRadius, GetMousePosition().y - buildingRadius),
             0,
             2 * buildingRadius / t->width,
-            MAIN_PLAYER.CanBuildCity(GetPixelOnMouse()) || MAIN_PLAYER.CanBuildSilo(GetPixelOnMouse())
-                ? Fade(GREEN, 0.5)
-                : Fade(RED, 0.5)
+            color
         );
     }
 }

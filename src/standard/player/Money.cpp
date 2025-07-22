@@ -16,3 +16,13 @@ void Money::getMoney(int amount)
     if (moneyBalance + amount > 100000000) return;
     moneyBalance += amount;
 }
+
+int Money::returnMoney()
+{
+    return moneyBalance;
+}
+
+void Money::setMoney(int amount)
+{
+    moneyBalance = amount;
+}

@@ -18,6 +18,9 @@ std::vector<SingleBomb> Bombs::allBombs = {};
 std::vector<RadiationZone> Bombs::allZones = {};
 std::vector<VisualEffectAfterDetonation> Bombs::allEffects = {};
 
+int Bombs::atomBombCost = 100'000;
+int Bombs::hydrogenBombCost = 1'000'000;
+
 bool SingleBomb::operator==(const SingleBomb &other) const {
     return pos.x == other.pos.x && pos.y == other.pos.y;
 }
@@ -84,7 +87,7 @@ void Bombs::Update() {
     Vector2 targetPos = GetScreenToWorld2D(GetMousePosition(), camera);
     if (targetPos.x < 0 || targetPos.x > MAP_WIDTH - 1 || targetPos.y < 0 || targetPos.y > MAP_HEIGHT - 1) return;
 
-    const int cost = IsKeyPressed(KEY_ONE) ? 10000 : 100000;
+    const int cost = IsKeyPressed(KEY_ONE) ? atomBombCost : hydrogenBombCost;
 
     if (MAIN_PLAYER._money.moneyBalance - cost < 0) return;
 

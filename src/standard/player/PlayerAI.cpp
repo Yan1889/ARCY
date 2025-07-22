@@ -34,7 +34,8 @@ void Player::BotLogic_Bombing() {
     Pixel *startPixel = GetNearestSiloFromPixel(target);
     if (startPixel == nullptr) return; // doesnt have a silo yet
 
-    constexpr int cost = 10000; // only atom bombs for now
+    int cost = Bombs::atomBombCost; // only atom bombs for now
+
     if (_money.moneyBalance < cost) return;
 
     _money.spendMoney(cost);

@@ -9,10 +9,12 @@
 
 class Money {
 public:
-    int moneyBalance = 1000;
+    int moneyBalance = 0;
 
     void spendMoney(int cost);
     void getMoney(int amount);
+    int returnMoney();
+    void setMoney(int amount);
 };
 
 #endif //MONEY_H

@@ -19,6 +19,7 @@ inline BUILDING_TYPE buildingTypeDragging = UNKNOWN;
 void displayGame();
 void displayInfoTexts();
 void displayPlayers();
+void displayPlayersInfo();
 void displayPlayerTags();
 void displayBGTextures();
 void displayCrossHair();

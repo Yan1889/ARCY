@@ -53,6 +53,8 @@ public:
     static std::vector<SingleBomb> allBombs;
     static void Update();
     static void Render();
+    static int atomBombCost;
+    static int hydrogenBombCost;
 };
 
 extern Bombs activeBomb;

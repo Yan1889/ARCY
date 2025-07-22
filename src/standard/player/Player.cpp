@@ -112,7 +112,7 @@ void Player::RemovePixelFromCenter(Pixel *newP) {
 }
 
 bool Player::TryAddCity(Pixel *pos) {
-    const int cost = 10000 * (_cities.size() + 1);
+    const int cost = cityCost * (_cities.size() + 1);
 
     if (_money.moneyBalance < cost || !_allPixels.contains(pos)) return false;
     _money.spendMoney(cost);
@@ -124,9 +124,9 @@ bool Player::TryAddCity(Pixel *pos) {
 }
 
 bool Player::TryAddSilo(Pixel *pos) {
-    const int cost = 10000 * (_silos.size() + 1);
+    const int cost = siloCost * (_silos.size() + 1);
 
-    if (!CanBuildCity(pos)) return false;
+    if (_money.moneyBalance < cost || !CanBuildCity(pos)) return false;
     _money.spendMoney(cost);
 
     mySounds.Play(mySounds.cityBuildPool);
@@ -136,13 +136,13 @@ bool Player::TryAddSilo(Pixel *pos) {
 }
 
 bool Player::CanBuildCity(Pixel *pos) const {
-    const int cost = 10000 * (_cities.size() + 1);
+    const int cost = cityCost * (_cities.size() + 1);
     if (_money.moneyBalance < cost || !_allPixels.contains(pos)) return false;
     return true;
 }
 
 bool Player::CanBuildSilo(Pixel *pos) const {
-    const int cost = 10000 * (_silos.size() + 1);
+    const int cost = siloCost * (_silos.size() + 1);
     if (_money.moneyBalance < cost || !_allPixels.contains(pos)) return false;
     return true;
 }

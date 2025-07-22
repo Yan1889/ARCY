@@ -12,9 +12,11 @@ class DayNightCycle {
 public:
     static void Update();
     static void Draw();
+    static void Time();
     static Color brightness;
     static float time;
     static int days;
+    static bool daysCounting;
 };
 
 
