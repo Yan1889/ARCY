@@ -40,13 +40,17 @@ void Player::BotLogic_Bombing() {
 
     _money.spendMoney(cost);
     mySounds.Play(mySounds.misslePool);
+
+    BombType type = ATOM;
+    float speed = type == ATOM? 15.0f : 10.0f;
+
     Bombs::allBombs.push_back(SingleBomb{
         .targetPos = target->ToVector2(),
         .originPos = startPixel->ToVector2(),
         .pos = startPixel->ToVector2(),
-        .speed = 1,
         .radius = 50.f,
-        .type = ATOM
+        .type = type,
+        .speed = speed
     });
 }
 

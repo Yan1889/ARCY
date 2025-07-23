@@ -23,6 +23,7 @@ public:
     Music forestSound;
     Music mountainSound;
     Music radiationSound;
+    Music nightAmbienceSound;
 
     void checkAtmosphere();
 

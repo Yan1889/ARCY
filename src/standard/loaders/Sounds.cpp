@@ -3,6 +3,10 @@
 //
 
 #include "Sounds.h"
+
+#include <iostream>
+#include <ostream>
+
 #include "TextureCollection.h"
 #include "../Globals.h"
 #include "../display/DayNightCycle.h"
@@ -28,6 +32,7 @@ Sounds::~Sounds()
     UnloadMusicStream(forestSound);
     UnloadMusicStream(fieldSound);
     UnloadMusicStream(radiationSound);
+    UnloadMusicStream(nightAmbienceSound);
     CloseAudioDevice();
 }
 
@@ -50,6 +55,9 @@ void Sounds::LoadAll()
     forestSound = LoadMusicStream("assets/sounds/forest.mp3");
     fieldSound = LoadMusicStream("assets/sounds/field.mp3");
     radiationSound = LoadMusicStream("assets/sounds/radiation.mp3");
+    nightAmbienceSound = LoadMusicStream("assets/sounds/nightambience.mp3");
+
+    if (nightAmbienceSound.frameCount == 0) std::cerr << "Sound not found!!!!!" << std::endl;
 
     PlayMusicStream(oceanSound);
     PlayMusicStream(beachSound);
@@ -57,6 +65,7 @@ void Sounds::LoadAll()
     PlayMusicStream(fieldSound);
     PlayMusicStream(forestSound);
     PlayMusicStream(radiationSound);
+    PlayMusicStream(nightAmbienceSound);
 }
 
 void Sounds::checkAtmosphere()
@@ -67,6 +76,7 @@ void Sounds::checkAtmosphere()
     UpdateMusicStream(fieldSound);
     UpdateMusicStream(forestSound);
     UpdateMusicStream(radiationSound);
+    UpdateMusicStream(nightAmbienceSound);
 
     const Color pixelColor = GetImageColor(G::perlin, static_cast<int>(playerPos.x), static_cast<int>(playerPos.y));
     const bool isContaminated = G::territoryMap[static_cast<int>(playerPos.x)][static_cast<int>(playerPos.y)].contaminated;
@@ -110,20 +120,43 @@ void Sounds::checkAtmosphere()
     else PauseMusicStream(beachSound);
 
     // Field
-    if (!(DayNightCycle::time > 0.25f && DayNightCycle::time < 0.75f) &&
-        (ColorToInt(pixelColor) == ColorToInt(mapColors[3]) ||
-        ColorToInt(pixelColor) == ColorToInt(mapColors[4]))) ResumeMusicStream(fieldSound);
+    if (ColorToInt(pixelColor) == ColorToInt(mapColors[3]) ||
+        ColorToInt(pixelColor) == ColorToInt(mapColors[4]))
+    {
+        if (!(DayNightCycle::time > 0.25f && DayNightCycle::time < 0.75f))
+        {
+            ResumeMusicStream(fieldSound);
+        }
+        else PauseMusicStream(fieldSound);
+    }
     else PauseMusicStream(fieldSound);
 
     // Forest
-    if (!(DayNightCycle::time > 0.25f && DayNightCycle::time < 0.75f) &&
-        ColorToInt(pixelColor) == ColorToInt(mapColors[5]) ||
-        ColorToInt(pixelColor) == ColorToInt(mapColors[6])) ResumeMusicStream(forestSound);
+    if (ColorToInt(pixelColor) == ColorToInt(mapColors[5]) ||
+        ColorToInt(pixelColor) == ColorToInt(mapColors[6]))
+    {
+        if (!(DayNightCycle::time > 0.25f && DayNightCycle::time < 0.75f))
+        {
+            ResumeMusicStream(forestSound);
+        }
+        else PauseMusicStream(forestSound);
+    }
     else PauseMusicStream(forestSound);
 
     // Mountain
     if (ColorToInt(pixelColor) == ColorToInt(mapColors[7]) ||
         ColorToInt(pixelColor) == ColorToInt(mapColors[8])) ResumeMusicStream(mountainSound);
     else PauseMusicStream(mountainSound);
+
+    // Night Ambience
+    if (ColorToInt(pixelColor) == ColorToInt(mapColors[3]) ||
+        ColorToInt(pixelColor) == ColorToInt(mapColors[4]) ||
+        ColorToInt(pixelColor) == ColorToInt(mapColors[5]) ||
+        ColorToInt(pixelColor) == ColorToInt(mapColors[6]))
+    {
+        if (DayNightCycle::time > 0.25f && DayNightCycle::time < 0.75f) ResumeMusicStream(nightAmbienceSound);
+        else PauseMusicStream(nightAmbienceSound);
+    }
+    else PauseMusicStream(nightAmbienceSound);
 }
 

@@ -21,9 +21,9 @@ struct SingleBomb {
     Vector2 targetPos{};
     Vector2 originPos{};
     Vector2 pos{};
-    float speed{};
     float radius{};
     BombType type;
+    float speed{};
 
     float time{};
     bool operator==(const SingleBomb& other) const;

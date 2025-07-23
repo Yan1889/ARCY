@@ -29,10 +29,13 @@ void Bombs::Update() {
     for (auto it = allBombs.begin(); it != allBombs.end(); ++it) {
         SingleBomb& b = *it;
 
+        float distance = Vector2Distance(b.originPos, b.targetPos);
+        float duration = distance / b.speed;
+
         b.time += b.speed * GetFrameTime();
 
-        if (b.time >= 1.0f) {
-            b.time = 1.0f;
+        if (b.time >= duration) {
+            b.time = duration;
             b.pos = b.targetPos;
 
             checkSound(b);
@@ -48,7 +51,9 @@ void Bombs::Update() {
             it = allBombs.erase(it);
             --it;
         } else {
-            b.pos = Vector2Lerp(b.originPos, b.targetPos, b.time);
+            float t = b.time / duration;
+
+            b.pos = Vector2Lerp(b.originPos, b.targetPos, t);
         }
     }
     for (auto it = allZones.begin(); it != allZones.end(); ++it) {
@@ -99,13 +104,16 @@ void Bombs::Update() {
     
     mySounds.Play(mySounds.misslePool);
 
+    BombType type = IsKeyPressed(KEY_ONE)? ATOM : HYDROGEN;
+    float speed = type == ATOM? 15.0f : 10.0f;
+
     allBombs.push_back({
         .targetPos = targetPos,
         .originPos = startPixel->ToVector2(),
         .pos =  startPixel->ToVector2(),
-        .speed = 1,
         .radius = IsKeyPressed(KEY_ONE) ? 50.f : 300.f,
-        .type = IsKeyPressed(KEY_ONE)? ATOM : HYDROGEN
+        .type = type,
+        .speed = speed
     });
 }
 

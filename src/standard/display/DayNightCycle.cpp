@@ -13,7 +13,7 @@
 Color DayNightCycle::brightness = {0, 0, 0, 0};
 float DayNightCycle::time = 0;
 int DayNightCycle::days = 0;
-bool DayNightCycle::daysCounting = false;
+bool DayNightCycle::daysCounting = true;
 
 void DayNightCycle::Draw()
 {
@@ -30,11 +30,10 @@ void DayNightCycle::Update()
         time = 0.0f;
         daysCounting = true;
     }
-    if (0.4 < time && time < 0.6 && daysCounting)
+    if (0.5 < time && time < 0.75 && daysCounting)
     {
         daysCounting = false;
         days++;
-        std::cout << days << std::endl;
     }
 
     float alpha = (sinf(time * 2 * PI - PI / 2) + 1) / 2;

@@ -264,7 +264,7 @@ void displayBuildMenu() {
 void displayGameOver() {
     if (gameOver) {
         constexpr int fontSize = 200;
-        const std::string winnerText = winnerId == -1? std::string("Y'all lost!") : players[winnerId]._name;
+        const std::string winnerText = winnerId == -1? std::string("Y'all lost!") : std::string(players[winnerId]._name + " win(s)!");
         const int textWidth = MeasureText(winnerText.c_str(), fontSize);
         DrawText(winnerText.c_str(), GetScreenWidth() / 2 - textWidth / 2, GetScreenHeight() / 2, fontSize, WHITE);
     }
