@@ -30,14 +30,22 @@ public:
     std::string _name;
 
     bool _dead{};
+    bool _bot{};
 
     // population
-    int _population;
-    int _maxPopulation;
+    int _maxTotalPopulation{};
+    int _totalPopulation{};
+    int _maxTroops{};
+    int _troops{};
+    int _maxWorkers{};
+    int _workers{};
+    float _troopPercentage = 0.80f;
+
+    /*
     float _growthCooldown = 100;
     float _growthRate = 100;
-    float _growth{};
     float _growthFactor = 0.0085f;
+    */
 
     // buildings
     std::vector<Pixel *> _cities{};
@@ -65,7 +73,7 @@ public:
     int _centerPixel_x{};
     int _centerPixel_y{};
 
-    Player(Pixel* startPos, int startPop, const std::string& name);
+    Player(Pixel* startPos, const std::string& name);
 
     void Update();
     void Expand(int target, float percentage);
@@ -85,6 +93,7 @@ public:
     void BotLogic_Bombing();
     void BotLogic_Building();
     void BotLogic_Expanding();
+    void UpdatePopulationMaxValues();
     void GrowPopulation();
     void IncreaseMoney();
     void RemovePixelFromCenter(Pixel* newP);

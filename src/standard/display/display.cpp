@@ -8,7 +8,6 @@
 #include <cmath>
 
 #include "../loaders/TextureCollection.h"
-#include <cstring>
 #include <format>
 #include <iostream>
 #include <ostream>
@@ -18,6 +17,9 @@
 #include "../Globals.h"
 #include "raylib.h"
 #include "DayNightCycle.h"
+
+#define RAYGUI_IMPLEMENTATION
+#include "raygui.h"
 
 
 constexpr float buildingRadius = 20;
@@ -39,6 +41,7 @@ void displayGame() {
 
     DayNightCycle::Update();
     displayInfoTexts();
+    displayTroopSlider();
     displayBuildMenu();
     displayGameOver();
     displayPlayersInfo();
@@ -49,9 +52,9 @@ void displayGame() {
 
 void displayInfoTexts() {
     // population
-    const std::string populationStr = formatNumber(MAIN_PLAYER._population);
-    const std::string maxPopulationStr = formatNumber(MAIN_PLAYER._maxPopulation);
-    const std::string totalPopStr = "Population: " + populationStr + " / " + maxPopulationStr;
+    const std::string populationStr = formatNumber(MAIN_PLAYER._totalPopulation);
+    const std::string maxPopulationStr = formatNumber(MAIN_PLAYER._maxTotalPopulation);
+    const std::string totalPopStr = "Total population: " + populationStr + " / " + maxPopulationStr;
     DrawText(totalPopStr.c_str(), 0 + 25, GetScreenHeight() - 50, 20, MAIN_PLAYER_COLOR);
 
 
@@ -133,9 +136,10 @@ void displayPlayersInfo() {
 
     for (int i = 0; i <  players.size(); i++) {
         const Player& p = players[playerIdxOrder[i]];
-        const std::string populationStr = "Population: " + formatNumber(p._population) + " / " + formatNumber(p._maxPopulation);
+        const std::string troopsStr = "Troops: " + formatNumber(p._troops) + " / " + formatNumber(p._maxTroops);
+        const std::string workersStr = "Workers: " + formatNumber(p._workers) + " / " + formatNumber(p._maxWorkers);
         const std::string moneyStr = "Money: " + formatNumber(p._money.returnMoney());
-        const std::string infoStr = p._name + ": " + moneyStr + "; " + populationStr;
+        const std::string infoStr = p._name + ": " + troopsStr + "; " + workersStr + "; " + moneyStr;
         DrawText(infoStr.c_str(), 25, 20 + 30 * i, 20, p._color);
     }
 }
@@ -259,6 +263,17 @@ void displayBuildMenu() {
             color
         );
     }
+}
+
+void displayTroopSlider() {
+    const Rectangle sliderRect{
+        100,
+        GetScreenHeight() * 0.8f,
+        150,
+        GetScreenHeight() * 0.05f
+    };
+    GuiSetStyle(DEFAULT, TEXT_SIZE, 20);
+    GuiSlider(sliderRect, "workers", "troops", &players[0]._troopPercentage, 0, 1);
 }
 
 void displayGameOver() {

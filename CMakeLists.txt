@@ -53,6 +53,7 @@ add_executable(ARCY src/standard/main.cpp
         src/standard/Building.h
         src/standard/display/DayNightCycle.cpp
         src/standard/display/DayNightCycle.h
+        src/standard/display/raygui.h
         src/standard/player/PlayerAI.cpp
 )
 

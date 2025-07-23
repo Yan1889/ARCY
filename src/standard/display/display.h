@@ -20,6 +20,7 @@ void displayGame();
 void displayInfoTexts();
 void displayPlayers();
 void displayPlayersInfo();
+void displayTroopSlider();
 void displayPlayerTags();
 void displayBGTextures();
 void displayCrossHair();

@@ -155,7 +155,6 @@ void initPlayers() {
     // main character
     players.emplace_back(
         PixelAt(playerPos.x, playerPos.y),
-        1000,
         std::string("You")
     );
 
@@ -167,9 +166,9 @@ void initPlayers() {
                 static_cast<int>(playerPos.x + std::cos(angle) * botSpawnRadius),
                 static_cast<int>(playerPos.y + std::sin(angle) * botSpawnRadius)
             ),
-            300,
             std::string("NPC ") + std::to_string(i)
         );
+        players.back()._bot = true;
     }
 }
 
