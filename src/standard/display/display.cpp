@@ -131,11 +131,13 @@ void displayPlayersInfo() {
         return players[i1]._allPixels.size() > players[i2]._allPixels.size();
     });
 
-    for (int i = 0; i <  players.size(); i++) {
+    for (int i = 0; i <  10; i++) {
         const Player& p = players[playerIdxOrder[i]];
         const std::string populationStr = "Population: " + formatNumber(p._population) + " / " + formatNumber(p._maxPopulation);
         const std::string moneyStr = "Money: " + formatNumber(p._money.returnMoney());
-        const std::string infoStr = p._name + ": " + moneyStr + "; " + populationStr;
+        const std::string deadStr = p._dead ? "(Defeated)" : "";
+        const std::string numberStr = std::to_string(i + 1);
+        const std::string infoStr = numberStr + ". " + p._name + ": " + moneyStr + "; " + populationStr + " " + deadStr;
         DrawText(infoStr.c_str(), 25, 20 + 30 * i, 20, p._color);
     }
 }
