@@ -281,7 +281,11 @@ void displayTroopSlider() {
 void displayGameOver() {
     if (gameOver) {
         constexpr int fontSize = 200;
-        const std::string winnerText = winnerId == -1? std::string("Y'all lost!") : std::string(players[winnerId]._name + " win(s)!");
+        std::string winnerText = winnerId == -1? std::string("Y'all lost!") : std::string(players[winnerId]._name + " win");
+        if (winnerId > 0) {
+            winnerText += 's';
+        }
+        winnerText += '!';
         const int textWidth = MeasureText(winnerText.c_str(), fontSize);
         DrawText(winnerText.c_str(), GetScreenWidth() / 2 - textWidth / 2, GetScreenHeight() / 2, fontSize, WHITE);
     }

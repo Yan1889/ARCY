@@ -94,7 +94,7 @@ void Player::GrowPopulation() {
     addedPeople *= ratio;
 
     if (_bot) {
-        addedPeople *= 0.6;
+        addedPeople *= 0.5;
     }
 
     const int addedTroops = addedPeople * _troopPercentage;
