@@ -29,7 +29,7 @@ constexpr int zoomSpeed = 5;
 constexpr float zoomMin = 0.25f;
 constexpr float zoomMax = 10.0f;
 
-constexpr int botCount = 2;
+constexpr int botCount = 20;
 constexpr int botSpawnRadius = 500;
 
 
@@ -68,7 +68,7 @@ int main() {
         }
         displayGame();
         mySounds.checkAtmosphere();
-        // MAIN_PLAYER._money.getMoney(100000);
+        MAIN_PLAYER._money.getMoney(100000);
     }
 
     // clean up everything
