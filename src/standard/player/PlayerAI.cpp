@@ -74,7 +74,8 @@ void Player::BotLogic_Expanding() {
     if (_maxPopulation == 0) return;
 
     // do a random attack if bot has enough troops
-    const float popPercentage = _population / _maxPopulation;
+    const float popPercentage = _population / static_cast<float>(_maxPopulation);
+
     if (popPercentage < 0.50) return;
 
     // expand with 20% strength and random target:
