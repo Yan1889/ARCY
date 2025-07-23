@@ -134,7 +134,7 @@ void displayPlayersInfo() {
         return players[i1]._allPixels.size() > players[i2]._allPixels.size();
     });
 
-    for (int i = 0; i <  10; i++) {
+    for (int i = 0; i < players.size() && i < 10; i++) {
         const Player& p = players[playerIdxOrder[i]];
         const std::string troopsStr = "Troops: " + formatNumber(p._troops) + " / " + formatNumber(p._maxTroops);
         const std::string workersStr = "Workers: " + formatNumber(p._workers) + " / " + formatNumber(p._maxWorkers);
