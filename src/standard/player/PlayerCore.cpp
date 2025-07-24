@@ -22,6 +22,9 @@ void Player::Expand(const int target, const float percentage) {
     attack.targetPlayerId = target;
     attack.troops += newPeopleLeaving;
     ReFillAttackQueueFromScratch(attack);
+
+    // Attack sounds if main character is targeting a player/bot
+    if (_id == 0 && target != -1 && !attack.set.empty()) mySounds.Play(mySounds.attackPool);
 }
 
 

@@ -67,26 +67,6 @@ void Player::UpdatePopulationMaxValues() {
 }
 
 void Player::GrowPopulation() {
-    /*
-    _growthCooldown -= GetTime();
-    const float _growth = _growthFactor * (1.0f - exp(-_population / 10.f));
-
-    if (_population < 50000) {
-        _growthFactor = 0.001;
-    } else {
-        _growthFactor = 0.0003;
-    }
-
-    if (_growthCooldown <= 0) {
-        const float totalGrowth = _population * _growth;
-
-        const int newPopulation = _population + static_cast<int>(ceil(totalGrowth));
-        _population = std::min(newPopulation, _maxPopulation);
-
-        _growthCooldown = _growthRate;
-    }
-    */
-
     // some random ass formula
     int addedPeople = 10 + std::pow(_totalPopulation, 0.73) / 4;
 
@@ -105,19 +85,6 @@ void Player::GrowPopulation() {
 }
 
 void Player::IncreaseMoney() {
-    /*
-    const float currentTime = GetTime();
-
-    if (currentTime - _lastActionTime >= _cooldownTime) {
-        int peopleAddition = 2;
-        int totalAddition = peopleAddition * _population;
-
-        if (_money.moneyBalance + totalAddition > 100000000) _money.moneyBalance = 100000000;
-        else _money.moneyBalance += totalAddition;
-
-        _lastActionTime = currentTime;
-    }
-    */
     // another random formula
     _money.getMoney(std::floor(0.045 * std::pow(_workers, 0.7)));
 }

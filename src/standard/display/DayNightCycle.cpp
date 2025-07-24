@@ -37,7 +37,7 @@ void DayNightCycle::Update()
     }
 
     float alpha = (sinf(time * 2 * PI - PI / 2) + 1) / 2;
-    unsigned char nightAlpha = (unsigned char)(alpha * 245);
+    unsigned char nightAlpha = (unsigned char)(alpha * 200);
 
     brightness = { 0, 0, 0, nightAlpha };
     Draw();

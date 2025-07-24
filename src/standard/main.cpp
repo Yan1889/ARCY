@@ -123,10 +123,6 @@ void checkExpansionAndAttack() {
     const bool mouseOverBuildMenu = buildMenuShown && GetMousePosition().y > GetScreenHeight() * 0.9;
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !mouseOverBuildMenu) {
         const int playerIdClickd = GetPixelOnMouse()->playerId;
-        if (playerIdClickd == 0) return; // clicked on himself
-
-        if (playerIdClickd != -1) mySounds.Play(mySounds.attackPool); // Attack sounds if targeting a player/bot
-
         MAIN_PLAYER.Expand(playerIdClickd, 0.5);
     }
 }

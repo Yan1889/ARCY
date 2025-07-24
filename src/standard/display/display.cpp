@@ -231,6 +231,7 @@ void displayBuildMenu() {
         switch (buildingTypeDragging) {
             case CITY:
                 MAIN_PLAYER.TryAddCity(GetPixelOnMouse());
+                break;
             case SILO:
                 MAIN_PLAYER.TryAddSilo(GetPixelOnMouse());
                 break;
