@@ -125,6 +125,8 @@ void checkExpansionAndAttack() {
         const int playerIdClickd = GetPixelOnMouse()->playerId;
         if (playerIdClickd == 0) return; // clicked on himself
 
+        if (playerIdClickd != -1) mySounds.Play(mySounds.attackPool); // Attack sounds if targeting a player/bot
+
         MAIN_PLAYER.Expand(playerIdClickd, 0.5);
     }
 }
@@ -154,13 +156,13 @@ void checkGameOver() {
 void initPlayers() {
     // main character
     players.emplace_back(
-        PixelAt(playerPos.x, playerPos.y),
+        PixelAt(static_cast<int>(playerPos.x), static_cast<int>(playerPos.y)),
         std::string("You")
     );
 
     // bots
     for (int i = 0; i < botCount; i++) {
-        const float angle = 2 * PI * i / botCount;
+        const float angle = 2 * PI * static_cast<float>(i) / botCount;
         players.emplace_back(
             PixelAt(
                 static_cast<int>(playerPos.x + std::cos(angle) * botSpawnRadius),
@@ -196,7 +198,7 @@ void initCamAndMap() {
 
     territoryImage = GenImageColor(MAP_WIDTH, MAP_HEIGHT, BLANK);
     territoryTexture = LoadTextureFromImage(territoryImage);
-    territoryMap = std::vector<std::vector<Pixel> >(MAP_WIDTH, std::vector<Pixel>(MAP_HEIGHT));
+    territoryMap = std::vector<std::vector<Pixel>>(MAP_WIDTH, std::vector<Pixel>(MAP_HEIGHT));
     for (int y = 0; y < MAP_HEIGHT; y++) {
         for (int x = 0; x < MAP_WIDTH; x++) {
             territoryMap[x][y] = Pixel(x, y, -1);
@@ -207,5 +209,5 @@ void initCamAndMap() {
             territoryMap[x][y].LoadNeighbors();
         }
     }
-    playerPos = Vector2{MAP_WIDTH / 2, MAP_HEIGHT / 2};
+    playerPos = Vector2{static_cast<float>(MAP_WIDTH) / 2, static_cast<float>(MAP_HEIGHT) / 2};
 }

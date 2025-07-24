@@ -141,7 +141,7 @@ void displayPlayersInfo() {
         const std::string moneyStr = "Money: " + formatNumber(p._money.returnMoney());
         const std::string deadStr = p._dead ? "(Defeated)" : "";
         const std::string numberStr = std::to_string(i + 1);
-        const std::string infoStr = numberStr + ". " + p._name + ": " + troopsStr + "; " + workersStr + "; " + moneyStr + deadStr;
+        const std::string infoStr = numberStr + ". " + p._name + ": " + troopsStr + "; " + workersStr + "; " + moneyStr + " " + deadStr;
         DrawText(infoStr.c_str(), 25, 20 + 30 * i, 20, p._color);
     }
 }

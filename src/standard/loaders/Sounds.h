@@ -32,6 +32,7 @@ public:
     SoundPool* distantExplosionPool = nullptr;
     SoundPool* cityBuildPool = nullptr;
     SoundPool* misslePool = nullptr;
+    SoundPool* attackPool = nullptr;
 };
 
 #endif //SOUNDS_H

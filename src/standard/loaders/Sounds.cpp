@@ -25,6 +25,7 @@ Sounds::~Sounds()
     delete misslePool;
     delete nearExplosionPool;
     delete distantExplosionPool;
+    delete attackPool;
 
     UnloadMusicStream(oceanSound);
     UnloadMusicStream(beachSound);
@@ -48,6 +49,7 @@ void Sounds::LoadAll()
     distantExplosionPool = new SoundPool("assets/sounds/distantnukeexplosion.mp3");
     cityBuildPool = new SoundPool("assets/sounds/citybuilding.mp3");
     misslePool = new SoundPool("assets/sounds/nukeflyby.mp3");
+    attackPool = new SoundPool("assets/sounds/attack.mp3");
 
     oceanSound = LoadMusicStream("assets/sounds/ocean.mp3");
     beachSound = LoadMusicStream("assets/sounds/beach.mp3");
