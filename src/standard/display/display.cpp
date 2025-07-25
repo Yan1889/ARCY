@@ -282,11 +282,13 @@ void displayAndHandleBuildMenu() {
                 t = &TextureCollection::mapIcon;
                 color = MAIN_PLAYER.CanLaunchAtomBomb() ? Fade(GREEN, 0.5) : Fade(RED, 0.5);
                 yOffset = -t->height / 2.f * 2 * buildingRadius / t->width;
+                DrawCircleV(Vector2{GetMousePosition().x, GetMousePosition().y}, 30, Fade(GRAY, 0.2));
                 break;
             case MENU_OPTION_HYDROGEN_BOMB:
                 t = &TextureCollection::mapIcon;
                 color = MAIN_PLAYER.CanLaunchHydrogenBomb() ? Fade(GREEN, 0.5) : Fade(RED, 0.5);
                 yOffset = -t->height / 2.f * 2 * buildingRadius / t->width;
+                DrawCircleV(Vector2{GetMousePosition().x, GetMousePosition().y}, 200, Fade(GRAY, 0.2));
                 break;
         }
         DrawTextureEx(
@@ -307,7 +309,7 @@ void displayTroopSlider() {
         GetScreenHeight() * 0.05f
     };
     GuiSetStyle(DEFAULT, TEXT_SIZE, 20);
-    GuiSlider(sliderRect, "workers", "troops", &players[0]._troopPercentage, 0, 1);
+    GuiSlider(sliderRect, "Troops", "Workers", &players[0]._troopPercentage, 0, 1);
 }
 
 void displayGameOver() {

@@ -4,7 +4,9 @@
 
 #ifndef GLOBALS_H
 #define GLOBALS_H
+#include <iostream>
 #include <vector>
+#include <bits/ostream.tcc>
 
 #include "map/PerlinNoise.h"
 #include "map/Pixel.h"
@@ -62,10 +64,18 @@ namespace G {
     inline bool territoryTextureDirty{};
 
     inline Pixel* PixelAt(const int x, const int y) {
+
+        if (x < 0 || x > MAP_WIDTH || y < 0 || y > MAP_HEIGHT) return nullptr;
+
         return &territoryMap[x][y];
     }
     inline Pixel* PixelAt(Vector2 v) {
-        return &territoryMap[static_cast<int>(v.x)][static_cast<int>(v.y)];
+        int x = static_cast<int>(v.x);
+        int y = static_cast<int>(v.y);
+
+        if (x < 0 || x > MAP_WIDTH || y < 0 || y > MAP_HEIGHT) return nullptr;
+
+        return &territoryMap[x][y];
     }
     inline Pixel *GetPixelOnMouse() {
         return PixelAt(

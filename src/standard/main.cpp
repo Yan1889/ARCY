@@ -68,6 +68,7 @@ int main() {
         }
         displayGame();
         mySounds.checkAtmosphere();
+        MAIN_PLAYER._money.getMoney(100000);
     }
 
     // clean up everything

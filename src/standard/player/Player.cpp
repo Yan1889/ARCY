@@ -153,7 +153,7 @@ bool Player::CanLaunchHydrogenBomb() const {
 
 
 void Player::TryLaunchAtomBomb(Pixel *targetPixel) {
-    if (!CanLaunchAtomBomb()) return;
+    if (!CanLaunchAtomBomb() || targetPixel == nullptr) return;
 
     const int cost = Bombs::atomBombCost;
 
@@ -172,9 +172,9 @@ void Player::TryLaunchAtomBomb(Pixel *targetPixel) {
 }
 
 void Player::TryLaunchHydrogenBomb(Pixel *targetPixel) {
-    if (!CanLaunchHydrogenBomb()) return;
+    if (!CanLaunchHydrogenBomb() || targetPixel == nullptr) return;
 
-    const int cost = Bombs::atomBombCost;
+    const int cost = Bombs::hydrogenBombCost;
 
     _money.spendMoney(cost);
     mySounds.Play(mySounds.misslePool);
