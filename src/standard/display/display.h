@@ -9,11 +9,16 @@
 #define MAIN_PLAYER_COLOR G::players[0]._color
 #include <string>
 
-#include "../Building.h"
-
+enum MenuOption {
+    MENU_OPTION_CITY,
+    MENU_OPTION_SILO,
+    MENU_OPTION_ATOM_BOMB,
+    MENU_OPTION_HYDROGEN_BOMB,
+    MENU_OPTION_NONE,
+};
 
 inline bool buildMenuShown{};
-inline BUILDING_TYPE buildingTypeDragging = UNKNOWN;
+inline MenuOption currentMenuOption = MENU_OPTION_NONE;
 
 
 void displayGame();
@@ -24,7 +29,7 @@ void displayTroopSlider();
 void displayPlayerTags();
 void displayBGTextures();
 void displayCrossHair();
-void displayBuildMenu();
+void displayAndHandleBuildMenu();
 void displayGameOver();
 
 std::string formatNumber(int number);

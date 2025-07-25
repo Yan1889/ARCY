@@ -30,28 +30,7 @@ void Player::BotLogic_Bombing() {
     Pixel *target = *iter;
 
     // Pixel *target = PixelAt(rand() % MAP_WIDTH, rand() % MAP_HEIGHT); // alternative: random firing
-
-    Pixel *startPixel = GetNearestSiloFromPixel(target);
-    if (startPixel == nullptr) return; // doesnt have a silo yet
-
-    int cost = Bombs::atomBombCost; // only atom bombs for now
-
-    if (_money.moneyBalance < cost) return;
-
-    _money.spendMoney(cost);
-    mySounds.Play(mySounds.misslePool);
-
-    BombType type = ATOM;
-    float speed = type == ATOM? 15.0f : 10.0f;
-
-    Bombs::allBombs.push_back(SingleBomb{
-        .targetPos = target->ToVector2(),
-        .originPos = startPixel->ToVector2(),
-        .pos = startPixel->ToVector2(),
-        .radius = 50.f,
-        .type = type,
-        .speed = speed
-    });
+    TryLaunchAtomBomb(target);
 }
 
 void Player::BotLogic_Building() {

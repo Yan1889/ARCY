@@ -14,6 +14,7 @@ namespace  TextureCollection {
     inline Texture2D hydrogenBomb;
     inline Texture2D explosion;
     inline Texture2D flash;
+    inline Texture2D mapIcon;
 
     void LoadAll();
     void UnloadAll();

@@ -143,6 +143,55 @@ bool Player::CanBuildSilo(Pixel *pos) const {
     return true;
 }
 
+bool Player::CanLaunchAtomBomb() const {
+    return !_silos.empty() && Bombs::atomBombCost < _money.moneyBalance;
+}
+
+bool Player::CanLaunchHydrogenBomb() const {
+    return !_silos.empty() && Bombs::hydrogenBombCost < _money.moneyBalance;
+}
+
+
+void Player::TryLaunchAtomBomb(Pixel *targetPixel) {
+    if (!CanLaunchAtomBomb()) return;
+
+    const int cost = Bombs::atomBombCost;
+
+    _money.spendMoney(cost);
+    mySounds.Play(mySounds.misslePool);
+
+    Pixel *startPixel = GetNearestSiloFromPixel(targetPixel);
+    Bombs::allBombs.push_back(SingleBomb{
+        .targetPos = targetPixel->ToVector2(),
+        .originPos = startPixel->ToVector2(),
+        .pos = startPixel->ToVector2(),
+        .radius = 50.f,
+        .type = ATOM,
+        .speed = 15.0
+    });
+}
+
+void Player::TryLaunchHydrogenBomb(Pixel *targetPixel) {
+    if (!CanLaunchHydrogenBomb()) return;
+
+    const int cost = Bombs::atomBombCost;
+
+    _money.spendMoney(cost);
+    mySounds.Play(mySounds.misslePool);
+
+    Pixel *startPixel = GetNearestSiloFromPixel(targetPixel);
+    Bombs::allBombs.push_back(SingleBomb{
+        .targetPos = targetPixel->ToVector2(),
+        .originPos = startPixel->ToVector2(),
+        .pos = startPixel->ToVector2(),
+        .radius = 350.f,
+        .type = HYDROGEN,
+        .speed = 10.0
+    });
+}
+
+
+
 Pixel *Player::GetNearestSiloFromPixel(Pixel *target) const {
     if (_silos.empty()) return nullptr;
 

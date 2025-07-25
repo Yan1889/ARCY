@@ -103,6 +103,11 @@ public:
     bool CanBuildCity(Pixel* pos) const;
     bool CanBuildSilo(Pixel* pos) const;
     Pixel* GetNearestSiloFromPixel(Pixel* point) const;
+
+    bool CanLaunchAtomBomb() const;
+    bool CanLaunchHydrogenBomb() const;
+    void TryLaunchAtomBomb(Pixel *targetPixel);
+    void TryLaunchHydrogenBomb(Pixel *targetPixel);
 };
 
 

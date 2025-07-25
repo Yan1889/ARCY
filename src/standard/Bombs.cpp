@@ -86,35 +86,6 @@ void Bombs::Update() {
             explosionTextureDirty = true;
         }
     }
-
-    if (!IsKeyPressed(KEY_ONE) && !IsKeyPressed(KEY_TWO)) return;
-
-    Vector2 targetPos = GetScreenToWorld2D(GetMousePosition(), camera);
-    if (targetPos.x < 0 || targetPos.x > MAP_WIDTH - 1 || targetPos.y < 0 || targetPos.y > MAP_HEIGHT - 1) return;
-
-    const int cost = IsKeyPressed(KEY_ONE) ? atomBombCost : hydrogenBombCost;
-
-    if (MAIN_PLAYER._money.moneyBalance - cost < 0) return;
-
-    Pixel* startPixel = MAIN_PLAYER.GetNearestSiloFromPixel(PixelAt(targetPos));
-
-    if (startPixel == nullptr) return;
-
-    MAIN_PLAYER._money.spendMoney(cost);
-    
-    mySounds.Play(mySounds.misslePool);
-
-    BombType type = IsKeyPressed(KEY_ONE)? ATOM : HYDROGEN;
-    float speed = type == ATOM? 15.0f : 10.0f;
-
-    allBombs.push_back({
-        .targetPos = targetPos,
-        .originPos = startPixel->ToVector2(),
-        .pos =  startPixel->ToVector2(),
-        .radius = IsKeyPressed(KEY_ONE) ? 50.f : 300.f,
-        .type = type,
-        .speed = speed
-    });
 }
 
 void Bombs::Render() {

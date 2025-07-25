@@ -42,7 +42,7 @@ void displayGame() {
     DayNightCycle::Update();
     displayInfoTexts();
     displayTroopSlider();
-    displayBuildMenu();
+    displayAndHandleBuildMenu();
     displayGameOver();
     displayPlayersInfo();
 
@@ -72,7 +72,8 @@ void displayInfoTexts() {
 
 
     // _pixelsOccupied
-    const std::string territorySizeText = "Pixels occupied (your size): " + std::to_string(MAIN_PLAYER._allPixels.size());
+    const std::string territorySizeText = "Pixels occupied (your size): " + std::to_string(
+                                              MAIN_PLAYER._allPixels.size());
     DrawText(territorySizeText.c_str(), 0 + 25, GetScreenHeight() - 100, 20, MAIN_PLAYER_COLOR);
 
 
@@ -135,19 +136,20 @@ void displayPlayersInfo() {
     });
 
     for (int i = 0; i < players.size() && i < 10; i++) {
-        const Player& p = players[playerIdxOrder[i]];
+        const Player &p = players[playerIdxOrder[i]];
         const std::string troopsStr = "Troops: " + formatNumber(p._troops) + " / " + formatNumber(p._maxTroops);
         const std::string workersStr = "Workers: " + formatNumber(p._workers) + " / " + formatNumber(p._maxWorkers);
         const std::string moneyStr = "Money: " + formatNumber(p._money.returnMoney());
         const std::string deadStr = p._dead ? "(Defeated)" : "";
         const std::string numberStr = std::to_string(i + 1);
-        const std::string infoStr = numberStr + ". " + p._name + ": " + troopsStr + "; " + workersStr + "; " + moneyStr + " " + deadStr;
+        const std::string infoStr = numberStr + ". " + p._name + ": " + troopsStr + "; " + workersStr + "; " + moneyStr
+                                    + " " + deadStr;
         DrawText(infoStr.c_str(), 25, 20 + 30 * i, 20, p._color);
     }
 }
 
 void displayPlayerTags() {
-    for (auto & p : players) {
+    for (auto &p: players) {
         if (p._dead) continue;
 
         // A = π * r^2 => r = sqrt(A / π)
@@ -186,10 +188,8 @@ void displayBGTextures() {
     DrawTextureV(explosionTexture, Vector2{0, 0}, WHITE);
 }
 
-void displayBuildMenu() {
+void displayAndHandleBuildMenu() {
     if (IsKeyPressed(KEY_M)) {
-        // menu state is changed when 'm' is pressed
-        // not shown -> shown -> not shown -> ...;
         buildMenuShown = !buildMenuShown;
     }
     if (!buildMenuShown) return;
@@ -200,67 +200,98 @@ void displayBuildMenu() {
         (float) GetScreenWidth(),
         GetScreenHeight() * 0.1f
     };
-    // black transparent bg
     DrawRectangleRec(menuRect, Color{0, 0, 0, 150});
 
     const Rectangle cityButtonRect{
         menuRect.x,
         menuRect.y + menuRect.height * 0.1f,
-        menuRect.width * 0.2f,
+        menuRect.width * 0.15f,
         menuRect.height * 0.8f,
     };
     const Rectangle siloButtonRect{
-        menuRect.x + menuRect.width * 0.3f,
+        menuRect.x + menuRect.width * 0.2f,
         menuRect.y + menuRect.height * 0.1f,
-        menuRect.width * 0.2f,
+        menuRect.width * 0.15f,
+        menuRect.height * 0.8f,
+    };
+    const Rectangle atomButtonRect{
+        menuRect.x + menuRect.width * 0.4f,
+        menuRect.y + menuRect.height * 0.1f,
+        menuRect.width * 0.15f,
+        menuRect.height * 0.8f,
+    };
+    const Rectangle hydrogenButtonRect{
+        menuRect.x + menuRect.width * 0.6f,
+        menuRect.y + menuRect.height * 0.1f,
+        menuRect.width * 0.15f,
         menuRect.height * 0.8f,
     };
     DrawRectangleRec(cityButtonRect, DARKBLUE);
-    DrawText("Build city", cityButtonRect.x + 20, cityButtonRect.y + 10, 50, WHITE);
+    DrawText("Build city", cityButtonRect.x + 20, cityButtonRect.y + 10, 30, WHITE);
     DrawRectangleRec(siloButtonRect, DARKBLUE);
-    DrawText("Build silo", siloButtonRect.x + 20, siloButtonRect.y + 10, 50, WHITE);
+    DrawText("Build silo", siloButtonRect.x + 20, siloButtonRect.y + 10, 30, WHITE);
+    DrawRectangleRec(atomButtonRect, DARKBLUE);
+    DrawText("Atom bomb", atomButtonRect.x + 20, atomButtonRect.y + 10, 30, WHITE);
+    DrawRectangleRec(hydrogenButtonRect, DARKBLUE);
+    DrawText("H-Bomb", hydrogenButtonRect.x + 20, hydrogenButtonRect.y + 10, 30, WHITE);
 
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         if (CheckCollisionPointRec(GetMousePosition(), cityButtonRect)) {
-            buildingTypeDragging = CITY;
+            currentMenuOption = MENU_OPTION_CITY;
         } else if (CheckCollisionPointRec(GetMousePosition(), siloButtonRect)) {
-            buildingTypeDragging = SILO;
+            currentMenuOption = MENU_OPTION_SILO;
+        } else if (CheckCollisionPointRec(GetMousePosition(), atomButtonRect)) {
+            currentMenuOption = MENU_OPTION_ATOM_BOMB;
+        } else if (CheckCollisionPointRec(GetMousePosition(), hydrogenButtonRect)) {
+            currentMenuOption = MENU_OPTION_HYDROGEN_BOMB;
         }
     }
-    if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && buildingTypeDragging != UNKNOWN) {
-        switch (buildingTypeDragging) {
-            case CITY:
+    if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && currentMenuOption != MENU_OPTION_NONE) {
+        switch (currentMenuOption) {
+            case MENU_OPTION_CITY:
                 MAIN_PLAYER.TryAddCity(GetPixelOnMouse());
                 break;
-            case SILO:
+            case MENU_OPTION_SILO:
                 MAIN_PLAYER.TryAddSilo(GetPixelOnMouse());
                 break;
-            case UNKNOWN:
-                std::cerr << "Unknown building type" << std::endl;
+            case MENU_OPTION_ATOM_BOMB:
+                MAIN_PLAYER.TryLaunchAtomBomb(GetPixelOnMouse());
+                break;
+            case MENU_OPTION_HYDROGEN_BOMB:
+                MAIN_PLAYER.TryLaunchHydrogenBomb(GetPixelOnMouse());
+                break;
         }
-        buildingTypeDragging = UNKNOWN;
+        currentMenuOption = MENU_OPTION_NONE;
     }
 
-
-    // displaying the dragged object
-    if (buildingTypeDragging != UNKNOWN) {
+    if (currentMenuOption != MENU_OPTION_NONE) {
+        // displaying the dragged object
         const Texture2D *t = nullptr;
-        Color color = Fade(RED, 0.5);
-        switch (buildingTypeDragging) {
-            case CITY:
+        Color color{};
+        float yOffset = 0.f;
+        switch (currentMenuOption) {
+            case MENU_OPTION_CITY:
                 t = &TextureCollection::city;
                 color = MAIN_PLAYER.CanBuildCity(GetPixelOnMouse()) ? Fade(GREEN, 0.5) : Fade(RED, 0.5);
                 break;
-            case SILO:
+            case MENU_OPTION_SILO:
                 t = &TextureCollection::silo;
                 color = MAIN_PLAYER.CanBuildSilo(GetPixelOnMouse()) ? Fade(GREEN, 0.5) : Fade(RED, 0.5);
                 break;
-            case UNKNOWN:
-                std::cerr << "Unknown building type" << std::endl;
+            case MENU_OPTION_ATOM_BOMB:
+                t = &TextureCollection::mapIcon;
+                color = MAIN_PLAYER.CanLaunchAtomBomb() ? Fade(GREEN, 0.5) : Fade(RED, 0.5);
+                yOffset = -t->height / 2.f * 2 * buildingRadius / t->width;
+                break;
+            case MENU_OPTION_HYDROGEN_BOMB:
+                t = &TextureCollection::mapIcon;
+                color = MAIN_PLAYER.CanLaunchHydrogenBomb() ? Fade(GREEN, 0.5) : Fade(RED, 0.5);
+                yOffset = -t->height / 2.f * 2 * buildingRadius / t->width;
+                break;
         }
         DrawTextureEx(
             *t,
-            Vector2(GetMousePosition().x - buildingRadius, GetMousePosition().y - buildingRadius),
+            Vector2{GetMousePosition().x - buildingRadius, GetMousePosition().y - buildingRadius + yOffset},
             0,
             2 * buildingRadius / t->width,
             color
@@ -282,7 +313,9 @@ void displayTroopSlider() {
 void displayGameOver() {
     if (gameOver) {
         constexpr int fontSize = 200;
-        std::string winnerText = winnerId == -1? std::string("Y'all lost!") : std::string(players[winnerId]._name + " win");
+        std::string winnerText = winnerId == -1
+                                     ? std::string("Y'all lost!")
+                                     : std::string(players[winnerId]._name + " win");
         if (winnerId > 0) {
             winnerText += 's';
         }
