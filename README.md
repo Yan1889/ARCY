@@ -59,8 +59,7 @@ In `Globals.h` lives a `std::vector<Player> players`
 
 ## UI
 ### Sounds
-+ Sound for attacking
-+ Sound for night (owl, etc.)
++ better sound for attacking 
 ### Sprites
 + Icon for missile silo
 + Icon for boat (future)
