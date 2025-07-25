@@ -9,6 +9,8 @@
 #define MAIN_PLAYER_COLOR G::players[0]._color
 #include <string>
 
+#include "raylib.h"
+
 enum MenuOption {
     MENU_OPTION_CITY,
     MENU_OPTION_SILO,
@@ -19,6 +21,7 @@ enum MenuOption {
 
 inline bool buildMenuShown{};
 inline MenuOption currentMenuOption = MENU_OPTION_NONE;
+inline Rectangle menuRect;
 
 
 void displayGame();
@@ -31,6 +34,7 @@ void displayBGTextures();
 void displayCrossHair();
 void displayAndHandleBuildMenu();
 void displayGameOver();
+void initDisplay();
 
 std::string formatNumber(int number);
 

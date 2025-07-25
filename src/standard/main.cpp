@@ -206,4 +206,5 @@ void initCamAndMap() {
         }
     }
     playerPos = Vector2{static_cast<float>(MAP_WIDTH) / 2, static_cast<float>(MAP_HEIGHT) / 2};
+    initDisplay();
 }

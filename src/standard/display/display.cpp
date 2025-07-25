@@ -55,26 +55,29 @@ void displayInfoTexts() {
     const std::string populationStr = formatNumber(MAIN_PLAYER._totalPopulation);
     const std::string maxPopulationStr = formatNumber(MAIN_PLAYER._maxTotalPopulation);
     const std::string totalPopStr = "Total population: " + populationStr + " / " + maxPopulationStr;
-    DrawText(totalPopStr.c_str(), 0 + 25, GetScreenHeight() - 50, 20, MAIN_PLAYER_COLOR);
-
+    Vector2 textPos = {0 + 25, GetScreenHeight() - 50.f - (buildMenuShown? menuRect.height: 0)};
+    DrawText(totalPopStr.c_str(), textPos.x, textPos.y, 20, MAIN_PLAYER_COLOR);
 
     // neutral send
     const char *sendText = TextFormat(
         "People exploring neutral land: %d",
         MAIN_PLAYER._targetToAttackMap.contains(-1) ? MAIN_PLAYER._targetToAttackMap[-1].troops : 0
     );
-    DrawText(sendText, 0 + 25, GetScreenHeight() - 25, 20, MAIN_PLAYER_COLOR);
+    textPos = {0 + 25, GetScreenHeight() - 25.f - (buildMenuShown? menuRect.height: 0)};
+    DrawText(sendText, textPos.x, textPos.y, 20, MAIN_PLAYER_COLOR);
 
 
     // money
     const std::string moneyText = "Money: " + formatNumber(MAIN_PLAYER._money.moneyBalance);
-    DrawText(moneyText.c_str(), 25, GetScreenHeight() - 75, 20, MAIN_PLAYER_COLOR);
+    textPos = {25, GetScreenHeight() - 75 - (buildMenuShown? menuRect.height: 0)};
+    DrawText(moneyText.c_str(), textPos.x, textPos.y, 20, MAIN_PLAYER_COLOR);
 
 
     // _pixelsOccupied
-    const std::string territorySizeText = "Pixels occupied (your size): " + std::to_string(
-                                              MAIN_PLAYER._allPixels.size());
-    DrawText(territorySizeText.c_str(), 0 + 25, GetScreenHeight() - 100, 20, MAIN_PLAYER_COLOR);
+    const std::string territorySizeText = "Pixels occupied (your size): "
+                                          + std::to_string(MAIN_PLAYER._allPixels.size());
+    textPos = {0 + 25, GetScreenHeight() - 100.f - (buildMenuShown? menuRect.height: 0)};
+    DrawText(territorySizeText.c_str(), textPos.x, textPos.y, 20, MAIN_PLAYER_COLOR);
 
 
     // fps
@@ -194,12 +197,6 @@ void displayAndHandleBuildMenu() {
     }
     if (!buildMenuShown) return;
 
-    const Rectangle menuRect{
-        0.f,
-        GetScreenHeight() * 0.9f,
-        (float) GetScreenWidth(),
-        GetScreenHeight() * 0.1f
-    };
     DrawRectangleRec(menuRect, Color{0, 0, 0, 150});
 
     const Rectangle cityButtonRect{
@@ -302,12 +299,14 @@ void displayAndHandleBuildMenu() {
 }
 
 void displayTroopSlider() {
-    const Rectangle sliderRect{
+    Rectangle sliderRect{
         100,
         GetScreenHeight() * 0.8f,
         150,
         GetScreenHeight() * 0.05f
     };
+    if (buildMenuShown) sliderRect.y -= menuRect.height;
+
     GuiSetStyle(DEFAULT, TEXT_SIZE, 20);
     GuiSlider(sliderRect, "Troops", "Workers", &players[0]._troopPercentage, 0, 1);
 }
@@ -338,4 +337,13 @@ std::string formatNumber(const int number) {
         return std::format("{:.1f}M", number / 1'000'000.f);
     }
     return std::format("{:.1f}B", number / 1'000'000'000.f);
+}
+
+void initDisplay() {
+    menuRect = {
+        0.f,
+        GetScreenHeight() * 0.9f,
+        (float) GetScreenWidth(),
+        GetScreenHeight() * 0.1f
+    };
 }
