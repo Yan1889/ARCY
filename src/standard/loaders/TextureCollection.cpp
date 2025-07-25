@@ -12,7 +12,7 @@ void TextureCollection::LoadAll() {
     explosion = LoadTexture("assets/images/explosion.png");
     flash = LoadTexture("assets/images/flash.png");
     silo = LoadTexture("assets/images/icbm.png");
-    mapIcon = LoadTexture("assets/images/mapIcon2.png");
+    mapIcon = LoadTexture("assets/images/mapIcon.png");
 }
 
 void TextureCollection::UnloadAll() {
