@@ -57,7 +57,7 @@ int main() {
     TextureCollection::LoadAll();
 
     // we dont need 4000 fps - Yes we need 4000+ fps to ditch Python! Sincerely Colin
-    SetTargetFPS(100);
+    SetTargetFPS(10000);
 
     initCamAndMap();
     initPlayers();
@@ -122,7 +122,8 @@ void checkExpansionAndAttack() {
     // attack player if left-click
     const bool mouseOverBuildMenu = buildMenuShown && GetMousePosition().y > GetScreenHeight() * 0.9;
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !mouseOverBuildMenu) {
-        const int playerIdClickd = GetPixelOnMouse()->playerId;
+        const int playerIdClickd = GetPixelOnMouse() == nullptr ? -1 : GetPixelOnMouse()->playerId;
+
         MAIN_PLAYER.Expand(playerIdClickd, 0.5);
     }
 }

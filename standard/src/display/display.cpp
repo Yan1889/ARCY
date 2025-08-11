@@ -145,7 +145,7 @@ void displayPlayersInfo() {
         const std::string moneyStr = "Money: " + formatNumber(p._money.returnMoney());
         const std::string deadStr = p._dead ? "(Defeated)" : "";
         const std::string numberStr = std::to_string(i + 1);
-        const std::string infoStr = numberStr + ". " + p._name + ": " + troopsStr + "; " + workersStr + "; " + moneyStr
+        const std::string infoStr = numberStr + ". " + p._name + ": " + troopsStr + "; " + moneyStr
                                     + " " + deadStr;
         DrawText(infoStr.c_str(), 25, 20 + 30 * i, 20, p._color);
     }
@@ -223,14 +223,18 @@ void displayAndHandleBuildMenu() {
         menuRect.width * 0.15f,
         menuRect.height * 0.8f,
     };
-    DrawRectangleRec(cityButtonRect, DARKBLUE);
+    DrawRectangleRec(cityButtonRect, GRAY);
     DrawText("Build city", cityButtonRect.x + 20, cityButtonRect.y + 10, 30, WHITE);
-    DrawRectangleRec(siloButtonRect, DARKBLUE);
+    DrawText(TextFormat("$%d", players[0].cityCost * (players[0]._cities.size() + 1)), cityButtonRect.x + 75, cityButtonRect.y + 40, 15, WHITE);
+    DrawRectangleRec(siloButtonRect, RED);
     DrawText("Build silo", siloButtonRect.x + 20, siloButtonRect.y + 10, 30, WHITE);
-    DrawRectangleRec(atomButtonRect, DARKBLUE);
+    DrawText(TextFormat("$%d", players[0].siloCost * (players[0]._silos.size() + 1)), siloButtonRect.x + 75, siloButtonRect.y + 40, 15, WHITE);
+    DrawRectangleRec(atomButtonRect, LIME);
     DrawText("Atom bomb", atomButtonRect.x + 20, atomButtonRect.y + 10, 30, WHITE);
+    DrawText(TextFormat("$%d", Bombs::atomBombCost), atomButtonRect.x + 75, atomButtonRect.y + 40, 15, WHITE);
     DrawRectangleRec(hydrogenButtonRect, DARKBLUE);
     DrawText("H-Bomb", hydrogenButtonRect.x + 20, hydrogenButtonRect.y + 10, 30, WHITE);
+    DrawText(TextFormat("$%d", Bombs::hydrogenBombCost), hydrogenButtonRect.x + 75, hydrogenButtonRect.y + 40, 15, WHITE);
 
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         if (CheckCollisionPointRec(GetMousePosition(), cityButtonRect)) {
@@ -277,15 +281,15 @@ void displayAndHandleBuildMenu() {
                 break;
             case MENU_OPTION_ATOM_BOMB:
                 t = &TextureCollection::mapIcon;
-                color = MAIN_PLAYER.CanLaunchAtomBomb() ? Fade(GREEN, 0.5) : Fade(RED, 0.5);
+                color = MAIN_PLAYER.CanLaunchAtomBomb() ? GREEN : RED;
                 yOffset = -t->height / 2.f * 2 * buildingRadius / t->width;
-                DrawCircleV(Vector2{GetMousePosition().x, GetMousePosition().y}, 30, Fade(GRAY, 0.2));
+                DrawCircleV(Vector2{GetMousePosition().x, GetMousePosition().y}, 30, MAIN_PLAYER.CanLaunchAtomBomb() ? Fade(WHITE, 0.5) : Fade(WHITE, 0.2));
                 break;
             case MENU_OPTION_HYDROGEN_BOMB:
                 t = &TextureCollection::mapIcon;
-                color = MAIN_PLAYER.CanLaunchHydrogenBomb() ? Fade(GREEN, 0.5) : Fade(RED, 0.5);
+                color = MAIN_PLAYER.CanLaunchHydrogenBomb() ? GREEN : RED;
                 yOffset = -t->height / 2.f * 2 * buildingRadius / t->width;
-                DrawCircleV(Vector2{GetMousePosition().x, GetMousePosition().y}, 200, Fade(GRAY, 0.2));
+                DrawCircleV(Vector2{GetMousePosition().x, GetMousePosition().y}, 200, MAIN_PLAYER.CanLaunchHydrogenBomb() ? Fade(WHITE, 0.5) : Fade(WHITE, 0.2));
                 break;
         }
         DrawTextureEx(
