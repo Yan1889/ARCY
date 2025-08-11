@@ -12,7 +12,6 @@ using namespace G;
 
 void Player::Expand(const int target, const float percentage) {
     const int newPeopleLeaving = _troops * percentage;
-
     // not enough troops or target is self
     if (target == _id || _troops - newPeopleLeaving < 30) return;
 

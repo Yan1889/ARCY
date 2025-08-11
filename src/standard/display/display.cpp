@@ -145,7 +145,7 @@ void displayPlayersInfo() {
         const std::string moneyStr = "Money: " + formatNumber(p._money.returnMoney());
         const std::string deadStr = p._dead ? "(Defeated)" : "";
         const std::string numberStr = std::to_string(i + 1);
-        const std::string infoStr = numberStr + ". " + p._name + ": " + troopsStr + "; " + workersStr + "; " + moneyStr
+        const std::string infoStr = numberStr + ". " + p._name + ": " + troopsStr + "; " + moneyStr
                                     + " " + deadStr;
         DrawText(infoStr.c_str(), 25, 20 + 30 * i, 20, p._color);
     }
@@ -223,11 +223,11 @@ void displayAndHandleBuildMenu() {
         menuRect.width * 0.15f,
         menuRect.height * 0.8f,
     };
-    DrawRectangleRec(cityButtonRect, DARKBLUE);
+    DrawRectangleRec(cityButtonRect, GRAY);
     DrawText("Build city", cityButtonRect.x + 20, cityButtonRect.y + 10, 30, WHITE);
-    DrawRectangleRec(siloButtonRect, DARKBLUE);
+    DrawRectangleRec(siloButtonRect, RED);
     DrawText("Build silo", siloButtonRect.x + 20, siloButtonRect.y + 10, 30, WHITE);
-    DrawRectangleRec(atomButtonRect, DARKBLUE);
+    DrawRectangleRec(atomButtonRect, LIME);
     DrawText("Atom bomb", atomButtonRect.x + 20, atomButtonRect.y + 10, 30, WHITE);
     DrawRectangleRec(hydrogenButtonRect, DARKBLUE);
     DrawText("H-Bomb", hydrogenButtonRect.x + 20, hydrogenButtonRect.y + 10, 30, WHITE);

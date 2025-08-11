@@ -122,7 +122,8 @@ void checkExpansionAndAttack() {
     // attack player if left-click
     const bool mouseOverBuildMenu = buildMenuShown && GetMousePosition().y > GetScreenHeight() * 0.9;
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !mouseOverBuildMenu) {
-        const int playerIdClickd = GetPixelOnMouse()->playerId;
+        const int playerIdClickd = GetPixelOnMouse() == nullptr ? -1 : GetPixelOnMouse()->playerId;
+
         MAIN_PLAYER.Expand(playerIdClickd, 0.5);
     }
 }
