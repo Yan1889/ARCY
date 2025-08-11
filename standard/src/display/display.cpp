@@ -283,13 +283,13 @@ void displayAndHandleBuildMenu() {
                 t = &TextureCollection::mapIcon;
                 color = MAIN_PLAYER.CanLaunchAtomBomb() ? GREEN : RED;
                 yOffset = -t->height / 2.f * 2 * buildingRadius / t->width;
-                DrawCircleV(Vector2{GetMousePosition().x, GetMousePosition().y}, 30, MAIN_PLAYER.CanLaunchAtomBomb() ? Fade(WHITE, 0.5) : Fade(WHITE, 0.2));
+                DrawCircleV(GetMousePosition(), camera.zoom * 50, MAIN_PLAYER.CanLaunchAtomBomb() ? Fade(WHITE, 0.5) : Fade(WHITE, 0.2));
                 break;
             case MENU_OPTION_HYDROGEN_BOMB:
                 t = &TextureCollection::mapIcon;
                 color = MAIN_PLAYER.CanLaunchHydrogenBomb() ? GREEN : RED;
                 yOffset = -t->height / 2.f * 2 * buildingRadius / t->width;
-                DrawCircleV(Vector2{GetMousePosition().x, GetMousePosition().y}, 200, MAIN_PLAYER.CanLaunchHydrogenBomb() ? Fade(WHITE, 0.5) : Fade(WHITE, 0.2));
+                DrawCircleV(GetMousePosition(), camera.zoom * 350, MAIN_PLAYER.CanLaunchHydrogenBomb() ? Fade(WHITE, 0.5) : Fade(WHITE, 0.2));
                 break;
         }
         DrawTextureEx(
