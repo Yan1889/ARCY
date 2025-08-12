@@ -48,6 +48,8 @@ namespace Terrain {
 
     float GetInvasionProbability(Kind kind);
 
+    bool GetContamination(int x, int y);
+
     Kind GetKindAt(int x, int y);
 
     Pixel* FindRandomPixelWithKind(Kind kind);
