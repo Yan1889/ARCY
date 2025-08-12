@@ -50,12 +50,10 @@ namespace G {
     }
 
     inline Pixel *PixelAt(const Vector2 v) {
-        const int x = static_cast<int>(v.x);
-        const int y = static_cast<int>(v.y);
-
-        if (x < 0 || x > MAP_WIDTH || y < 0 || y > MAP_HEIGHT) return nullptr;
-
-        return &territoryMap[x][y];
+        return PixelAt(
+            static_cast<int>(v.x),
+            static_cast<int>(v.y)
+        );
     }
 
     inline Pixel *GetPixelOnMouse() {

@@ -40,6 +40,8 @@ Terrain::Kind Terrain::GetKindAt(const int x, const int y) {
             return static_cast<Kind>(i);
         }
     }
+    std::cerr << "[Warning] pixel does not match any color" << std::endl;
+    return SNOW;
 }
 
 Pixel *Terrain::FindRandomPixelWithKind(const Kind kind) {
