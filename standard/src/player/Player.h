@@ -53,7 +53,7 @@ public:
     Money _money;
 
     // territory
-    std::unordered_set<Pixel *> _allPixels;
+    int _pixelCount{};
     std::vector<Pixel *> _border_vec;
     std::unordered_set<Pixel *> _border_set;
     std::vector<Pixel *> _dirtyBorderPixels_vec;

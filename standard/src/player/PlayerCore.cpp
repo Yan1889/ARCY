@@ -91,7 +91,7 @@ void Player::ReFillAttackQueueFromScratch(Attack &attack) {
 
 
 void Player::GetOwnershipOfPixel(Pixel *newP) {
-    _allPixels.insert(newP);
+    _pixelCount++;
     AddPixelToCenter(newP);
 
     if (newP->playerId >= 0) {
@@ -123,7 +123,7 @@ void Player::GetOwnershipOfPixel(Pixel *newP) {
 }
 
 std::vector<Building> Player::LoseOwnershipOfPixel(Pixel *pixel, const bool updateTextureToo) {
-    _allPixels.erase(pixel);
+    _pixelCount--;
     RemovePixelFromCenter(pixel);
 
     pixel->playerId = -1;
@@ -136,7 +136,7 @@ std::vector<Building> Player::LoseOwnershipOfPixel(Pixel *pixel, const bool upda
     }
 
     // die if too small
-    if (_allPixels.empty()) {
+    if (_pixelCount == 0) {
         UpdateAllDirtyBorder();
         _dead = true;
     }
@@ -187,7 +187,7 @@ void Player::UpdateAllDirtyBorder() {
 
 
 void Player::UpdateBorderSingle(Pixel *pixel) {
-    if (!_allPixels.contains(pixel)) {
+    if (pixel->playerId != _id) {
         // pixel isn't owned by player
         RemoveBorderPixel(pixel);
         return;

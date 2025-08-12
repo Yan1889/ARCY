@@ -67,7 +67,7 @@ namespace G {
 
 
     // randomness
-    static unsigned long x=123456789, y=362436069, z=521288629;
+    static unsigned long x = 123456789, y = 362436069, z = 521288629;
 
     inline unsigned long xorshf96() {
         unsigned long t;
@@ -85,6 +85,11 @@ namespace G {
 
     inline float RandomFloat_0to1() {
         return static_cast<float>(xorshf96()) / static_cast<float>(ULONG_MAX);
+    }
+
+    inline Pixel *GetRandPixel() {
+        const int randIdx = xorshf96() % (MAP_WIDTH * MAP_HEIGHT);
+        return &territoryMap[randIdx];
     }
 }
 

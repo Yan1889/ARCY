@@ -59,7 +59,7 @@ void Player::Update() {
 
 void Player::UpdatePopulationMaxValues() {
     _maxTotalPopulation = 200; // min maxPopulation 200 (you are cooked if < 200)
-    _maxTotalPopulation += _allPixels.size(); // +1 for each pixel
+    _maxTotalPopulation += _pixelCount; // +1 for each pixel
     _maxTotalPopulation += 1000 * _cities.size(); // +1000 for each city
 
     _maxTroops = _maxTotalPopulation * _troopPercentage;
@@ -90,27 +90,27 @@ void Player::IncreaseMoney() {
 }
 
 void Player::AddPixelToCenter(Pixel *newP) {
-    if (_allPixels.empty()) return;
+    if (_pixelCount == 0) return;
 
     _allPixelsSummed_x += newP->x;
     _allPixelsSummed_y += newP->y;
-    _centerPixel_x = _allPixelsSummed_x / _allPixels.size();
-    _centerPixel_y = _allPixelsSummed_y / _allPixels.size();
+    _centerPixel_x = _allPixelsSummed_x / _pixelCount;
+    _centerPixel_y = _allPixelsSummed_y / _pixelCount;
 }
 
 void Player::RemovePixelFromCenter(Pixel *newP) {
-    if (_allPixels.empty()) return;
+    if (_pixelCount == 0) return;
 
     _allPixelsSummed_x -= newP->x;
     _allPixelsSummed_y -= newP->y;
-    _centerPixel_x = _allPixelsSummed_x / _allPixels.size();
-    _centerPixel_y = _allPixelsSummed_y / _allPixels.size();
+    _centerPixel_x = _allPixelsSummed_x / _pixelCount;
+    _centerPixel_y = _allPixelsSummed_y / _pixelCount;
 }
 
 bool Player::TryAddCity(Pixel *pos) {
     const int cost = cityCost * (_cities.size() + 1);
 
-    if (_money.moneyBalance < cost || !_allPixels.contains(pos)) return false;
+    if (_money.moneyBalance < cost || pos->playerId != _id) return false;
     _money.spendMoney(cost);
 
     if (_id == 0) mySounds.Play(mySounds.cityBuildPool);
@@ -133,14 +133,12 @@ bool Player::TryAddSilo(Pixel *pos) {
 
 bool Player::CanBuildCity(Pixel *pos) const {
     const int cost = cityCost * (_cities.size() + 1);
-    if (_money.moneyBalance < cost || !_allPixels.contains(pos)) return false;
-    return true;
+    return _money.moneyBalance > cost && pos->playerId == _id;
 }
 
 bool Player::CanBuildSilo(Pixel *pos) const {
     const int cost = siloCost * (_silos.size() + 1);
-    if (_money.moneyBalance < cost || !_allPixels.contains(pos)) return false;
-    return true;
+    return _money.moneyBalance > cost && pos->playerId == _id;
 }
 
 bool Player::CanLaunchAtomBomb() const {

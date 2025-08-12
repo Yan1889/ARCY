@@ -73,7 +73,7 @@ void displayInfoTexts() {
 
 
     // _pixelsOccupied
-    const std::string territorySizeText = "Territory size: " + formatNumber(MAIN_PLAYER._allPixels.size()) + " pixels";
+    const std::string territorySizeText = "Territory size: " + formatNumber(MAIN_PLAYER._pixelCount) + " pixels";
     textPos = {0 + 25, GetScreenHeight() - 100.f - (buildMenuShown ? menuRect.height : 0)};
     DrawText(territorySizeText.c_str(), textPos.x, textPos.y, 20, MAIN_PLAYER_COLOR);
 
@@ -151,7 +151,7 @@ void displayPlayersInfo() {
         playerIdxOrder[i] = i;
     }
     std::ranges::sort(playerIdxOrder, [](const int i1, const int i2) {
-        return players[i1]._allPixels.size() > players[i2]._allPixels.size();
+        return players[i1]._pixelCount > players[i2]._pixelCount;
     });
 
     for (int i = 0; i < players.size() && i < 10; i++) {
@@ -172,7 +172,7 @@ void displayPlayerTags() {
         if (p._dead) continue;
 
         // A = π * r^2 => r = sqrt(A / π)
-        const float diameter = 2 * std::sqrt(p._allPixels.size() / PI);
+        const float diameter = 2 * std::sqrt(p._pixelCount / PI);
         const int charCount = p._name.length();
         const float pxWidthPerChar = diameter / charCount;
 
