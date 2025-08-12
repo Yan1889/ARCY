@@ -44,11 +44,12 @@ namespace G {
     inline Image territoryImage;
     inline bool territoryTextureDirty{};
 
-    inline Pixel* PixelAt(const int x, const int y) {
+    inline Pixel *PixelAt(const int x, const int y) {
         if (x < 0 || x > MAP_WIDTH || y < 0 || y > MAP_HEIGHT) return nullptr;
         return &territoryMap[x][y];
     }
-    inline Pixel* PixelAt(Vector2 v) {
+
+    inline Pixel *PixelAt(const Vector2 v) {
         const int x = static_cast<int>(v.x);
         const int y = static_cast<int>(v.y);
 
@@ -56,6 +57,7 @@ namespace G {
 
         return &territoryMap[x][y];
     }
+
     inline Pixel *GetPixelOnMouse() {
         return PixelAt(
             static_cast<int>(GetScreenToWorld2D(GetMousePosition(), camera).x),

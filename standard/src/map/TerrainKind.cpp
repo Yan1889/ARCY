@@ -23,10 +23,14 @@ float Terrain::GetInvasionProbability(const Kind kind) {
     return mapParts[kind].invasionProbability;
 }
 
-bool Terrain::GetContamination(int x, int y)
-{
+bool Terrain::GetContamination(int x, int y) {
     return G::territoryMap[x][y].contaminated;
 }
+
+Terrain::Kind Terrain::GetKindAt(Pixel *p) {
+    return GetKindAt(p->x, p->y);
+}
+
 
 Terrain::Kind Terrain::GetKindAt(const int x, const int y) {
     const Color c = static_cast<const Color *>(G::perlin.data)[G::perlin.width * y + x];

@@ -51,6 +51,8 @@ namespace Terrain {
     bool GetContamination(int x, int y);
 
     Kind GetKindAt(int x, int y);
+    Kind GetKindAt(Pixel *p);
+
 
     Pixel* FindRandomPixelWithKind(Kind kind);
 }
