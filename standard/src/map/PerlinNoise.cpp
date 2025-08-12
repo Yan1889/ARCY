@@ -6,8 +6,9 @@
 
 
 #include "raymath.h"
+#include "TerrainKind.h"
 
-void PerlinNoise::proceedMap(Image *image, const std::vector<struct Gradient> &map) {
+void PerlinNoise::proceedMap(Image *image) {
     ImageFormat(image, PIXELFORMAT_UNCOMPRESSED_GRAYSCALE);
 
     const unsigned char *pixels = static_cast<unsigned char *>(image->data);
@@ -22,8 +23,8 @@ void PerlinNoise::proceedMap(Image *image, const std::vector<struct Gradient> &m
             int index = y * width + x;
             unsigned char value = pixels[index];
 
-            Color color = map.back().color;
-            for (const auto &g: map) {
+            Color color = Terrain::mapParts.back().color;
+            for (const auto &g: Terrain::mapParts) {
                 if (value < g.level) {
                     color = g.color;
                     break;

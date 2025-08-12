@@ -8,15 +8,9 @@
 
 #include "raylib.h"
 
-struct Gradient {
-    int level;
-    Color color;
-    float difficulty; // between 0 and 1, 0 = impossible to occupy
-};
-
 class PerlinNoise {
 public:
-    static void proceedMap(Image *image, const std::vector<Gradient> &map);
+    static void proceedMap(Image *image);
 
     static void ApplyFalloffToImage(Image *image, const std::vector<std::vector<float> > &falloffMap);
 
