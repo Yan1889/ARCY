@@ -14,14 +14,15 @@
 struct Pixel {
     int x{};
     int y{};
+    int idx{};
     int playerId{};
     Terrain::Kind kind{};
 
     bool contaminated{};
-    std::vector<Pixel *> neighborsCached;
+    std::vector<Pixel *> neighborsCached{};
 
     Pixel() = default;
-    Pixel(int x, int y, int id, Terrain::Kind kind);
+    Pixel(int x, int y, Terrain::Kind kind);
 
     void LoadNeighbors();
 

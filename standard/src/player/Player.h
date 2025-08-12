@@ -41,12 +41,6 @@ public:
     int _workers{};
     float _troopPercentage = 0.80f;
 
-    /*
-    float _growthCooldown = 100;
-    float _growthRate = 100;
-    float _growthFactor = 0.0085f;
-    */
-
     // buildings
     std::vector<Pixel *> _cities{};
     std::vector<Pixel *> _silos{};

@@ -19,8 +19,6 @@ namespace G {
     constexpr int SCREEN_WIDTH = 1366;
     constexpr int SCREEN_HEIGHT = 768;
 
-    inline int targetFPS = 60;
-
     inline Camera2D camera{};
     inline Image perlin;
     inline Texture2D perlinTexture{};
@@ -39,14 +37,18 @@ namespace G {
     inline Texture2D explosionTexture;
     inline bool explosionTextureDirty{};
 
-    inline std::vector<std::vector<Pixel> > territoryMap; // [x][y]
+    inline std::vector<Pixel> territoryMap; // [x * MAP_HEIGHT + y]
     inline Texture2D territoryTexture;
     inline Image territoryImage;
     inline bool territoryTextureDirty{};
 
+    inline int ToIdx(const int x, const int y) {
+        return x * MAP_HEIGHT + y;
+    }
+
     inline Pixel *PixelAt(const int x, const int y) {
         if (x < 0 || x > MAP_WIDTH || y < 0 || y > MAP_HEIGHT) return nullptr;
-        return &territoryMap[x][y];
+        return &territoryMap[ToIdx(x, y)];
     }
 
     inline Pixel *PixelAt(const Vector2 v) {
@@ -61,6 +63,28 @@ namespace G {
             static_cast<int>(GetScreenToWorld2D(GetMousePosition(), camera).x),
             static_cast<int>(GetScreenToWorld2D(GetMousePosition(), camera).y)
         );
+    }
+
+
+    // randomness
+    static unsigned long x=123456789, y=362436069, z=521288629;
+
+    inline unsigned long xorshf96() {
+        unsigned long t;
+        x ^= x << 16;
+        x ^= x >> 5;
+        x ^= x << 1;
+
+        t = x;
+        x = y;
+        y = z;
+        z = t ^ x ^ y;
+
+        return z;
+    }
+
+    inline float RandomFloat_0to1() {
+        return static_cast<float>(xorshf96()) / static_cast<float>(ULONG_MAX);
     }
 }
 

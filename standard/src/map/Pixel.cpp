@@ -4,18 +4,30 @@
 
 #include "Pixel.h"
 
+#include <algorithm>
 #include <iostream>
 
 #include "../Globals.h"
 
-Pixel::Pixel(const int x, const int y, const int id, const Terrain::Kind kind): x(x), y(y), playerId(id), kind(kind) {
+Pixel::Pixel(const int x, const int y, const Terrain::Kind kind): x(x),
+                                                                  y(y),
+                                                                  idx(G::ToIdx(x, y)),
+                                                                  playerId(-1),
+                                                                  kind(kind) {
 }
 
 void Pixel::LoadNeighbors() {
-    if (x > 0) neighborsCached.emplace_back(&G::territoryMap[x - 1][y]); // Left
-    if (x + 1 < G::MAP_WIDTH) neighborsCached.emplace_back(&G::territoryMap[x + 1][y]); // Right
-    if (y > 0) neighborsCached.emplace_back(&G::territoryMap[x][y - 1]); // Up
-    if (y + 1 < G::MAP_HEIGHT) neighborsCached.emplace_back(&G::territoryMap[x][y + 1]); // Down
+    const std::vector<Pixel *> allNeighbors = {
+        G::PixelAt(x - 1, y), // left
+        G::PixelAt(x + 1, y), // right
+        G::PixelAt(x, y - 1), // up
+        G::PixelAt(x, y + 1), // down
+    };
+    for (Pixel *n: allNeighbors) {
+        if (n != nullptr) {
+            neighborsCached.push_back(n);
+        }
+    }
 }
 
 const std::vector<Pixel *> &Pixel::GetNeighbors() const {
@@ -33,6 +45,6 @@ Vector2 Pixel::ToVector2() const {
 bool Pixel::acceptRandomly() const {
     // radiation = 3x harder
     const float multiplier = contaminated ? 3.f : 1.f;
-    const float randomValue = static_cast<float>(rand()) / RAND_MAX;
+    const float randomValue = G::RandomFloat_0to1(); // static_cast<float>(rand()) / RAND_MAX;
     return Terrain::GetInvasionProbability(kind) > randomValue * multiplier;
 }

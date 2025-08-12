@@ -15,16 +15,12 @@ Color Terrain::GetColor(const Kind kind) {
     return mapParts[kind].color;
 }
 
-float Terrain::GetLevel(const Kind kind) {
+int Terrain::GetLevel(const Kind kind) {
     return mapParts[kind].level;
 }
 
 float Terrain::GetInvasionProbability(const Kind kind) {
     return mapParts[kind].invasionProbability;
-}
-
-bool Terrain::GetContamination(int x, int y) {
-    return G::territoryMap[x][y].contaminated;
 }
 
 Terrain::Kind Terrain::GetKindAt(Pixel *p) {

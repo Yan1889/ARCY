@@ -44,7 +44,7 @@ namespace Terrain {
 
     Color GetColor(Kind kind);
 
-    float GetLevel(Kind kind);
+    int GetLevel(Kind kind);
 
     float GetInvasionProbability(Kind kind);
 

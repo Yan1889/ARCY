@@ -91,9 +91,8 @@ void Sounds::checkAtmosphere() {
     } else PauseMusicStream(radiationSound);
 
     // Ocean
-    if (kind == DEEP_WATER || kind == LOW_WATER)
-        ResumeMusicStream(oceanSound);
-    else if (playerPos.x < 0 || playerPos.x >= MAP_WIDTH || playerPos.y < 0 || playerPos.y >= MAP_HEIGHT)
+    if (kind == DEEP_WATER || kind == LOW_WATER
+        || playerPos.x < 0 || playerPos.x >= MAP_WIDTH || playerPos.y < 0 || playerPos.y >= MAP_HEIGHT)
         ResumeMusicStream(oceanSound);
     else PauseMusicStream(oceanSound);
 

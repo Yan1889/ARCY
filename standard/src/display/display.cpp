@@ -61,14 +61,10 @@ void displayInfoTexts() {
     DrawText(totalPopStr.c_str(), textPos.x, textPos.y, 20, MAIN_PLAYER_COLOR);
 
     // neutral send
-    const std::string sendText = "People exploring neutral land: " + formatNumber(
-                                     MAIN_PLAYER._targetToAttackMap.contains(-1)
-                                         ? MAIN_PLAYER._targetToAttackMap[-1].troops
-                                         : 0
-                                 );
+    const int toNeutral = MAIN_PLAYER._targetToAttackMap.contains(-1) ? MAIN_PLAYER._targetToAttackMap[-1].troops : 0;
+    const std::string sendText = "People exploring neutral land: " + formatNumber(toNeutral);
     textPos = {0 + 25, GetScreenHeight() - 25.f - (buildMenuShown ? menuRect.height : 0)};
     DrawText(sendText.c_str(), textPos.x, textPos.y, 20, MAIN_PLAYER_COLOR);
-
 
     // money
     const std::string moneyText = "Money: " + formatNumber(MAIN_PLAYER._money.moneyBalance);
@@ -109,8 +105,7 @@ void displayPlayers() {
                 2 * buildingRadius,
                 2 * buildingRadius,
             };
-            if (CheckCollisionRecs(cityRect, viewRect))
-            {
+            if (CheckCollisionRecs(cityRect, viewRect)) {
                 DrawTextureEx(
                     TextureCollection::city,
                     Vector2{c->x - buildingRadius, c->y - buildingRadius},
@@ -130,8 +125,7 @@ void displayPlayers() {
                 2 * buildingRadius,
                 2 * buildingRadius,
             };
-            if (CheckCollisionRecs(siloRect, viewRect))
-            {
+            if (CheckCollisionRecs(siloRect, viewRect)) {
                 DrawTextureEx(
                     TextureCollection::silo,
                     Vector2(s->x - buildingRadius, s->y - buildingRadius),
