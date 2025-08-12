@@ -225,16 +225,20 @@ void displayAndHandleBuildMenu() {
     };
     DrawRectangleRec(cityButtonRect, GRAY);
     DrawText("Build city", cityButtonRect.x + 20, cityButtonRect.y + 10, 30, WHITE);
-    DrawText(TextFormat("$%d", players[0].cityCost * (players[0]._cities.size() + 1)), cityButtonRect.x + 75, cityButtonRect.y + 40, 15, WHITE);
+    const std::string cityCostStr = "$" + formatNumber(players[0].cityCost * (players[0]._cities.size() + 1));
+    DrawText(cityCostStr.c_str(), cityButtonRect.x + 75, cityButtonRect.y + 40, 15, WHITE);
     DrawRectangleRec(siloButtonRect, RED);
     DrawText("Build silo", siloButtonRect.x + 20, siloButtonRect.y + 10, 30, WHITE);
-    DrawText(TextFormat("$%d", players[0].siloCost * (players[0]._silos.size() + 1)), siloButtonRect.x + 75, siloButtonRect.y + 40, 15, WHITE);
+    const std::string siloCostStr = "$" + formatNumber(players[0].siloCost * (players[0]._silos.size() + 1));
+    DrawText(siloCostStr.c_str(), siloButtonRect.x + 75, siloButtonRect.y + 40, 15, WHITE);
     DrawRectangleRec(atomButtonRect, LIME);
     DrawText("Atom bomb", atomButtonRect.x + 20, atomButtonRect.y + 10, 30, WHITE);
-    DrawText(TextFormat("$%d", Bombs::atomBombCost), atomButtonRect.x + 75, atomButtonRect.y + 40, 15, WHITE);
+    const std::string atomBombCostStr = "$" + formatNumber(Bombs::atomBombCost);
+    DrawText(atomBombCostStr.c_str(), atomButtonRect.x + 75, atomButtonRect.y + 40, 15, WHITE);
     DrawRectangleRec(hydrogenButtonRect, DARKBLUE);
     DrawText("H-Bomb", hydrogenButtonRect.x + 20, hydrogenButtonRect.y + 10, 30, WHITE);
-    DrawText(TextFormat("$%d", Bombs::hydrogenBombCost), hydrogenButtonRect.x + 75, hydrogenButtonRect.y + 40, 15, WHITE);
+    const std::string hydrogenBombCostStr = "$" + formatNumber(Bombs::hydrogenBombCost);
+    DrawText(hydrogenBombCostStr.c_str(), hydrogenButtonRect.x + 75, hydrogenButtonRect.y + 40, 15, WHITE);
 
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         if (CheckCollisionPointRec(GetMousePosition(), cityButtonRect)) {

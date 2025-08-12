@@ -21,9 +21,16 @@ void DayNightCycle::Draw()
     Time();
 }
 
+float DayNightCycle::smoothTransition(float x, float y, float z)
+{
+    z = (z - x) / (y - x);
+    z = z < 0 ? 0 : (z > 1 ? 1 : z);
+    return z * z * (3 - 2 * z);
+}
+
 void DayNightCycle::Update()
 {
-    time += GetFrameTime() / 300.0f; // Default 300.0f
+    time += GetFrameTime() / 100.0f; // Default 300.0f
 
     if (time > 1.0f)
     {
@@ -37,9 +44,48 @@ void DayNightCycle::Update()
     }
 
     float alpha = (sinf(time * 2 * PI - PI / 2) + 1) / 2;
-    unsigned char nightAlpha = (unsigned char)(alpha * 200);
+    unsigned char nightAlpha = (unsigned char)(alpha * 250);
 
-    brightness = { 0, 0, 0, nightAlpha };
+    Color overlayColor;
+
+    // Evening
+    if (time >= 0.20f && time <= 0.30f) {
+        float t = (time - 0.20f) / 0.10f;
+        float colorFade = t <= 0.5f ? t * 2.0f : (1.0f - t) * 2.0f;
+        colorFade = smoothTransition(0.0f, 1.0f, colorFade);
+
+        overlayColor = {
+            (unsigned char)(255 * colorFade),
+            (unsigned char)(150 * colorFade),
+            0,
+            (unsigned char)(180 * t)
+        };
+    }
+    // Night
+    else if (time > 0.30f && time < 0.50f) {
+        float t = (time - 0.30f) / 0.20f;
+        overlayColor = {0, 0, 0, (unsigned char)(180 + t * (nightAlpha - 180))};
+    }
+    // Midnight
+    else if (time >= 0.50f && time <= 0.60f) {
+        overlayColor = {0, 0, 0, nightAlpha};
+    }
+    // Morning
+    else if (time > 0.60f && time < 0.70f) {
+        float t = (time - 0.60f) / 0.10f;
+        float colorFade = t <= 0.5f ? t * 2.0f : (1.0f - t) * 2.0f;
+        colorFade = smoothTransition(0.0f, 1.0f, colorFade);
+
+        overlayColor = {
+            (unsigned char)(255 * colorFade),
+            (unsigned char)(150 * colorFade),
+            0,
+            (unsigned char)(180 * (1 - t))
+        };
+    }
+
+    brightness = overlayColor;
+
     Draw();
 }
 

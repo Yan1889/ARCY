@@ -152,6 +152,29 @@ void checkGameOver() {
 
 void initPlayers() {
     // main character
+    std::vector<Color> mapColors = {
+        Color{90, 90, 255, 255},
+        Color{125, 125, 255, 255},
+        Color{247, 252, 204, 255},
+
+        Color{129, 245, 109, 255},
+        Color{117, 219, 99, 255},
+        Color{97, 184, 81, 255},
+        Color{191, 191, 191, 255},
+        Color{153, 153, 153, 255},
+        Color{255, 255, 255, 255}
+    };
+
+    Color playerPixelColor;
+
+    do
+    {
+        playerPos.x = rand() % MAP_WIDTH;
+        playerPos.y = rand() % MAP_HEIGHT;
+        playerPixelColor = GetImageColor(G::perlin, static_cast<int>(playerPos.x), static_cast<int>(playerPos.y));
+    }
+    while (ColorToInt(playerPixelColor) != ColorToInt(mapColors[2]));
+
     players.emplace_back(
         PixelAt(static_cast<int>(playerPos.x), static_cast<int>(playerPos.y)),
         std::string("You")
@@ -159,11 +182,21 @@ void initPlayers() {
 
     // bots
     for (int i = 0; i < botCount; i++) {
-        const float angle = 2 * PI * static_cast<float>(i) / botCount;
+        Vector2 botPos;
+        Color botPixelColor;
+
+        do
+        {
+            botPos.x = rand() % MAP_WIDTH;
+            botPos.y = rand() % MAP_HEIGHT;
+            botPixelColor = GetImageColor(G::perlin, static_cast<int>(botPos.x), static_cast<int>(botPos.y));
+        }
+        while (ColorToInt(botPixelColor) != ColorToInt(mapColors[2]));
+
         players.emplace_back(
             PixelAt(
-                static_cast<int>(playerPos.x + std::cos(angle) * botSpawnRadius),
-                static_cast<int>(playerPos.y + std::sin(angle) * botSpawnRadius)
+                static_cast<int>(botPos.x),
+                static_cast<int>(botPos.y)
             ),
             std::string("NPC ") + std::to_string(i)
         );
