@@ -55,28 +55,28 @@ void displayInfoTexts() {
     const std::string populationStr = formatNumber(MAIN_PLAYER._totalPopulation);
     const std::string maxPopulationStr = formatNumber(MAIN_PLAYER._maxTotalPopulation);
     const std::string totalPopStr = "Total population: " + populationStr + " / " + maxPopulationStr;
-    Vector2 textPos = {0 + 25, GetScreenHeight() - 50.f - (buildMenuShown? menuRect.height: 0)};
+    Vector2 textPos = {0 + 25, GetScreenHeight() - 50.f - (buildMenuShown ? menuRect.height : 0)};
     DrawText(totalPopStr.c_str(), textPos.x, textPos.y, 20, MAIN_PLAYER_COLOR);
 
     // neutral send
-    const char *sendText = TextFormat(
-        "People exploring neutral land: %d",
-        MAIN_PLAYER._targetToAttackMap.contains(-1) ? MAIN_PLAYER._targetToAttackMap[-1].troops : 0
-    );
-    textPos = {0 + 25, GetScreenHeight() - 25.f - (buildMenuShown? menuRect.height: 0)};
-    DrawText(sendText, textPos.x, textPos.y, 20, MAIN_PLAYER_COLOR);
+    const std::string sendText = "People exploring neutral land: " + formatNumber(
+                                     MAIN_PLAYER._targetToAttackMap.contains(-1)
+                                         ? MAIN_PLAYER._targetToAttackMap[-1].troops
+                                         : 0
+                                 );
+    textPos = {0 + 25, GetScreenHeight() - 25.f - (buildMenuShown ? menuRect.height : 0)};
+    DrawText(sendText.c_str(), textPos.x, textPos.y, 20, MAIN_PLAYER_COLOR);
 
 
     // money
     const std::string moneyText = "Money: " + formatNumber(MAIN_PLAYER._money.moneyBalance);
-    textPos = {25, GetScreenHeight() - 75 - (buildMenuShown? menuRect.height: 0)};
+    textPos = {25, GetScreenHeight() - 75 - (buildMenuShown ? menuRect.height : 0)};
     DrawText(moneyText.c_str(), textPos.x, textPos.y, 20, MAIN_PLAYER_COLOR);
 
 
     // _pixelsOccupied
-    const std::string territorySizeText = "Pixels occupied (your size): "
-                                          + std::to_string(MAIN_PLAYER._allPixels.size());
-    textPos = {0 + 25, GetScreenHeight() - 100.f - (buildMenuShown? menuRect.height: 0)};
+    const std::string territorySizeText = "Pixels occupied (your size): " + formatNumber(MAIN_PLAYER._allPixels.size());
+    textPos = {0 + 25, GetScreenHeight() - 100.f - (buildMenuShown ? menuRect.height : 0)};
     DrawText(territorySizeText.c_str(), textPos.x, textPos.y, 20, MAIN_PLAYER_COLOR);
 
 
@@ -298,13 +298,15 @@ void displayAndHandleBuildMenu() {
                 t = &TextureCollection::mapIcon;
                 color = MAIN_PLAYER.CanLaunchAtomBomb() ? GREEN : RED;
                 yOffset = -t->height / 2.f * 2 * buildingRadius / t->width;
-                DrawCircleV(GetMousePosition(), camera.zoom * 50, MAIN_PLAYER.CanLaunchAtomBomb() ? Fade(WHITE, 0.5) : Fade(WHITE, 0.2));
+                DrawCircleV(GetMousePosition(), camera.zoom * 50,
+                            MAIN_PLAYER.CanLaunchAtomBomb() ? Fade(WHITE, 0.5) : Fade(WHITE, 0.2));
                 break;
             case MENU_OPTION_HYDROGEN_BOMB:
                 t = &TextureCollection::mapIcon;
                 color = MAIN_PLAYER.CanLaunchHydrogenBomb() ? GREEN : RED;
                 yOffset = -t->height / 2.f * 2 * buildingRadius / t->width;
-                DrawCircleV(GetMousePosition(), camera.zoom * 350, MAIN_PLAYER.CanLaunchHydrogenBomb() ? Fade(WHITE, 0.5) : Fade(WHITE, 0.2));
+                DrawCircleV(GetMousePosition(), camera.zoom * 350,
+                            MAIN_PLAYER.CanLaunchHydrogenBomb() ? Fade(WHITE, 0.5) : Fade(WHITE, 0.2));
                 break;
         }
         DrawTextureEx(
