@@ -59,13 +59,9 @@ void displayInfoTexts() {
     DrawText(totalPopStr.c_str(), textPos.x, textPos.y, 20, MAIN_PLAYER_COLOR);
 
     // neutral send
-    const char *sendText = TextFormat(
-        "People exploring neutral land: %d",
-        MAIN_PLAYER._targetToAttackMap.contains(-1) ? MAIN_PLAYER._targetToAttackMap[-1].troops : 0
-    );
+    const std::string sendStr = "People exploring neutral land: " + formatNumber(MAIN_PLAYER._targetToAttackMap.contains(-1) ? MAIN_PLAYER._targetToAttackMap[-1].troops : 0);
     textPos = {0 + 25, GetScreenHeight() - 25.f - (buildMenuShown? menuRect.height: 0)};
-    DrawText(sendText, textPos.x, textPos.y, 20, MAIN_PLAYER_COLOR);
-
+    DrawText(sendStr.c_str(), textPos.x, textPos.y, 20, MAIN_PLAYER_COLOR);
 
     // money
     const std::string moneyText = "Money: " + formatNumber(MAIN_PLAYER._money.moneyBalance);
@@ -74,8 +70,8 @@ void displayInfoTexts() {
 
 
     // _pixelsOccupied
-    const std::string territorySizeText = "Pixels occupied (your size): "
-                                          + std::to_string(MAIN_PLAYER._allPixels.size());
+    const std::string territorySizeText = "Territory size: "
+                                          + formatNumber(MAIN_PLAYER._allPixels.size()) + " pixels";
     textPos = {0 + 25, GetScreenHeight() - 100.f - (buildMenuShown? menuRect.height: 0)};
     DrawText(territorySizeText.c_str(), textPos.x, textPos.y, 20, MAIN_PLAYER_COLOR);
 
