@@ -13,8 +13,8 @@
 #include "Bombs.h"
 #include "display/display.h"
 
-#define SCREEN_WIDTH 1366 // Default 980
-#define SCREEN_HEIGHT 768 // Default 650
+//#define SCREEN_WIDTH 1366 // Default 980
+//#define SCREEN_HEIGHT 768 // Default 650
 
 using namespace G;
 

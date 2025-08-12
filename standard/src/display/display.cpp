@@ -178,7 +178,17 @@ void displayCrossHair() {
 
 void displayBGTextures() {
     // terrain bg texture
-    DrawTextureV(perlinTexture, Vector2{0, 0}, WHITE);
+    float left = camera.target.x - SCREEN_WIDTH / 2 / camera.zoom;
+    float top = camera.target.y - SCREEN_HEIGHT / 2 / camera.zoom;
+
+    float visibleWidth = SCREEN_WIDTH / camera.zoom;
+    float visibleHeight = SCREEN_HEIGHT / camera.zoom;
+
+    Rectangle src = {left, top, visibleWidth, visibleHeight};
+    Rectangle dest = {left, top, visibleWidth, visibleHeight};
+
+    DrawTexturePro(perlinTexture, src, dest, Vector2{0, 0}, 0.0f, WHITE);
+
     // nuke bg texture
     if (explosionTextureDirty) {
         UpdateTexture(explosionTexture, explosionImage.data);

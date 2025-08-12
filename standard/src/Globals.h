@@ -19,6 +19,8 @@ struct Gradient;
 namespace G {
     constexpr int MAP_WIDTH = 2500;
     constexpr int MAP_HEIGHT = 2500;
+    constexpr int SCREEN_WIDTH = 1366;
+    constexpr int SCREEN_HEIGHT = 768;
 
     inline int targetFPS = 60;
 
