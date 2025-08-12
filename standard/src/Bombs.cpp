@@ -10,9 +10,11 @@
 #include "raymath.h"
 #include "Globals.h"
 #include "loaders/TextureCollection.h"
+#include "map/CameraClipping.h"
 
 #define MAIN_PLAYER players[0]
 
+using namespace CameraClipping;
 
 std::vector<SingleBomb> Bombs::allBombs = {};
 std::vector<RadiationZone> Bombs::allZones = {};
@@ -90,12 +92,14 @@ void Bombs::Update() {
 
 void Bombs::Render() {
     for (SingleBomb &b: allBombs) {
+        Texture2D& t = b.type == ATOM? TextureCollection::atomBomb : TextureCollection::hydrogenBomb;
+        const float scale = b.type == ATOM? 0.2 : 0.5;
+
+        if (CheckCollisionBombs(b.pos, 25.f, GetViewRectangle(camera))) continue;
+
         const float dx = b.targetPos.x - b.pos.x;
         const float dy = b.targetPos.y - b.pos.y;
         const float rotation = std::atan2(dy, dx);
-
-        Texture2D& t = b.type == ATOM? TextureCollection::atomBomb : TextureCollection::hydrogenBomb;
-        const float scale = b.type == ATOM? 0.2 : 0.5;
 
         DrawTexturePro(
             t,

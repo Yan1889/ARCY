@@ -11,6 +11,7 @@
 #include "raylib.h"
 
 using namespace G;
+using namespace Terrain;
 
 Player::Player(Pixel *startPos, const std::string &name): _id(static_cast<int>(players.size())),
                                                                               _name(name) {
@@ -152,7 +153,9 @@ bool Player::CanLaunchHydrogenBomb() const {
 
 
 void Player::TryLaunchAtomBomb(Pixel *targetPixel) {
-    if (!CanLaunchAtomBomb() || targetPixel == nullptr) return;
+    if (!CanLaunchAtomBomb() || targetPixel == nullptr ||
+        GetKindAt(targetPixel->x, targetPixel->y) == DEEP_WATER ||
+        GetKindAt(targetPixel->x, targetPixel->y) == LOW_WATER) return;
 
     const int cost = Bombs::atomBombCost;
 
@@ -171,7 +174,9 @@ void Player::TryLaunchAtomBomb(Pixel *targetPixel) {
 }
 
 void Player::TryLaunchHydrogenBomb(Pixel *targetPixel) {
-    if (!CanLaunchHydrogenBomb() || targetPixel == nullptr) return;
+    if (!CanLaunchHydrogenBomb() || targetPixel == nullptr ||
+        GetKindAt(targetPixel->x, targetPixel->y) == DEEP_WATER ||
+        GetKindAt(targetPixel->x, targetPixel->y) == LOW_WATER) return;
 
     const int cost = Bombs::hydrogenBombCost;
 

@@ -20,6 +20,9 @@
 
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
+#include "../map/CameraClipping.h"
+
+using namespace CameraClipping;
 
 
 constexpr float buildingRadius = 20;
@@ -30,7 +33,6 @@ void displayGame() {
     ClearBackground(Color{90, 90, 255, 255});
 
     BeginMode2D(camera);
-
     displayBGTextures();
     displayPlayers();
     Bombs::Render();
@@ -75,7 +77,7 @@ void displayInfoTexts() {
 
 
     // _pixelsOccupied
-    const std::string territorySizeText = "Pixels occupied (your size): " + formatNumber(MAIN_PLAYER._allPixels.size());
+    const std::string territorySizeText = "Territory size: " + formatNumber(MAIN_PLAYER._allPixels.size()) + " pixels";
     textPos = {0 + 25, GetScreenHeight() - 100.f - (buildMenuShown ? menuRect.height : 0)};
     DrawText(territorySizeText.c_str(), textPos.x, textPos.y, 20, MAIN_PLAYER_COLOR);
 
@@ -90,34 +92,54 @@ void displayInfoTexts() {
 }
 
 void displayPlayers() {
+    auto viewRect = GetViewRectangle(camera);
+
     for (const Player &p: players) {
         for (Pixel *pixel: p._border_vec) {
-            DrawPixel(pixel->x, pixel->y, p._color);
+            if (IsPixelVisible(pixel, viewRect)) DrawPixel(pixel->x, pixel->y, p._color);
         }
     }
 
     // display every city for each player
     for (const Player &p: players) {
         for (const Pixel *c: p._cities) {
-            DrawTextureEx(
-                TextureCollection::city,
-                Vector2{c->x - buildingRadius, c->y - buildingRadius},
-                0,
-                2 * buildingRadius / TextureCollection::city.width,
-                WHITE // p._color
-            );
+            Rectangle cityRect = {
+                c->x - buildingRadius,
+                c->y - buildingRadius,
+                2 * buildingRadius,
+                2 * buildingRadius,
+            };
+            if (CheckCollisionRecs(cityRect, viewRect))
+            {
+                DrawTextureEx(
+                    TextureCollection::city,
+                    Vector2{c->x - buildingRadius, c->y - buildingRadius},
+                    0,
+                    2 * buildingRadius / TextureCollection::city.width,
+                    p._color
+                );
+            }
         }
     }
     // display every city for each player
     for (const Player &p: players) {
         for (const Pixel *s: p._silos) {
-            DrawTextureEx(
-                TextureCollection::silo,
-                Vector2(s->x - buildingRadius, s->y - buildingRadius),
-                0,
-                2 * buildingRadius / TextureCollection::silo.width,
-                WHITE //p._color
-            );
+            Rectangle siloRect = {
+                s->x - buildingRadius,
+                s->y - buildingRadius,
+                2 * buildingRadius,
+                2 * buildingRadius,
+            };
+            if (CheckCollisionRecs(siloRect, viewRect))
+            {
+                DrawTextureEx(
+                    TextureCollection::silo,
+                    Vector2(s->x - buildingRadius, s->y - buildingRadius),
+                    0,
+                    2 * buildingRadius / TextureCollection::silo.width,
+                    p._color
+                );
+            }
         }
     }
 
@@ -183,23 +205,26 @@ void displayCrossHair() {
 void displayBGTextures() {
     // terrain bg texture
     SetTextureWrap(perlinTexture, TEXTURE_WRAP_CLAMP);
-    float left = camera.target.x - SCREEN_WIDTH / 2 / camera.zoom;
-    float top = camera.target.y - SCREEN_HEIGHT / 2 / camera.zoom;
 
-    float visibleWidth = SCREEN_WIDTH / camera.zoom;
-    float visibleHeight = SCREEN_HEIGHT / camera.zoom;
-
-    Rectangle src = {left, top, visibleWidth, visibleHeight};
-    Rectangle dest = {left, top, visibleWidth, visibleHeight};
+    Rectangle src = GetViewRectangle(camera);
+    Rectangle dest = GetViewRectangle(camera);
 
     DrawTexturePro(perlinTexture, src, dest, Vector2{0, 0}, 0.0f, WHITE);
 
     // nuke bg texture
+    SetTextureWrap(explosionTexture, TEXTURE_WRAP_CLAMP);
+
     if (explosionTextureDirty) {
         UpdateTexture(explosionTexture, explosionImage.data);
         explosionTextureDirty = false;
     }
-    DrawTextureV(explosionTexture, Vector2{0, 0}, WHITE);
+
+    Rectangle srcExplosion = GetViewRectangle(camera);
+    Rectangle destExplosion = GetViewRectangle(camera);
+
+    DrawTexturePro(explosionTexture, srcExplosion, destExplosion, Vector2{0, 0}, 0.0f, WHITE);
+
+    //DrawTextureV(explosionTexture, Vector2{0, 0}, WHITE);
 }
 
 void displayAndHandleBuildMenu() {
