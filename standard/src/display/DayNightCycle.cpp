@@ -30,7 +30,7 @@ float DayNightCycle::smoothTransition(float x, float y, float z)
 
 void DayNightCycle::Update()
 {
-    time += GetFrameTime() / 300.0f; // Default 300.0f
+    time += GetFrameTime() / 100.0f; // Default 300.0f
 
     if (time > 1.0f)
     {

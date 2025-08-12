@@ -53,6 +53,8 @@ add_executable(ARCY src/main.cpp
         src/display/DayNightCycle.h
         src/display/raygui.h
         src/player/PlayerAI.cpp
+        src/map/TerrainKind.h
+        src/map/TerrainKind.cpp
 )
 
 file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})

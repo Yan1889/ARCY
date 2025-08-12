@@ -8,8 +8,7 @@
 
 #include "../Globals.h"
 
-Pixel::Pixel(const int x, const int y, const int id): x(x), y(y), playerId(id),
-                                                      invasionAcceptProbability(GetColorProbability()) {
+Pixel::Pixel(const int x, const int y, const int id, const Terrain::Kind kind): x(x), y(y), playerId(id), kind(kind) {
 }
 
 void Pixel::LoadNeighbors() {
@@ -24,24 +23,6 @@ const std::vector<Pixel *> &Pixel::GetNeighbors() const {
 }
 
 
-Color Pixel::GetColor() const {
-    return static_cast<const Color *>(G::perlin.data)[G::perlin.width * y + x];
-}
-
-float Pixel::GetColorProbability() const {
-    const Color terrainColor = GetColor();
-    for (const Gradient &mapPart: G::mapParts) {
-        if (terrainColor.r == mapPart.color.r &&
-            terrainColor.g == mapPart.color.g &&
-            terrainColor.b == mapPart.color.b &&
-            terrainColor.a == mapPart.color.a) {
-            return mapPart.difficulty;
-        }
-    }
-    std::cerr << "Map not correct!" << std::endl;
-    return -1;
-}
-
 Vector2 Pixel::ToVector2() const {
     return Vector2{
         static_cast<float>(x),
@@ -53,5 +34,5 @@ bool Pixel::acceptRandomly() const {
     // radiation = 3x harder
     const float multiplier = contaminated ? 3.f : 1.f;
     const float randomValue = static_cast<float>(rand()) / RAND_MAX;
-    return invasionAcceptProbability > randomValue * multiplier;
+    return Terrain::GetInvasionProbability(kind) > randomValue * multiplier;
 }

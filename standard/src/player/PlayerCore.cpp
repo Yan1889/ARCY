@@ -56,7 +56,7 @@ void Player::ProcessAttackQueue(Attack &attack) {
             if (attack.troops <= 0) break; // no new Pixels
             if (neighbor->playerId == _id
                 || attack.set.contains(neighbor)
-                || neighbor->invasionAcceptProbability == 0)
+                || Terrain::GetInvasionProbability(neighbor->kind) == 0)
                 continue;
 
             attack.set.insert(neighbor);
@@ -80,7 +80,7 @@ void Player::ReFillAttackQueueFromScratch(Attack &attack) {
         for (Pixel *p: borderPixel->GetNeighbors()) {
             if (attack.set.contains(p) ||
                 p->playerId != target ||
-                p->invasionAcceptProbability == 0)
+                Terrain::GetInvasionProbability(p->kind) == 0)
                 continue;
 
             attack.queue.push(p);
@@ -110,7 +110,9 @@ void Player::GetOwnershipOfPixel(Pixel *newP) {
         }
     } else if (newP->playerId == -2) {
         // reclaim contaminated pixel
-        RemoveExplosionPixel(newP);
+        newP->contaminated = false;
+        ImageDrawPixel(&explosionImage, newP->x, newP->y, BLANK);
+        explosionTextureDirty = true;
     }
     newP->playerId = _id;
 
