@@ -178,6 +178,7 @@ void displayCrossHair() {
 
 void displayBGTextures() {
     // terrain bg texture
+    SetTextureWrap(perlinTexture, TEXTURE_WRAP_CLAMP);
     float left = camera.target.x - SCREEN_WIDTH / 2 / camera.zoom;
     float top = camera.target.y - SCREEN_HEIGHT / 2 / camera.zoom;
 
