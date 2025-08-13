@@ -24,7 +24,7 @@ void Pixel::LoadNeighbors() {
         G::PixelAt(x, y + 1), // down
     };
     for (Pixel *n: allNeighbors) {
-        if (n != nullptr) {
+        if (n) {
             neighborsCached.push_back(n);
         }
     }

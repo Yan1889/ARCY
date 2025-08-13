@@ -98,8 +98,8 @@ public:
     bool CanBuildSilo(Pixel* pos) const;
     Pixel* GetNearestSiloFromPixel(Pixel* point) const;
 
-    bool CanLaunchAtomBomb() const;
-    bool CanLaunchHydrogenBomb() const;
+    bool CanLaunchAtomBomb(Pixel* pixel) const;
+    bool CanLaunchHydrogenBomb(Pixel* pixel) const;
     void TryLaunchAtomBomb(Pixel *targetPixel);
     void TryLaunchHydrogenBomb(Pixel *targetPixel);
 };
