@@ -48,6 +48,7 @@ void displayGame() {
     displayTroopSlider();
     displayAndHandleBuildMenu();
     displayGameOver();
+
     displayPlayersInfo();
 
     EndDrawing();
@@ -167,7 +168,7 @@ void displayPlayersInfo() {
         const std::string numberStr = std::to_string(i + 1);
         const std::string infoStr = numberStr + ". " + p._name + ": " + troopsStr + "; " + moneyStr
                                     + " " + deadStr;
-        DrawText(infoStr.c_str(), 25, 20 + 30 * i, 20, p._color);
+        if (showLeaderboard) DrawText(infoStr.c_str(), 25, 20 + 30 * i, 20, p._color);
     }
 }
 

@@ -136,7 +136,6 @@ void Bombs::RenderFlash()
             float scale = 2 * e.radius / t->width;
             if (!CheckCollisionCameraCircle(e.pos, t->width * scale / 2, GetViewRectangle(camera)))
             {
-                std::cout << "Drawing explosion" << std::endl;
                 DrawTexturePro(
                 *t,
                 Rectangle{0, 0, (float) t->width, (float) t->height},
@@ -175,7 +174,6 @@ void Bombs::RenderFlash()
             scale = 1.5 * 2 * e.radius / t->width;
             if (!CheckCollisionCameraCircle(e.pos, t->width * scale / 2, GetViewRectangle(camera)))
             {
-                std::cout << "Drawing flash" << std::endl;
                 DrawTexturePro(
                 *t,
                 Rectangle{0, 0, (float) t->width, (float) t->height},

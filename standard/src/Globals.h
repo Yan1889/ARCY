@@ -23,6 +23,8 @@ namespace G {
     inline Image perlin;
     inline Texture2D perlinTexture{};
 
+    inline bool showLeaderboard = true;
+
     inline Sounds mySounds;
 
     inline float maxDifficulty = 30;

@@ -25,7 +25,6 @@ constexpr float zoomMax = 10.0f;
 constexpr int botCount = 20;
 constexpr int botSpawnRadius = 500;
 
-
 void initCamAndMap();
 
 void initPlayers();
@@ -95,6 +94,7 @@ void handleControls() {
     if (IsKeyDown(KEY_D)) playerPos.x += moveSpeed * GetFrameTime() * 1 / camera.zoom;
     if (IsKeyPressed(KEY_F11)) ToggleFullscreen();
     if (IsKeyDown(KEY_ESCAPE)) WindowShouldClose();
+    if (IsKeyPressed(KEY_Q)) showLeaderboard ? showLeaderboard = false : showLeaderboard = true;
 
     if (playerPos.x > MAP_WIDTH) playerPos.x = MAP_WIDTH;
     else if (playerPos.x < 0) playerPos.x = 0;
