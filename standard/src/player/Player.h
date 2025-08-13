@@ -41,12 +41,6 @@ public:
     int _workers{};
     float _troopPercentage = 0.80f;
 
-    /*
-    float _growthCooldown = 100;
-    float _growthRate = 100;
-    float _growthFactor = 0.0085f;
-    */
-
     // buildings
     std::vector<Pixel *> _cities{};
     std::vector<Pixel *> _silos{};
@@ -59,7 +53,7 @@ public:
     Money _money;
 
     // territory
-    std::unordered_set<Pixel *> _allPixels;
+    int _pixelCount{};
     std::vector<Pixel *> _border_vec;
     std::unordered_set<Pixel *> _border_set;
     std::vector<Pixel *> _dirtyBorderPixels_vec;

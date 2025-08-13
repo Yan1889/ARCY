@@ -14,13 +14,11 @@
 using namespace G;
 using namespace Terrain;
 
-Sounds::Sounds()
-{
+Sounds::Sounds() {
     InitAudioDevice();
 }
 
-Sounds::~Sounds()
-{
+Sounds::~Sounds() {
     delete explosionPool;
     delete cityBuildPool;
     delete misslePool;
@@ -38,13 +36,11 @@ Sounds::~Sounds()
     CloseAudioDevice();
 }
 
-void Sounds::Play(SoundPool* pool)
-{
+void Sounds::Play(SoundPool *pool) {
     pool->Play();
 }
 
-void Sounds::LoadAll()
-{
+void Sounds::LoadAll() {
     explosionPool = new SoundPool("assets/sounds/nukeexplosion.mp3");
     nearExplosionPool = new SoundPool("assets/sounds/nearnukeexplosion.mp3");
     distantExplosionPool = new SoundPool("assets/sounds/distantnukeexplosion.mp3");
@@ -71,8 +67,7 @@ void Sounds::LoadAll()
     PlayMusicStream(nightAmbienceSound);
 }
 
-void Sounds::checkAtmosphere()
-{
+void Sounds::checkAtmosphere() {
     UpdateMusicStream(oceanSound);
     UpdateMusicStream(beachSound);
     UpdateMusicStream(mountainSound);
@@ -81,69 +76,53 @@ void Sounds::checkAtmosphere()
     UpdateMusicStream(radiationSound);
     UpdateMusicStream(nightAmbienceSound);
 
+    Pixel *pixel = G::PixelAt(playerPos);
+    const Kind kind = GetKindAt(pixel);
+
     // Contaminated zone
-    if (GetContamination(static_cast<int>(playerPos.x), static_cast<int>(playerPos.y)))
-    {
+    if (pixel->contaminated) {
         ResumeMusicStream(radiationSound);
         PauseMusicStream(oceanSound);
         PauseMusicStream(beachSound);
         PauseMusicStream(fieldSound);
         PauseMusicStream(forestSound);
         PauseMusicStream(mountainSound);
-    }
-    else PauseMusicStream(radiationSound);
-
-    if (GetContamination(static_cast<int>(playerPos.x), static_cast<int>(playerPos.y))) return;
+        return;
+    } else PauseMusicStream(radiationSound);
 
     // Ocean
-    if (GetKindAt(static_cast<int>(playerPos.x), static_cast<int>(playerPos.y)) == DEEP_WATER ||
-        GetKindAt(static_cast<int>(playerPos.x), static_cast<int>(playerPos.y)) == LOW_WATER) ResumeMusicStream(oceanSound);
-    else if (playerPos.x < 0 || playerPos.x >= MAP_WIDTH || playerPos.y < 0 || playerPos.y >= MAP_HEIGHT) ResumeMusicStream(oceanSound);
+    if (kind == DEEP_WATER || kind == LOW_WATER
+        || playerPos.x < 0 || playerPos.x >= MAP_WIDTH || playerPos.y < 0 || playerPos.y >= MAP_HEIGHT)
+        ResumeMusicStream(oceanSound);
     else PauseMusicStream(oceanSound);
 
     // Beach
-    if (!(DayNightCycle::time > 0.25f && DayNightCycle::time < 0.75f) &&
-        GetKindAt(static_cast<int>(playerPos.x), static_cast<int>(playerPos.y)) == BEACH) ResumeMusicStream(beachSound);
+    if (!(DayNightCycle::time > 0.25f && DayNightCycle::time < 0.75f) && kind == BEACH)
+        ResumeMusicStream(beachSound);
     else PauseMusicStream(beachSound);
 
     // Field
-    if (GetKindAt(static_cast<int>(playerPos.x), static_cast<int>(playerPos.y)) == OPEN_FIELD ||
-        GetKindAt(static_cast<int>(playerPos.x), static_cast<int>(playerPos.y)) == HILLS)
-    {
-        if (!(DayNightCycle::time > 0.25f && DayNightCycle::time < 0.75f))
-        {
+    if (kind == OPEN_FIELD || kind == HILLS) {
+        if (!(DayNightCycle::time > 0.25f && DayNightCycle::time < 0.75f)) {
             ResumeMusicStream(fieldSound);
-        }
-        else PauseMusicStream(fieldSound);
-    }
-    else PauseMusicStream(fieldSound);
+        } else PauseMusicStream(fieldSound);
+    } else PauseMusicStream(fieldSound);
 
     // Forest
-    if (GetKindAt(static_cast<int>(playerPos.x), static_cast<int>(playerPos.y)) == FORREST ||
-        GetKindAt(static_cast<int>(playerPos.x), static_cast<int>(playerPos.y)) == STONE)
-    {
-        if (!(DayNightCycle::time > 0.25f && DayNightCycle::time < 0.75f))
-        {
+    if (kind == FORREST || kind == STONE) {
+        if (!(DayNightCycle::time > 0.25f && DayNightCycle::time < 0.75f)) {
             ResumeMusicStream(forestSound);
-        }
-        else PauseMusicStream(forestSound);
-    }
-    else PauseMusicStream(forestSound);
+        } else PauseMusicStream(forestSound);
+    } else PauseMusicStream(forestSound);
 
     // Mountain
-    if (GetKindAt(static_cast<int>(playerPos.x), static_cast<int>(playerPos.y)) == MOUNTAIN ||
-        GetKindAt(static_cast<int>(playerPos.x), static_cast<int>(playerPos.y)) == SNOW) ResumeMusicStream(mountainSound);
+    if (kind == MOUNTAIN || kind == SNOW)
+        ResumeMusicStream(mountainSound);
     else PauseMusicStream(mountainSound);
 
     // Night Ambience
-    if (GetKindAt(static_cast<int>(playerPos.x), static_cast<int>(playerPos.y)) == BEACH ||
-        GetKindAt(static_cast<int>(playerPos.x), static_cast<int>(playerPos.y)) == OPEN_FIELD ||
-        GetKindAt(static_cast<int>(playerPos.x), static_cast<int>(playerPos.y)) == HILLS ||
-        GetKindAt(static_cast<int>(playerPos.x), static_cast<int>(playerPos.y)) == FORREST)
-    {
+    if (kind == BEACH || kind == OPEN_FIELD || kind == HILLS || kind == FORREST) {
         if (DayNightCycle::time > 0.25f && DayNightCycle::time < 0.75f) ResumeMusicStream(nightAmbienceSound);
         else PauseMusicStream(nightAmbienceSound);
-    }
-    else PauseMusicStream(nightAmbienceSound);
+    } else PauseMusicStream(nightAmbienceSound);
 }
-

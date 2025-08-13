@@ -61,14 +61,10 @@ void displayInfoTexts() {
     DrawText(totalPopStr.c_str(), textPos.x, textPos.y, 20, MAIN_PLAYER_COLOR);
 
     // neutral send
-    const std::string sendText = "People exploring neutral land: " + formatNumber(
-                                     MAIN_PLAYER._targetToAttackMap.contains(-1)
-                                         ? MAIN_PLAYER._targetToAttackMap[-1].troops
-                                         : 0
-                                 );
+    const int toNeutral = MAIN_PLAYER._targetToAttackMap.contains(-1) ? MAIN_PLAYER._targetToAttackMap[-1].troops : 0;
+    const std::string sendText = "People exploring neutral land: " + formatNumber(toNeutral);
     textPos = {0 + 25, GetScreenHeight() - 25.f - (buildMenuShown ? menuRect.height : 0)};
     DrawText(sendText.c_str(), textPos.x, textPos.y, 20, MAIN_PLAYER_COLOR);
-
 
     // money
     const std::string moneyText = "Money: " + formatNumber(MAIN_PLAYER._money.moneyBalance);
@@ -77,7 +73,7 @@ void displayInfoTexts() {
 
 
     // _pixelsOccupied
-    const std::string territorySizeText = "Territory size: " + formatNumber(MAIN_PLAYER._allPixels.size()) + " pixels";
+    const std::string territorySizeText = "Territory size: " + formatNumber(MAIN_PLAYER._pixelCount) + " pixels";
     textPos = {0 + 25, GetScreenHeight() - 100.f - (buildMenuShown ? menuRect.height : 0)};
     DrawText(territorySizeText.c_str(), textPos.x, textPos.y, 20, MAIN_PLAYER_COLOR);
 
@@ -111,6 +107,7 @@ void displayPlayers() {
             };
             if (CheckCollisionCameraRec(viewRect, cityRect))
             {
+            if (CheckCollisionRecs(cityRect, viewRect)) {
                 DrawTextureEx(
                     TextureCollection::city,
                     Vector2{c->x - buildingRadius, c->y - buildingRadius},
@@ -132,6 +129,7 @@ void displayPlayers() {
             };
             if (CheckCollisionCameraRec(viewRect, siloRect))
             {
+            if (CheckCollisionRecs(siloRect, viewRect)) {
                 DrawTextureEx(
                     TextureCollection::silo,
                     Vector2(s->x - buildingRadius, s->y - buildingRadius),
@@ -157,7 +155,7 @@ void displayPlayersInfo() {
         playerIdxOrder[i] = i;
     }
     std::ranges::sort(playerIdxOrder, [](const int i1, const int i2) {
-        return players[i1]._allPixels.size() > players[i2]._allPixels.size();
+        return players[i1]._pixelCount > players[i2]._pixelCount;
     });
 
     for (int i = 0; i < players.size() && i < 10; i++) {
@@ -178,7 +176,7 @@ void displayPlayerTags() {
         if (p._dead) continue;
 
         // A = π * r^2 => r = sqrt(A / π)
-        const float diameter = 2 * std::sqrt(p._allPixels.size() / PI);
+        const float diameter = 2 * std::sqrt(p._pixelCount / PI);
         const int charCount = p._name.length();
         const float pxWidthPerChar = diameter / charCount;
 

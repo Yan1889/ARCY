@@ -13,14 +13,7 @@
 #include "Bombs.h"
 #include "display/display.h"
 
-//#define SCREEN_WIDTH 1366 // Default 980
-//#define SCREEN_HEIGHT 768 // Default 650
-
 using namespace G;
-
-Color grayScale(const unsigned char gray) {
-    return Color{gray, gray, gray, 255};
-}
 
 
 // ----- camera setting -----
@@ -193,16 +186,14 @@ void initCamAndMap() {
 
     territoryImage = GenImageColor(MAP_WIDTH, MAP_HEIGHT, BLANK);
     territoryTexture = LoadTextureFromImage(territoryImage);
-    territoryMap = std::vector<std::vector<Pixel>>(MAP_WIDTH, std::vector<Pixel>(MAP_HEIGHT));
+    territoryMap = std::vector<Pixel>(MAP_WIDTH * MAP_HEIGHT);
     for (int y = 0; y < MAP_HEIGHT; y++) {
         for (int x = 0; x < MAP_WIDTH; x++) {
-            territoryMap[x][y] = Pixel(x, y, -1, Terrain::GetKindAt(x, y));
+            territoryMap[G::ToIdx(x, y)] = Pixel(x, y, Terrain::GetKindAt(x, y));
         }
     }
-    for (int y = 0; y < MAP_HEIGHT; y++) {
-        for (int x = 0; x < MAP_WIDTH; x++) {
-            territoryMap[x][y].LoadNeighbors();
-        }
+    for (Pixel &p: territoryMap) {
+        p.LoadNeighbors();
     }
     playerPos = Vector2{static_cast<float>(MAP_WIDTH) / 2, static_cast<float>(MAP_HEIGHT) / 2};
     initDisplay();

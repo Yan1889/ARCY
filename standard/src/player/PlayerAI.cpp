@@ -16,29 +16,14 @@ void Player::BotLogic() {
 }
 
 void Player::BotLogic_Bombing() {
-    // randomly bomb something with a 1% chance
-    if (rand() > RAND_MAX / 100) return;
-
-    // chose a target that is not yourself
-    int targetId{};
-    do {
-        targetId = rand() % players.size();
-    } while (targetId == _id || players[targetId]._dead);
-
-    auto iter = players[targetId]._allPixels.begin();
-    std::advance(iter, rand() % players[targetId]._allPixels.size());
-    Pixel *target = *iter;
-
-    // Pixel *target = PixelAt(rand() % MAP_WIDTH, rand() % MAP_HEIGHT); // alternative: random firing
-    TryLaunchAtomBomb(target);
+    Pixel *target = G::GetRandPixel();
+    if (target->playerId >= 0) {
+        TryLaunchAtomBomb(target);
+    }
 }
 
 void Player::BotLogic_Building() {
-    // get a random pixel
-    auto iter = _allPixels.begin();
-    std::advance(iter, rand() % _allPixels.size());
-    Pixel *randomPixel = *iter;
-
+    Pixel *randomPixel = G::GetRandPixel();
     // add a random city with 1% chance
     if (rand() < RAND_MAX / 100) {
         TryAddCity(randomPixel);
