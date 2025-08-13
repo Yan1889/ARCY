@@ -108,50 +108,54 @@ void Player::RemovePixelFromCenter(Pixel *newP) {
 }
 
 bool Player::TryAddCity(Pixel *pos) {
-    const int cost = cityCost * (_cities.size() + 1);
+    if (!CanBuildCity(pos)) return false;
 
-    if (_money.moneyBalance < cost || pos->playerId != _id) return false;
+    const int cost = cityCost * (_cities.size() + 1);
     _money.spendMoney(cost);
+    _cities.emplace_back(pos);
 
     if (_id == 0) mySounds.Play(mySounds.cityBuildPool);
-
-    _cities.emplace_back(pos);
     return true;
 }
 
 bool Player::TryAddSilo(Pixel *pos) {
-    const int cost = siloCost * (_silos.size() + 1);
+    if (!CanBuildSilo(pos)) return false;
 
-    if (_money.moneyBalance < cost || !CanBuildCity(pos)) return false;
+    const int cost = siloCost * (_silos.size() + 1);
     _money.spendMoney(cost);
+    _silos.emplace_back(pos);
 
     if (_id == 0) mySounds.Play(mySounds.cityBuildPool);
-
-    _silos.emplace_back(pos);
     return true;
 }
 
 bool Player::CanBuildCity(Pixel *pos) const {
+    if (!pos) return false;
     const int cost = cityCost * (_cities.size() + 1);
     return _money.moneyBalance > cost && pos->playerId == _id;
 }
 
 bool Player::CanBuildSilo(Pixel *pos) const {
+    if (!pos) return false;
     const int cost = siloCost * (_silos.size() + 1);
     return _money.moneyBalance > cost && pos->playerId == _id;
 }
 
-bool Player::CanLaunchAtomBomb() const {
-    return !_silos.empty() && Bombs::atomBombCost < _money.moneyBalance;
+bool Player::CanLaunchAtomBomb(Pixel* pixel) const {
+    if (!pixel) return false;
+    const Kind k = GetKindAt(pixel);
+    return !_silos.empty() && Bombs::atomBombCost < _money.moneyBalance && k != LOW_WATER && k != DEEP_WATER;
 }
 
-bool Player::CanLaunchHydrogenBomb() const {
-    return !_silos.empty() && Bombs::hydrogenBombCost < _money.moneyBalance;
+bool Player::CanLaunchHydrogenBomb(Pixel* pixel) const {
+    if (!pixel) return false;
+    const Kind k = GetKindAt(pixel);
+    return !_silos.empty() && Bombs::hydrogenBombCost < _money.moneyBalance && k != LOW_WATER && k != DEEP_WATER;
 }
 
 
 void Player::TryLaunchAtomBomb(Pixel *targetPixel) {
-    if (!CanLaunchAtomBomb() || targetPixel == nullptr ||
+    if (!CanLaunchAtomBomb(targetPixel) ||
         GetKindAt(targetPixel->x, targetPixel->y) == DEEP_WATER ||
         GetKindAt(targetPixel->x, targetPixel->y) == LOW_WATER) return;
 
@@ -172,7 +176,7 @@ void Player::TryLaunchAtomBomb(Pixel *targetPixel) {
 }
 
 void Player::TryLaunchHydrogenBomb(Pixel *targetPixel) {
-    if (!CanLaunchHydrogenBomb() || targetPixel == nullptr ||
+    if (!CanLaunchHydrogenBomb(targetPixel) ||
         GetKindAt(targetPixel->x, targetPixel->y) == DEEP_WATER ||
         GetKindAt(targetPixel->x, targetPixel->y) == LOW_WATER) return;
 

@@ -108,8 +108,7 @@ void displayPlayers() {
                 2 * buildingRadius,
                 2 * buildingRadius,
             };
-            if (CheckCollisionCameraRec(viewRect, cityRect))
-            {
+            if (CheckCollisionCameraRec(viewRect, cityRect)) {
                 DrawTextureEx(
                     TextureCollection::city,
                     Vector2{c->x - buildingRadius, c->y - buildingRadius},
@@ -129,8 +128,7 @@ void displayPlayers() {
                 2 * buildingRadius,
                 2 * buildingRadius,
             };
-            if (CheckCollisionCameraRec(viewRect, siloRect))
-            {
+            if (CheckCollisionCameraRec(viewRect, siloRect)) {
                 DrawTextureEx(
                     TextureCollection::silo,
                     Vector2(s->x - buildingRadius, s->y - buildingRadius),
@@ -287,18 +285,19 @@ void displayAndHandleBuildMenu() {
         }
     }
     if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && currentMenuOption != MENU_OPTION_NONE) {
+        Pixel *mPixel = GetPixelOnMouse();
         switch (currentMenuOption) {
             case MENU_OPTION_CITY:
-                MAIN_PLAYER.TryAddCity(GetPixelOnMouse());
+                MAIN_PLAYER.TryAddCity(mPixel);
                 break;
             case MENU_OPTION_SILO:
-                MAIN_PLAYER.TryAddSilo(GetPixelOnMouse());
+                MAIN_PLAYER.TryAddSilo(mPixel);
                 break;
             case MENU_OPTION_ATOM_BOMB:
-                MAIN_PLAYER.TryLaunchAtomBomb(GetPixelOnMouse());
+                MAIN_PLAYER.TryLaunchAtomBomb(mPixel);
                 break;
             case MENU_OPTION_HYDROGEN_BOMB:
-                MAIN_PLAYER.TryLaunchHydrogenBomb(GetPixelOnMouse());
+                MAIN_PLAYER.TryLaunchHydrogenBomb(mPixel);
                 break;
         }
         currentMenuOption = MENU_OPTION_NONE;
@@ -309,28 +308,27 @@ void displayAndHandleBuildMenu() {
         const Texture2D *t = nullptr;
         Color color{};
         float yOffset = 0.f;
+        Pixel *mPixel = GetPixelOnMouse();
         switch (currentMenuOption) {
             case MENU_OPTION_CITY:
                 t = &TextureCollection::city;
-                color = MAIN_PLAYER.CanBuildCity(GetPixelOnMouse()) ? Fade(GREEN, 0.5) : Fade(RED, 0.5);
+                color = MAIN_PLAYER.CanBuildCity(mPixel) ? Fade(GREEN, 0.5) : Fade(RED, 0.5);
                 break;
             case MENU_OPTION_SILO:
                 t = &TextureCollection::silo;
-                color = MAIN_PLAYER.CanBuildSilo(GetPixelOnMouse()) ? Fade(GREEN, 0.5) : Fade(RED, 0.5);
+                color = MAIN_PLAYER.CanBuildSilo(mPixel) ? Fade(GREEN, 0.5) : Fade(RED, 0.5);
                 break;
             case MENU_OPTION_ATOM_BOMB:
                 t = &TextureCollection::mapIcon;
-                color = MAIN_PLAYER.CanLaunchAtomBomb() ? GREEN : RED;
                 yOffset = -t->height / 2.f * 2 * buildingRadius / t->width;
-                DrawCircleV(GetMousePosition(), camera.zoom * 50,
-                            MAIN_PLAYER.CanLaunchAtomBomb() ? Fade(WHITE, 0.5) : Fade(WHITE, 0.2));
+                color = MAIN_PLAYER.CanLaunchAtomBomb(mPixel) ? GREEN : RED;
+                DrawCircleV(GetMousePosition(), camera.zoom * 50, Fade(color, 0.5));
                 break;
             case MENU_OPTION_HYDROGEN_BOMB:
                 t = &TextureCollection::mapIcon;
-                color = MAIN_PLAYER.CanLaunchHydrogenBomb() ? GREEN : RED;
+                color = MAIN_PLAYER.CanLaunchHydrogenBomb(mPixel) ? GREEN : RED;
                 yOffset = -t->height / 2.f * 2 * buildingRadius / t->width;
-                DrawCircleV(GetMousePosition(), camera.zoom * 350,
-                            MAIN_PLAYER.CanLaunchHydrogenBomb() ? Fade(WHITE, 0.5) : Fade(WHITE, 0.2));
+                DrawCircleV(GetMousePosition(), camera.zoom * 350, Fade(color, 0.5));
                 break;
         }
         DrawTextureEx(
