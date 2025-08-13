@@ -6,6 +6,15 @@ An epic game
 2. open with clion
 3. click on run
 
+## How to play
+# Controls
+Move Camera with [W][A][S][D]
+Zoom in/out with Up and Down Key Arrows
+[Left-Click] to expand or attack other players
+[M] to open the build menu
+[F11] Toggle Fullscreen
+[Q] Show or hide Leaderboard
+
 ## Project structure
 
 ### Files
