@@ -60,7 +60,7 @@ int main() {
         }
         displayGame();
         mySounds.checkAtmosphere();
-        MAIN_PLAYER._money.getMoney(100000);
+        MAIN_PLAYER._money.getMoney(100000); //only for testing purposes!
     }
 
     // clean up everything
@@ -95,6 +95,12 @@ void handleControls() {
     if (IsKeyPressed(KEY_F11)) ToggleFullscreen();
     if (IsKeyDown(KEY_ESCAPE)) WindowShouldClose();
     if (IsKeyPressed(KEY_Q)) showLeaderboard = !showLeaderboard;
+
+    // Building shortcuts
+    if (IsKeyPressed(KEY_ONE) && buildMenuShown) MAIN_PLAYER.TryAddCity(GetPixelOnMouse());
+    if (IsKeyPressed(KEY_TWO) && buildMenuShown) MAIN_PLAYER.TryAddSilo(GetPixelOnMouse());
+    if (IsKeyPressed(KEY_THREE) && buildMenuShown) MAIN_PLAYER.TryLaunchAtomBomb(GetPixelOnMouse());
+    if (IsKeyPressed(KEY_FOUR) && buildMenuShown) MAIN_PLAYER.TryLaunchHydrogenBomb(GetPixelOnMouse());
 
     if (playerPos.x > MAP_WIDTH) playerPos.x = MAP_WIDTH;
     else if (playerPos.x < 0) playerPos.x = 0;
