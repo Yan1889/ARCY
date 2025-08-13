@@ -3,9 +3,13 @@
 //
 
 #include <cstdlib>
+#include <iostream>
+#include <ostream>
+
 #include "../Globals.h"
 #include "Player.h"
 #include "../Bombs.h"
+#include "../display/DayNightCycle.h"
 
 using namespace G;
 
@@ -41,6 +45,13 @@ void Player::BotLogic_Expanding() {
     const float troopFillPercentage = _totalPopulation * _troopPercentage / static_cast<float>(_maxTotalPopulation);
 
     if (troopFillPercentage < 0.50) return;
+
+    if (DayNightCycle::isNightTime)
+    {
+        int randomInt = rand() % 100;
+
+        if (randomInt != 0) return;
+    }
 
     // expand with 20% strength and random target:
     // radiation (-2) or neutral land (-1) or other player (>=0)

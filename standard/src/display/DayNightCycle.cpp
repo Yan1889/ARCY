@@ -17,6 +17,7 @@ Color DayNightCycle::brightness = {0, 0, 0, 0};
 float DayNightCycle::time = 0;
 int DayNightCycle::days = 0;
 bool DayNightCycle::daysCounting = true;
+bool DayNightCycle::isNightTime = time > 0.25f && time < 0.75f ? false : true;
 
 void DayNightCycle::Draw()
 {
@@ -35,7 +36,7 @@ float DayNightCycle::smoothTransition(float x, float y, float z)
 
 void DayNightCycle::Update()
 {
-    time += GetFrameTime() / 100.0f; // Default 300.0f
+    time += GetFrameTime() / 750.0f; // Default 300.0f
 
     if (time > 1.0f)
     {
@@ -47,6 +48,9 @@ void DayNightCycle::Update()
         daysCounting = false;
         days++;
     }
+
+    if (time > 0.3f && time < 0.70f) isNightTime = true;
+    else isNightTime = false;
 
     float alpha = (sinf(time * 2 * PI - PI / 2) + 1) / 2;
     unsigned char nightAlpha = (unsigned char)(alpha * 250);

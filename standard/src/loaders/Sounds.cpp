@@ -88,7 +88,8 @@ void Sounds::checkAtmosphere() {
         PauseMusicStream(forestSound);
         PauseMusicStream(mountainSound);
         return;
-    } else PauseMusicStream(radiationSound);
+    }
+    PauseMusicStream(radiationSound);
 
     // Ocean
     if (kind == DEEP_WATER || kind == LOW_WATER
@@ -97,20 +98,20 @@ void Sounds::checkAtmosphere() {
     else PauseMusicStream(oceanSound);
 
     // Beach
-    if (!(DayNightCycle::time > 0.25f && DayNightCycle::time < 0.75f) && kind == BEACH)
+    if (!DayNightCycle::isNightTime && kind == BEACH)
         ResumeMusicStream(beachSound);
     else PauseMusicStream(beachSound);
 
     // Field
     if (kind == OPEN_FIELD || kind == HILLS) {
-        if (!(DayNightCycle::time > 0.25f && DayNightCycle::time < 0.75f)) {
+        if (!DayNightCycle::isNightTime) {
             ResumeMusicStream(fieldSound);
         } else PauseMusicStream(fieldSound);
     } else PauseMusicStream(fieldSound);
 
     // Forest
     if (kind == FORREST || kind == STONE) {
-        if (!(DayNightCycle::time > 0.25f && DayNightCycle::time < 0.75f)) {
+        if (!DayNightCycle::isNightTime) {
             ResumeMusicStream(forestSound);
         } else PauseMusicStream(forestSound);
     } else PauseMusicStream(forestSound);
@@ -122,7 +123,7 @@ void Sounds::checkAtmosphere() {
 
     // Night Ambience
     if (kind == BEACH || kind == OPEN_FIELD || kind == HILLS || kind == FORREST) {
-        if (DayNightCycle::time > 0.25f && DayNightCycle::time < 0.75f) ResumeMusicStream(nightAmbienceSound);
+        if (DayNightCycle::isNightTime) ResumeMusicStream(nightAmbienceSound);
         else PauseMusicStream(nightAmbienceSound);
     } else PauseMusicStream(nightAmbienceSound);
 }

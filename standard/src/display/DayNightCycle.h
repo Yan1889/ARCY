@@ -17,6 +17,7 @@ public:
     static float time;
     static int days;
     static bool daysCounting;
+    static bool isNightTime;
     static float smoothTransition(float x, float y, float z);
 };
 
