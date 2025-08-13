@@ -36,7 +36,7 @@ float DayNightCycle::smoothTransition(float x, float y, float z)
 
 void DayNightCycle::Update()
 {
-    time += GetFrameTime() / 750.0f; // Default 300.0f
+    time += GetFrameTime() / 750.0f; // Default 750.0f
 
     if (time > 1.0f)
     {
@@ -49,7 +49,7 @@ void DayNightCycle::Update()
         days++;
     }
 
-    if (time > 0.3f && time < 0.70f) isNightTime = true;
+    if (time > 0.3f && time < 0.60f) isNightTime = true;
     else isNightTime = false;
 
     float alpha = (sinf(time * 2 * PI - PI / 2) + 1) / 2;
