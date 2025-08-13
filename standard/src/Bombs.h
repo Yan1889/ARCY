@@ -52,7 +52,8 @@ class Bombs {
 public:
     static std::vector<SingleBomb> allBombs;
     static void Update();
-    static void Render();
+    static void RenderBomb();
+    static void RenderFlash();
     static int atomBombCost;
     static int hydrogenBombCost;
 };

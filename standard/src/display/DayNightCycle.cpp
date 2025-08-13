@@ -9,6 +9,9 @@
 #include <ostream>
 
 #include "raylib.h"
+#include "../Globals.h"
+
+using namespace G;
 
 Color DayNightCycle::brightness = {0, 0, 0, 0};
 float DayNightCycle::time = 0;
@@ -17,8 +20,10 @@ bool DayNightCycle::daysCounting = true;
 
 void DayNightCycle::Draw()
 {
-    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), brightness);
-    Time();
+    Vector2 topLeft = GetScreenToWorld2D({0, 0}, camera);
+    Vector2 bottomRight = GetScreenToWorld2D({static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight())}, camera);
+    DrawRectangleV(topLeft,
+            {bottomRight.x - topLeft.x, bottomRight.y - topLeft.y}, brightness);
 }
 
 float DayNightCycle::smoothTransition(float x, float y, float z)
@@ -30,7 +35,7 @@ float DayNightCycle::smoothTransition(float x, float y, float z)
 
 void DayNightCycle::Update()
 {
-    time += GetFrameTime() / 750.0f; // Default 300.0f
+    time += GetFrameTime() / 100.0f; // Default 300.0f
 
     if (time > 1.0f)
     {

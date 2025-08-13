@@ -35,13 +35,15 @@ void displayGame() {
     BeginMode2D(camera);
     displayBGTextures();
     displayPlayers();
-    Bombs::Render();
+    Bombs::RenderBomb();
     displayPlayerTags();
     displayCrossHair();
+    DayNightCycle::Update();
+    Bombs::RenderFlash();
 
     EndMode2D();
 
-    DayNightCycle::Update();
+    DayNightCycle::Time();
     displayInfoTexts();
     displayTroopSlider();
     displayAndHandleBuildMenu();
@@ -107,7 +109,6 @@ void displayPlayers() {
             };
             if (CheckCollisionCameraRec(viewRect, cityRect))
             {
-            if (CheckCollisionRecs(cityRect, viewRect)) {
                 DrawTextureEx(
                     TextureCollection::city,
                     Vector2{c->x - buildingRadius, c->y - buildingRadius},
@@ -129,7 +130,6 @@ void displayPlayers() {
             };
             if (CheckCollisionCameraRec(viewRect, siloRect))
             {
-            if (CheckCollisionRecs(siloRect, viewRect)) {
                 DrawTextureEx(
                     TextureCollection::silo,
                     Vector2(s->x - buildingRadius, s->y - buildingRadius),

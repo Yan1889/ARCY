@@ -90,7 +90,7 @@ void Bombs::Update() {
     }
 }
 
-void Bombs::Render() {
+void Bombs::RenderBomb() {
     for (SingleBomb &b: allBombs) {
         Texture2D& t = b.type == ATOM? TextureCollection::atomBomb : TextureCollection::hydrogenBomb;
         const float scale = b.type == ATOM? 0.2 : 0.5;
@@ -118,6 +118,10 @@ void Bombs::Render() {
             WHITE
         );
     }
+}
+
+void Bombs::RenderFlash()
+{
     for (auto it = allEffects.begin(); it != allEffects.end(); ++it) {
         VisualEffectAfterDetonation& e = *it;
         e.timeLeft -= GetFrameTime();
@@ -192,7 +196,6 @@ void Bombs::Render() {
         }
     }
 }
-
 
 void Bombs::Explode(SingleBomb &b) {
     for (int y = -b.radius; y <= b.radius; y++) {
