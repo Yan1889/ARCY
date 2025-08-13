@@ -88,13 +88,13 @@ void frameLogic() {
 }
 
 void handleControls() {
-    if (IsKeyDown(KEY_W)) playerPos.y -= moveSpeed * GetFrameTime() * 1 / camera.zoom;
-    if (IsKeyDown(KEY_S)) playerPos.y += moveSpeed * GetFrameTime() * 1 / camera.zoom;
-    if (IsKeyDown(KEY_A)) playerPos.x -= moveSpeed * GetFrameTime() * 1 / camera.zoom;
-    if (IsKeyDown(KEY_D)) playerPos.x += moveSpeed * GetFrameTime() * 1 / camera.zoom;
+    if (IsKeyDown(KEY_W) && !buildMenuShown) playerPos.y -= moveSpeed * GetFrameTime() * 1 / camera.zoom;
+    if (IsKeyDown(KEY_S) && !buildMenuShown) playerPos.y += moveSpeed * GetFrameTime() * 1 / camera.zoom;
+    if (IsKeyDown(KEY_A) && !buildMenuShown) playerPos.x -= moveSpeed * GetFrameTime() * 1 / camera.zoom;
+    if (IsKeyDown(KEY_D) && !buildMenuShown) playerPos.x += moveSpeed * GetFrameTime() * 1 / camera.zoom;
     if (IsKeyPressed(KEY_F11)) ToggleFullscreen();
     if (IsKeyDown(KEY_ESCAPE)) WindowShouldClose();
-    if (IsKeyPressed(KEY_Q)) showLeaderboard ? showLeaderboard = false : showLeaderboard = true;
+    if (IsKeyPressed(KEY_Q)) showLeaderboard = !showLeaderboard;
 
     if (playerPos.x > MAP_WIDTH) playerPos.x = MAP_WIDTH;
     else if (playerPos.x < 0) playerPos.x = 0;
@@ -104,8 +104,8 @@ void handleControls() {
 
     camera.target = playerPos;
 
-    if (IsKeyDown(KEY_UP)) camera.zoom += zoomSpeed * GetFrameTime();
-    if (IsKeyDown(KEY_DOWN)) camera.zoom -= zoomSpeed * GetFrameTime();
+    if (IsKeyDown(KEY_UP) && !buildMenuShown) camera.zoom += zoomSpeed * GetFrameTime();
+    if (IsKeyDown(KEY_DOWN) && !buildMenuShown) camera.zoom -= zoomSpeed * GetFrameTime();
 
     if (camera.zoom < zoomMin) camera.zoom = zoomMin;
     if (camera.zoom > zoomMax) camera.zoom = zoomMax;
@@ -113,8 +113,7 @@ void handleControls() {
 
 void checkExpansionAndAttack() {
     // attack player if left-click
-    const bool mouseOverBuildMenu = buildMenuShown && GetMousePosition().y > GetScreenHeight() * 0.9;
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !mouseOverBuildMenu) {
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !buildMenuShown) {
         const int playerIdClickd = GetPixelOnMouse() == nullptr ? -1 : GetPixelOnMouse()->playerId;
 
         MAIN_PLAYER.Expand(playerIdClickd, 0.5);
