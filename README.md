@@ -7,7 +7,7 @@ An epic game
 3. click on run
 
 ## How to play
-# Controls
+### Controls
 Move Camera with [W][A][S][D]
 Zoom in/out with Up and Down Key Arrows
 [Left-Click] to expand or attack other players
