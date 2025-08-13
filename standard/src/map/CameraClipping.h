@@ -15,13 +15,13 @@ namespace CameraClipping
                (p->y >= viewRect.y && p->y <= viewRect.y + viewRect.height);
     }
 
-    inline bool CheckCollisionBuildings(const Rectangle& buildingRect, const Rectangle& viewRect)
+    inline bool CheckCollisionCameraRec(const Rectangle& buildingRect, const Rectangle& viewRect)
     {
         return (buildingRect.x < viewRect.x + viewRect.width) && (buildingRect.x + buildingRect.width > viewRect.x) &&
                (buildingRect.y < viewRect.y + viewRect.height) && (buildingRect.y + buildingRect.height > viewRect.y);
     }
 
-    inline bool CheckCollisionBombs(const Vector2& center, float radius, const Rectangle& viewRect)
+    inline bool CheckCollisionCameraCircle(const Vector2& center, float radius, const Rectangle& viewRect)
     {
         return (center.x + radius < viewRect.x ||
              center.x - radius > viewRect.x + viewRect.width ||

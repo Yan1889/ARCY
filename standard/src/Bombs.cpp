@@ -95,7 +95,7 @@ void Bombs::Render() {
         Texture2D& t = b.type == ATOM? TextureCollection::atomBomb : TextureCollection::hydrogenBomb;
         const float scale = b.type == ATOM? 0.2 : 0.5;
 
-        if (CheckCollisionBombs(b.pos, 25.f, GetViewRectangle(camera))) continue;
+        if (CheckCollisionCameraCircle(b.pos, t.height / 2, GetViewRectangle(camera))) continue;
 
         const float dx = b.targetPos.x - b.pos.x;
         const float dy = b.targetPos.y - b.pos.y;
@@ -130,7 +130,26 @@ void Bombs::Render() {
 
             Texture2D* t = &TextureCollection::explosion;
             float scale = 2 * e.radius / t->width;
-            DrawTexturePro(
+            if (!CheckCollisionCameraCircle(e.pos, t->width * scale / 2, GetViewRectangle(camera)))
+            {
+                std::cout << "Drawing explosion" << std::endl;
+                DrawTexturePro(
+                *t,
+                Rectangle{0, 0, (float) t->width, (float) t->height},
+                Rectangle{
+                        e.pos.x,
+                        e.pos.y,
+                    t->width * scale,
+                    t->height * scale,
+                    },
+                    Vector2{
+                        t->width / 2.f * scale,
+                        t->height / 2.f * scale,
+                    },
+                    e.rotation,
+                    WHITE
+                );
+                DrawTexturePro(
                 *t,
                 Rectangle{0, 0, (float) t->width, (float) t->height},
                 Rectangle{
@@ -146,10 +165,14 @@ void Bombs::Render() {
                 e.rotation,
                 WHITE
             );
+            }
 
             t = &TextureCollection::flash;
             scale = 1.5 * 2 * e.radius / t->width;
-            DrawTexturePro(
+            if (!CheckCollisionCameraCircle(e.pos, t->width * scale / 2, GetViewRectangle(camera)))
+            {
+                std::cout << "Drawing flash" << std::endl;
+                DrawTexturePro(
                 *t,
                 Rectangle{0, 0, (float) t->width, (float) t->height},
                 Rectangle{
@@ -165,6 +188,7 @@ void Bombs::Render() {
                 -2 * e.rotation + 90,
                 WHITE
             );
+            }
         }
     }
 }

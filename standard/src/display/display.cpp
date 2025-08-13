@@ -109,7 +109,7 @@ void displayPlayers() {
                 2 * buildingRadius,
                 2 * buildingRadius,
             };
-            if (CheckCollisionRecs(cityRect, viewRect))
+            if (CheckCollisionCameraRec(viewRect, cityRect))
             {
                 DrawTextureEx(
                     TextureCollection::city,
@@ -121,7 +121,7 @@ void displayPlayers() {
             }
         }
     }
-    // display every city for each player
+    // display every silo for each player
     for (const Player &p: players) {
         for (const Pixel *s: p._silos) {
             Rectangle siloRect = {
@@ -130,7 +130,7 @@ void displayPlayers() {
                 2 * buildingRadius,
                 2 * buildingRadius,
             };
-            if (CheckCollisionRecs(siloRect, viewRect))
+            if (CheckCollisionCameraRec(viewRect, siloRect))
             {
                 DrawTextureEx(
                     TextureCollection::silo,
