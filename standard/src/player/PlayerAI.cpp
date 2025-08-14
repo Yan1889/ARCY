@@ -4,7 +4,6 @@
 
 #include <cstdlib>
 #include <iostream>
-#include <ostream>
 
 #include "../Globals.h"
 #include "Player.h"

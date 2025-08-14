@@ -4,6 +4,7 @@
 
 #ifndef GLOBALS_H
 #define GLOBALS_H
+#include <climits>
 #include <vector>
 #include "raylib.h"
 #include "player/Player.h"
@@ -14,8 +15,8 @@ struct Gradient;
 
 // G for global
 namespace G {
-    constexpr int MAP_WIDTH = 2500;
-    constexpr int MAP_HEIGHT = 2500;
+    constexpr int MAP_WIDTH = 750;
+    constexpr int MAP_HEIGHT = 750;
     constexpr int SCREEN_WIDTH = 1366;
     constexpr int SCREEN_HEIGHT = 768;
 

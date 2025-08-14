@@ -2,6 +2,7 @@
 // Created by yanam on 14.07.2025.
 //
 
+#include <algorithm>
 #include <iostream>
 #include <ostream>
 
@@ -12,15 +13,16 @@ using namespace G;
 
 void Player::Expand(const int target, const float percentage) {
     const int newPeopleLeaving = _troops * percentage;
-    // not enough troops or target is self
-    if (target == _id || _troops - newPeopleLeaving < 30) return;
+    // target is self or not enough troops or odes not border
+    if (target == _id || _troops - newPeopleLeaving < 30 || !Borders(target)) return;
 
     _troops -= newPeopleLeaving;
 
     auto &attack = _targetToAttackMap[target];
     attack.targetPlayerId = target;
     attack.troops += newPeopleLeaving;
-    ReFillAttackQueueFromScratch(attack);
+
+    // ReFillAttackQueueFromScratch(attack);
 
     // Attack sounds if main character is targeting a player/bot
     if (_id == 0 && target != -1 && !attack.set.empty()) mySounds.Play(mySounds.attackPool);
@@ -71,6 +73,7 @@ void Player::ProcessAttackQueue(Attack &attack) {
 }
 
 void Player::ReFillAttackQueueFromScratch(Attack &attack) {
+    std::cout << "Refill from scratch" << std::endl;
     UpdateAllDirtyBorder();
     attack.queue = {};
     attack.set.clear();
@@ -218,4 +221,12 @@ void Player::RemoveBorderPixel(Pixel *p) {
     if (_border_set.erase(p)) {
         _border_vec.erase(std::ranges::find(_border_vec, p));
     }
+}
+
+bool Player::Borders(const int otherId) const {
+    return std::ranges::any_of(_border_vec, [otherId](const Pixel *borderP) {
+        return std::ranges::any_of(borderP->GetNeighbors(), [otherId](const Pixel *n) {
+            return n->playerId == otherId;
+        });
+    });
 }

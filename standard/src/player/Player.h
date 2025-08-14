@@ -88,6 +88,7 @@ public:
     void BotLogic_Building();
     void BotLogic_Expanding();
     void UpdatePopulationMaxValues();
+    bool Borders(int otherId) const;
     void GrowPopulation();
     void IncreaseMoney();
     void RemovePixelFromCenter(Pixel* newP);

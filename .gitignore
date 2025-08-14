@@ -1,5 +1,10 @@
 # build folders
 cmake-build-debug/
-build_web/
+build*/
+_deps/
+CMakeFiles/
+
+# profiling
+*perf
 
 *.sh

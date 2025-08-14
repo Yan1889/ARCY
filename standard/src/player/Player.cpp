@@ -39,6 +39,7 @@ Player::Player(Pixel *startPos, const std::string &name): _id(static_cast<int>(p
 
 void Player::Update() {
     // expand
+    /*
     for (auto it = _targetToAttackMap.begin(); it != _targetToAttackMap.end();) {
         ProcessAttackQueue(it->second);
         if (it->second.troops <= 0) {
@@ -48,6 +49,15 @@ void Player::Update() {
             it = _targetToAttackMap.erase(it);
         } else {
             ++it;
+        }
+    }*/
+    for (auto& pair: _targetToAttackMap) {
+        if (pair.second.troops > 0) {
+            ProcessAttackQueue(pair.second);
+        }
+        if (pair.second.set.empty()) {
+            _troops += pair.second.troops;
+            pair.second.troops = 0;
         }
     }
     UpdateAllDirtyBorder();
