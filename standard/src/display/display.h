@@ -23,7 +23,7 @@ inline bool buildMenuShown{};
 inline MenuOption currentMenuOption = MENU_OPTION_NONE;
 inline Rectangle menuRect;
 
-
+void displayControls();
 void displayGame();
 void displayInfoTexts();
 void displayPlayers();

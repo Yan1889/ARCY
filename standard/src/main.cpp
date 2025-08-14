@@ -95,6 +95,7 @@ void handleControls() {
     if (IsKeyPressed(KEY_F11)) ToggleFullscreen();
     if (IsKeyDown(KEY_ESCAPE)) WindowShouldClose();
     if (IsKeyPressed(KEY_Q)) showLeaderboard = !showLeaderboard;
+    if (IsKeyPressed(KEY_E)) showControls = !showControls;
 
     // Building shortcuts
     if (IsKeyPressed(KEY_ONE) && buildMenuShown) MAIN_PLAYER.TryAddCity(GetPixelOnMouse());

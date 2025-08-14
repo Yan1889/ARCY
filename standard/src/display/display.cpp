@@ -44,6 +44,7 @@ void displayGame() {
     EndMode2D();
 
     DayNightCycle::Time();
+    if (showControls) displayControls();
     displayInfoTexts();
     displayTroopSlider();
     displayAndHandleBuildMenu();
@@ -54,8 +55,33 @@ void displayGame() {
     EndDrawing();
 }
 
+void displayControls()
+{
+    Rectangle backgroundRec = {
+        static_cast<float>(GetScreenWidth()) - 400,
+        170,
+        420,
+        300
+    };
+    DrawRectangleRounded(backgroundRec, 0.1, 1, Fade(BLACK, 0.5));
+    DrawText("Controls", GetScreenWidth() - 150, 190, 25, WHITE);
+    DrawText("[W][A][S][D] Move camera", GetScreenWidth() - 250, 230, 20, WHITE);
+    DrawText("[Up Arrow][Down Arrow] Zoom camera", GetScreenWidth() - 380, 260, 20, WHITE);
+    DrawText("[M] Toggle build menu", GetScreenWidth() - 225, 290, 20, WHITE);
+    DrawText("[F11] Toggle fullscreen", GetScreenWidth() - 235, 320, 20, WHITE);
+    DrawText("[Q] Toggle building menu", GetScreenWidth() - 245, 350, 20, WHITE);
+    DrawText("[1][2][3][4] Quick-building", GetScreenWidth() - 240, 380, 20, WHITE);
+    DrawText("Press [E] to hide/show controls", GetScreenWidth() - 370, 420, 22, WHITE);
+}
 
 void displayInfoTexts() {
+    Rectangle backgroundRec = {
+        -25,
+        static_cast<float>(GetScreenHeight()) - 175,
+        425,
+        200
+    };
+    DrawRectangleRounded(backgroundRec, 0.25, 1, Fade(BLACK, 0.5));
     // population
     const std::string populationStr = formatNumber(MAIN_PLAYER._totalPopulation);
     const std::string maxPopulationStr = formatNumber(MAIN_PLAYER._maxTotalPopulation);
@@ -87,7 +113,7 @@ void displayInfoTexts() {
     const int textWidth = MeasureText(fpsText, 20);
     const int textX = GetScreenWidth() - textWidth - 25;
     const int textY = GetScreenHeight() - 25;
-    DrawText(fpsText, textX, textY, 20, MAIN_PLAYER_COLOR);
+    DrawText(fpsText, textX, textY, 20, WHITE);
 }
 
 void displayPlayers() {
@@ -157,6 +183,14 @@ void displayPlayersInfo() {
         return players[i1]._pixelCount > players[i2]._pixelCount;
     });
 
+    Rectangle backgroundRec = {
+        -25,
+        -25,
+        static_cast<float>(showLeaderboard ? 550 : 350),
+        static_cast<float>(showLeaderboard ? 425 : 100)
+    };
+    DrawRectangleRounded(backgroundRec, showLeaderboard ? 0.1 : 0.25, 1, Fade(BLACK, 0.5));
+
     for (int i = 0; i < players.size() && i < 10; i++) {
         const Player &p = players[playerIdxOrder[i]];
         const std::string troopsStr = "Troops: " + formatNumber(p._troops) + " / " + formatNumber(p._maxTroops);
@@ -166,8 +200,10 @@ void displayPlayersInfo() {
         const std::string numberStr = std::to_string(i + 1);
         const std::string infoStr = numberStr + ". " + p._name + ": " + troopsStr + "; " + moneyStr
                                     + " " + deadStr;
-        if (showLeaderboard) DrawText(infoStr.c_str(), 25, 20 + 30 * i, 20, p._color);
+        if (showLeaderboard) DrawText(infoStr.c_str(), 25, 75 + 30 * i, 20, p._color);
     }
+
+    DrawText("Leaderboard", 25, 20, 40, WHITE);
 }
 
 void displayPlayerTags() {

@@ -24,6 +24,7 @@ namespace G {
     inline Texture2D perlinTexture{};
 
     inline bool showLeaderboard = true;
+    inline bool showControls = true;
 
     inline Sounds mySounds;
 
