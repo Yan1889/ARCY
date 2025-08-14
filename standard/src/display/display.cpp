@@ -108,6 +108,14 @@ void displayInfoTexts() {
 
 
     // fps
+    Rectangle backgroundRecFPS = {
+        static_cast<float>(GetScreenWidth()) - 125,
+        static_cast<float>(GetScreenHeight()) - 40,
+        135,
+        50
+    };
+    DrawRectangleRounded(backgroundRecFPS, 0.25, 1, Fade(BLACK, 0.5));
+
     const int fps = GetFPS();
     const char *fpsText = TextFormat("FPS: %d", fps);
     const int textWidth = MeasureText(fpsText, 20);
@@ -256,8 +264,6 @@ void displayBGTextures() {
     Rectangle destExplosion = GetViewRectangle(camera);
 
     DrawTexturePro(explosionTexture, srcExplosion, destExplosion, Vector2{0, 0}, 0.0f, WHITE);
-
-    //DrawTextureV(explosionTexture, Vector2{0, 0}, WHITE);
 }
 
 void displayAndHandleBuildMenu() {

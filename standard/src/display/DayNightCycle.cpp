@@ -100,6 +100,14 @@ void DayNightCycle::Update()
 
 void DayNightCycle::Time()
 {
+    Rectangle backgroundRec = {
+        static_cast<float>(GetScreenWidth()) - 125,
+        -10,
+        135,
+        100
+    };
+    DrawRectangleRounded(backgroundRec, 0.25, 1, Fade(BLACK, 0.5));
+
     float convertedTime = fmod(time + 0.5f, 1.0f) * 24.0f;
 
     int hour = static_cast<int>(convertedTime);

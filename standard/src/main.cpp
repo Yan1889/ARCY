@@ -103,10 +103,11 @@ void handleControls() {
     if (IsKeyPressed(KEY_THREE) && buildMenuShown) MAIN_PLAYER.TryLaunchAtomBomb(GetPixelOnMouse());
     if (IsKeyPressed(KEY_FOUR) && buildMenuShown) MAIN_PLAYER.TryLaunchHydrogenBomb(GetPixelOnMouse());
 
-    if (playerPos.x > MAP_WIDTH) playerPos.x = MAP_WIDTH;
+    int offset = 10;
+    if (playerPos.x > MAP_WIDTH - offset) playerPos.x = MAP_WIDTH - offset;
     else if (playerPos.x < 0) playerPos.x = 0;
 
-    if (playerPos.y > MAP_HEIGHT) playerPos.y = MAP_HEIGHT;
+    if (playerPos.y > MAP_HEIGHT - offset) playerPos.y = MAP_HEIGHT - offset;
     else if (playerPos.y < 0) playerPos.y = 0;
 
     camera.target = playerPos;
