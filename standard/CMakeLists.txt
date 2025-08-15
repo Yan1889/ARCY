@@ -68,15 +68,22 @@ file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
 
 set(CITY_IMAGE ${CMAKE_CURRENT_SOURCE_DIR}/src/images/city.png)
 
-target_link_libraries(ARCY PRIVATE raylib)
+target_link_libraries(ARCY PRIVATE raylib -fopenmp)
 
 # Native compiler flags for Release builds
-if(BUILD_PLATFORM STREQUAL "Native")
+if(BUILD_PLATFORM STREQUAL "Native" AND CMAKE_BUILD_TYPE STREQUAL "Release")
     target_compile_options(ARCY PRIVATE
             -O3
             -Wall
-            -Wextra
+            # -Wextra
+            -fopenmp
     )
+
+    # add omp
+    find_package(OpenMP REQUIRED)
+    if (OpenMP_CXX_FOUND)
+        target_link_libraries(ARCY PRIVATE OpenMP::OpenMP_CXX)
+    endif()
 endif()
 
 # Web-specific options
