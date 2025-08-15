@@ -55,8 +55,7 @@ void displayGame() {
     EndDrawing();
 }
 
-void displayControls()
-{
+void displayControls() {
     Rectangle backgroundRec = {
         static_cast<float>(GetScreenWidth()) - 400,
         170,
@@ -128,6 +127,7 @@ void displayPlayers() {
     auto viewRect = GetViewRectangle(camera);
 
     for (const Player &p: players) {
+        #pragma omp parallel for
         for (Pixel *pixel: p._border_vec) {
             if (IsPixelVisible(pixel, viewRect)) DrawPixel(pixel->x, pixel->y, p._color);
         }

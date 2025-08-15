@@ -21,8 +21,7 @@ void Player::Expand(const int target, const float percentage) {
     auto &attack = _targetToAttackMap[target];
     attack.targetPlayerId = target;
     attack.troops += newPeopleLeaving;
-
-    // ReFillAttackQueueFromScratch(attack);
+    ReFillAttackQueueFromScratch(attack);
 
     // Attack sounds if main character is targeting a player/bot
     if (_id == 0 && target != -1 && !attack.set.empty()) mySounds.Play(mySounds.attackPool);
@@ -73,7 +72,7 @@ void Player::ProcessAttackQueue(Attack &attack) {
 }
 
 void Player::ReFillAttackQueueFromScratch(Attack &attack) {
-    std::cout << "Refill from scratch" << std::endl;
+    // std::cout << "Refill from scratch" << std::endl;
     UpdateAllDirtyBorder();
     attack.queue = {};
     attack.set.clear();

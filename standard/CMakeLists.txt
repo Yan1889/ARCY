@@ -3,11 +3,13 @@ project(ARCY)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
 
 # Detect if we're using Emscripten
 if("${CMAKE_CXX_COMPILER}" MATCHES "em\\+\\+")
-    set(PLATFORM "Web")
+    set(BUILD_PLATFORM "Web")
+else()
+    set(BUILD_PLATFORM "Native")
 endif()
 
 set(RAYLIB_VERSION 5.5)
@@ -28,7 +30,8 @@ if (NOT raylib_FOUND)
     endif()
 endif()
 
-add_executable(ARCY src/main.cpp
+add_executable(ARCY
+        src/main.cpp
         src/map/PerlinNoise.cpp
         src/map/PerlinNoise.h
         src/loaders/TextureCollection.cpp
@@ -63,12 +66,19 @@ file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
 
 set(CITY_IMAGE ${CMAKE_CURRENT_SOURCE_DIR}/src/images/city.png)
 
-# set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --preload-file ${CITY_IMAGE}@/city.png")
-
 target_link_libraries(ARCY PRIVATE raylib)
 
+# Native compiler flags for Release builds
+if(BUILD_PLATFORM STREQUAL "Native")
+    target_compile_options(ARCY PRIVATE
+            -O3
+            -Wall
+            -Wextra
+    )
+endif()
+
 # Web-specific options
-if(PLATFORM STREQUAL "Web")
+if(BUILD_PLATFORM STREQUAL "Web")
     set_target_properties(ARCY PROPERTIES SUFFIX ".html")
 
     target_link_options(ARCY PRIVATE
@@ -76,7 +86,6 @@ if(PLATFORM STREQUAL "Web")
             "-sASYNCIFY"
             "-sFULL_ES2=1"
             "-sFORCE_FILESYSTEM=1"
-            "-sINITIAL_MEMORY=536870912"      # 512MB in bytes
             "-sALLOW_MEMORY_GROWTH=1"
             "-sASSERTIONS=1"
             "--preload-file src/images"

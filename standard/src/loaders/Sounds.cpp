@@ -110,7 +110,7 @@ void Sounds::checkAtmosphere() {
     } else PauseMusicStream(fieldSound);
 
     // Forest
-    if (kind == FORREST || kind == STONE && !DayNightCycle::isNightTime) {
+    if ((kind == FORREST || kind == STONE) && !DayNightCycle::isNightTime) {
         ResumeMusicStream(forestSound);
     } else PauseMusicStream(forestSound);
 
@@ -120,7 +120,7 @@ void Sounds::checkAtmosphere() {
     else PauseMusicStream(mountainSound);
 
     // Night Ambience
-    if (kind == BEACH || kind == OPEN_FIELD || kind == HILLS || kind == FORREST && DayNightCycle::isNightTime) {
+    if ((kind == BEACH || kind == OPEN_FIELD || kind == HILLS || kind == FORREST) && DayNightCycle::isNightTime) {
         ResumeMusicStream(nightAmbienceSound);
     } else PauseMusicStream(nightAmbienceSound);
 }

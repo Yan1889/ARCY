@@ -4,14 +4,11 @@
 
 #include "Pixel.h"
 
-#include <algorithm>
-#include <iostream>
 
 #include "../Globals.h"
 
 Pixel::Pixel(const int x, const int y, const Terrain::Kind kind): x(x),
                                                                   y(y),
-                                                                  idx(G::ToIdx(x, y)),
                                                                   playerId(-1),
                                                                   kind(kind) {
 }
