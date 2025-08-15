@@ -80,24 +80,23 @@ std::vector<Chunk*> ChunkGeneration::GetVisibleChunks(Camera2D camera, float scr
         for (int x = minChunkX; x <= maxChunkX; x++)
         {
             auto key = std::make_pair(x, y);
+            Chunk* cPtr;
+            std::cout << chunkMap.size() << std::endl;
 
-            if (chunkMap.find(key) == chunkMap.end())
-            {
-                Chunk& c = chunkMap[key];
+            auto it = chunkMap.find(key);
+            if (it == chunkMap.end()) {
+                Chunk c;
                 c.x = x;
                 c.y = y;
                 c.generated = true;
 
                 int worldOffsetX = x * chunkSize;
                 int worldOffsetY = y * chunkSize;
-
                 Image perlin = GenImagePerlinNoise(chunkSize, chunkSize, worldOffsetX, worldOffsetY, 6);
 
                 std::vector<std::vector<float>> chunkFalloff(chunkSize, std::vector<float>(chunkSize));
-                for (int yy = 0; yy < chunkSize; yy++)
-                {
-                    for (int xx = 0; xx < chunkSize; xx++)
-                    {
+                for (int yy = 0; yy < chunkSize; yy++) {
+                    for (int xx = 0; xx < chunkSize; xx++) {
                         int wx = worldOffsetX + xx;
                         int wy = worldOffsetY + yy;
                         chunkFalloff[yy][xx] = globalFalloff[wy][wx];
@@ -109,10 +108,17 @@ std::vector<Chunk*> ChunkGeneration::GetVisibleChunks(Camera2D camera, float scr
 
                 c.texture = LoadTextureFromImage(perlin);
                 UnloadImage(perlin);
+
                 std::cout << "Generated chunk: " << x << "," << y << std::endl;
+
+                auto insertResult = chunkMap.insert({key, c});
+                chunkMap.insert({key, c});
+                cPtr = &insertResult.first->second;
+            } else {
+                cPtr = &it->second;
             }
 
-            visibleChunks.push_back(&chunkMap[key]);
+            visibleChunks.push_back(cPtr);
         }
     }
 
