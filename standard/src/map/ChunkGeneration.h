@@ -33,7 +33,7 @@ struct Chunk
 
         void InitFalloff();
         Chunk GenerateChunk(int chunkX, int chunkY);
-        std::vector<Chunk*> GetVisibleChunks(Camera2D camera, float screenWidth, float screenHeight);
+        std::vector<Chunk*> GetVisibleChunks(const Camera2D& camera, float screenWidth, float screenHeight);
         void DrawChunks(const std::vector<Chunk*>& chunks);
         Image GenerateChunkImage(int chunkX, int chunkY);
 

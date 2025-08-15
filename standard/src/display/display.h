@@ -25,7 +25,7 @@ inline MenuOption currentMenuOption = MENU_OPTION_NONE;
 inline Rectangle menuRect;
 
 void displayControls();
-void displayGame(ChunkGeneration chunkGen);
+void displayGame(ChunkGeneration& chunkGen);
 void displayInfoTexts();
 void displayPlayers();
 void displayPlayersInfo();

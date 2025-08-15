@@ -28,7 +28,7 @@ using namespace CameraClipping;
 constexpr float buildingRadius = 20;
 
 
-void displayGame(ChunkGeneration chunkGen) {
+void displayGame(ChunkGeneration& chunkGen) {
     auto visibleChunks = chunkGen.GetVisibleChunks(camera, GetScreenWidth(), GetScreenHeight());
 
     BeginDrawing();
@@ -131,7 +131,8 @@ void displayPlayers() {
 
     for (const Player &p: players) {
         #pragma omp parallel for
-        for (Pixel *pixel: p._border_vec) {
+        for (int i = 0; i < p._border_vec.size(); i++) {
+            Pixel *pixel = p._border_vec[i];
             if (IsPixelVisible(pixel, viewRect)) DrawPixel(pixel->x, pixel->y, p._color);
         }
     }
