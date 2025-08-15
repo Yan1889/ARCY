@@ -9,20 +9,21 @@
 #include "raylib.h"
 #include "player/Player.h"
 #include "loaders/Sounds.h"
+#include "map/ChunkGeneration.h"
 
 struct Gradient;
 
 
 // G for global
 namespace G {
-    constexpr int MAP_WIDTH = 2500;
-    constexpr int MAP_HEIGHT = 2500;
+    constexpr int MAP_WIDTH = 4 * 1028; // 2500
+    constexpr int MAP_HEIGHT = 4 * 1028; // 2500
     constexpr int SCREEN_WIDTH = 1366;
     constexpr int SCREEN_HEIGHT = 768;
 
     inline Camera2D camera{};
-    inline Image perlin;
-    inline Texture2D perlinTexture{};
+    //inline Image perlin;
+    //inline Texture2D perlinTexture{};
 
     inline bool showLeaderboard = true;
     inline bool showControls = true;

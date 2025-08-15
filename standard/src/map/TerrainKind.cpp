@@ -29,14 +29,14 @@ Terrain::Kind Terrain::GetKindAt(Pixel *p) {
 
 
 Terrain::Kind Terrain::GetKindAt(const int x, const int y) {
-    const Color c = static_cast<const Color *>(G::perlin.data)[G::perlin.width * y + x];
+    /*const Color c = static_cast<const Color *>(G::perlin.data)[G::perlin.width * y + x];
     for (int i = 0; i < mapParts.size(); i++) {
         const Color g = mapParts[i].color;
         if (c.r == g.r && c.g == g.g && c.b == g.b && c.a == g.a) {
             return static_cast<Kind>(i);
         }
     }
-    std::cerr << "[Warning] pixel does not match any color" << std::endl;
+    std::cerr << "[Warning] pixel does not match any color" << std::endl;*/
     return SNOW;
 }
 

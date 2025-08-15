@@ -28,11 +28,14 @@ using namespace CameraClipping;
 constexpr float buildingRadius = 20;
 
 
-void displayGame() {
+void displayGame(ChunkGeneration chunkGen) {
+    auto visibleChunks = chunkGen.GetVisibleChunks(camera, GetScreenWidth(), GetScreenHeight());
+
     BeginDrawing();
     ClearBackground(Color{90, 90, 255, 255});
 
     BeginMode2D(camera);
+    chunkGen.DrawChunks(visibleChunks);
     displayBGTextures();
     displayPlayers();
     Bombs::RenderBomb();
@@ -244,13 +247,14 @@ void displayCrossHair() {
 }
 
 void displayBGTextures() {
-    // terrain bg texture
+    /* terrain bg texture
     SetTextureWrap(perlinTexture, TEXTURE_WRAP_CLAMP);
 
     Rectangle src = GetViewRectangle(camera);
     Rectangle dest = GetViewRectangle(camera);
 
     DrawTexturePro(perlinTexture, src, dest, Vector2{0, 0}, 0.0f, WHITE);
+    */
 
     // nuke bg texture
     SetTextureWrap(explosionTexture, TEXTURE_WRAP_CLAMP);

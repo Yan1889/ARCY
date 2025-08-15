@@ -12,6 +12,7 @@
 #include "map/PerlinNoise.h"
 #include "Bombs.h"
 #include "display/display.h"
+#include  "map/ChunkGeneration.h"
 
 using namespace G;
 
@@ -52,13 +53,15 @@ int main() {
     SetTargetFPS(10000);
 
     initCamAndMap();
+    ChunkGeneration chunkGen(1028, 4, 4);
+    chunkGen.InitFalloff();
     initPlayers();
 
     while (!WindowShouldClose()) {
         if (!gameOver) {
             frameLogic();
         }
-        displayGame();
+        displayGame(chunkGen);
         mySounds.checkAtmosphere();
         MAIN_PLAYER._money.getMoney(100000); //only for testing purposes!
     }
@@ -152,7 +155,7 @@ void checkGameOver() {
 
 void initPlayers() {
     // main character
-    Pixel *mainCharacterSpawnPixel = Terrain::FindRandomPixelWithKind(Terrain::BEACH);
+    Pixel *mainCharacterSpawnPixel = Terrain::FindRandomPixelWithKind(Terrain::SNOW); // Default BEACH
     playerPos = mainCharacterSpawnPixel->ToVector2();
     players.emplace_back(
         mainCharacterSpawnPixel,
@@ -162,7 +165,7 @@ void initPlayers() {
     // bots
     for (int i = 0; i < botCount; i++) {
         players.emplace_back(
-            Terrain::FindRandomPixelWithKind(Terrain::BEACH),
+            Terrain::FindRandomPixelWithKind(Terrain::SNOW), // Default BEACH
             std::string("NPC ") + std::to_string(i)
         );
         players.back()._bot = true;
@@ -176,7 +179,7 @@ void initCamAndMap() {
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
 
-    // terrain
+    /* terrain
     perlin = GenImagePerlinNoise(
         MAP_WIDTH, MAP_HEIGHT,
         static_cast<int>(rand() * 10000.0f / RAND_MAX) * (MAP_WIDTH / 2),
@@ -187,6 +190,7 @@ void initCamAndMap() {
     PerlinNoise::ApplyFalloffToImage(&perlin, falloff); // finally use falloff
     PerlinNoise::proceedMap(&perlin);
     perlinTexture = LoadTextureFromImage(perlin);
+    */
 
     explosionImage = GenImageColor(MAP_WIDTH, MAP_HEIGHT, BLANK);
     explosionTexture = LoadTextureFromImage(explosionImage);

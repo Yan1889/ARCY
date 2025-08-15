@@ -60,6 +60,8 @@ add_executable(ARCY
         src/map/TerrainKind.h
         src/map/TerrainKind.cpp
         src/map/CameraClipping.h
+        src/map/ChunkGeneration.cpp
+        src/map/ChunkGeneration.h
 )
 
 file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})

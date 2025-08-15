@@ -9,6 +9,7 @@
 #define MAIN_PLAYER_COLOR G::players[0]._color
 #include <string>
 
+#include "../map/ChunkGeneration.h"
 #include "raylib.h"
 
 enum MenuOption {
@@ -24,7 +25,7 @@ inline MenuOption currentMenuOption = MENU_OPTION_NONE;
 inline Rectangle menuRect;
 
 void displayControls();
-void displayGame();
+void displayGame(ChunkGeneration chunkGen);
 void displayInfoTexts();
 void displayPlayers();
 void displayPlayersInfo();

@@ -16,7 +16,7 @@ void PerlinNoise::proceedMap(Image *image) {
     const int height = image->height;
 
     Image newImage = GenImageColor(width, height, BLACK);
-    Color *newPixels = LoadImageColors(newImage);
+    Color *newPixels = static_cast<Color *>(newImage.data);//LoadImageColors(newImage);
 
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
@@ -44,7 +44,7 @@ void PerlinNoise::proceedMap(Image *image) {
     };
 
     UnloadImage(*image);
-    *image = resultImage;
+    *image = newImage;//resultImage;
 }
 
 float PerlinNoise::FalloffValue(float x, float y) // Falloff Function
