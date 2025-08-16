@@ -25,7 +25,7 @@ std::vector<std::vector<float> > ChunkGeneration::globalFalloff{};
 void ChunkGeneration::InitChunkGeneration(const int x, const int y) {
     chunkAmountX = x;
     chunkAmountY = y;
-    chunkSize = G::MAP_WIDTH / G::CHUNK_COUNT_SIDE;
+    //chunkSize = G::MAP_WIDTH / G::CHUNK_COUNT_SIDE;
     chunkSize = 1028;
     worldWidth = chunkAmountX * chunkSize;
     worldHeight = chunkAmountY * chunkSize;
