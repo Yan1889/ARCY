@@ -10,12 +10,9 @@
 
 #include "raylib.h"
 
-struct Chunk
-{
-    int x;
-    int y;
+struct Chunk {
+    int x, y;
     Texture2D texture;
-    bool generated = false;
 };
 
 class ChunkGeneration {
@@ -34,9 +31,8 @@ class ChunkGeneration {
         static void InitFalloff();
         static int GetChunkSize();
         static Chunk GenerateChunk(int chunkX, int chunkY);
-        static std::vector<Chunk*> GetVisibleChunks(const Camera2D& camera, float screenWidth, float screenHeight);
+        static std::vector<Chunk*> GetVisibleChunks(const Camera2D& camera);
         static void DrawChunks(const std::vector<Chunk*>& chunks);
-        static Image GenerateChunkImage(int chunkX, int chunkY);
 
         static std::vector<std::vector<float>> globalFalloff;
     };

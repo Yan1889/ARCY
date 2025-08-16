@@ -6,7 +6,6 @@
 #define GLOBALS_H
 #include <climits>
 #include <vector>
-#include <iostream>
 #include "raylib.h"
 #include "player/Player.h"
 #include "loaders/Sounds.h"

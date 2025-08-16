@@ -43,7 +43,7 @@ void Player::ProcessAttackQueue(Attack &attack) {
         attack.troops--;
 
         // randomly don't get the pixel even though lost troops for it
-        if (!newP->acceptRandomly()) {
+        if (!newP->AcceptRandomly()) {
             // add the pixel to the queue in the back
             attack.set.insert(newP);
             attack.queue.push(newP);

@@ -90,15 +90,17 @@ Chunk ChunkGeneration::GenerateChunk(int chunkX, int chunkY) {
         .x = chunkX,
         .y = chunkY,
         .texture = perlinTexture,
-        .generated = true,
     };
 }
 
-std::vector<Chunk *> ChunkGeneration::GetVisibleChunks(const Camera2D &camera, float screenWidth, float screenHeight) {
+std::vector<Chunk *> ChunkGeneration::GetVisibleChunks(const Camera2D &camera) {
+    const float screenW = GetScreenWidth();
+    const float screenH = GetScreenHeight();
+
     std::vector<Chunk *> visibleChunks;
 
-    const float camX = camera.target.x - screenWidth / 2 / camera.zoom;
-    const float camY = camera.target.y - screenHeight / 2 / camera.zoom;
+    const float camX = camera.target.x - screenW / 2 / camera.zoom;
+    const float camY = camera.target.y - screenH / 2 / camera.zoom;
 
     const int CHUNK_BUFFER = 0;
 
@@ -108,7 +110,7 @@ std::vector<Chunk *> ChunkGeneration::GetVisibleChunks(const Camera2D &camera, f
     );
     const int maxChunkX = std::min(
         chunkAmountX - 1,
-        static_cast<int>(floor((camX + screenWidth / camera.zoom) / chunkSize)) + CHUNK_BUFFER
+        static_cast<int>(floor((camX + screenW / camera.zoom) / chunkSize)) + CHUNK_BUFFER
     );
     const int minChunkY = std::max(
         0,
@@ -116,7 +118,7 @@ std::vector<Chunk *> ChunkGeneration::GetVisibleChunks(const Camera2D &camera, f
     );
     const int maxChunkY = std::min(
         chunkAmountY - 1,
-        static_cast<int>(floor((camY + screenHeight / camera.zoom) / chunkSize)) + CHUNK_BUFFER
+        static_cast<int>(floor((camY + screenH / camera.zoom) / chunkSize)) + CHUNK_BUFFER
     );
 
     for (int y = minChunkY; y <= maxChunkY; y++) {
@@ -139,8 +141,6 @@ std::vector<Chunk *> ChunkGeneration::GetVisibleChunks(const Camera2D &camera, f
 
 void ChunkGeneration::DrawChunks(const std::vector<Chunk *> &chunks) {
     for (auto *chunk: chunks) {
-        if (!chunk->generated) continue;
-
         Rectangle src = {0, 0, static_cast<float>(chunkSize), static_cast<float>(chunkSize)};
         Rectangle dest = {
             static_cast<float>(chunk->x * chunkSize), static_cast<float>(chunk->y * chunkSize),

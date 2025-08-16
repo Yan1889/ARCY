@@ -29,7 +29,7 @@ constexpr float buildingRadius = 20;
 
 
 void displayGame() {
-    auto visibleChunks = ChunkGeneration::GetVisibleChunks(camera, GetScreenWidth(), GetScreenHeight());
+    const std::vector<Chunk *> visibleChunks = ChunkGeneration::GetVisibleChunks(camera);
 
     BeginDrawing();
     ClearBackground(Color{90, 90, 255, 255});

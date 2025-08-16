@@ -57,7 +57,7 @@ int main() {
     ChunkGeneration::InitFalloff();
 
     // don't remove: triggering the chunk generation before placing the players
-    ChunkGeneration::GetVisibleChunks(camera, GetScreenWidth(), GetScreenHeight());
+    ChunkGeneration::GetVisibleChunks(camera);
     initPlayers();
 
     while (!WindowShouldClose()) {

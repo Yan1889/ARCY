@@ -4,12 +4,12 @@
 
 #include "Pixel.h"
 
+#include <iostream>
+
 
 #include "../Globals.h"
 
-Pixel::Pixel(const int x, const int y): x(x),
-                                        y(y),
-                                        playerId(-1) {
+Pixel::Pixel(const int x, const int y): x(x), y(y), playerId(-1) {
 }
 
 void Pixel::Load(const Color &color) {
@@ -48,12 +48,12 @@ Vector2 Pixel::ToVector2() const {
     };
 }
 
-bool Pixel::acceptRandomly() const {
+bool Pixel::AcceptRandomly() const {
     if (!loaded) {
         std::cerr << "[Error] didnt load pixel\n";
     }
     // radiation = 3x harder
     const float multiplier = contaminated ? 3.f : 1.f;
-    const float randomValue = G::RandomFloat_0to1(); // static_cast<float>(rand()) / RAND_MAX;
+    const float randomValue = G::RandomFloat_0to1();
     return Terrain::GetInvasionProbability(kind) > randomValue * multiplier;
 }

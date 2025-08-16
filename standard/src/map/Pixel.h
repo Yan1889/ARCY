@@ -29,7 +29,7 @@ struct Pixel {
     void LoadNeighbors();
 
     [[nodiscard]] const std::vector<Pixel *>& GetNeighbors() const;
-    [[nodiscard]] bool acceptRandomly() const;
+    [[nodiscard]] bool AcceptRandomly() const;
     [[nodiscard]] Vector2 ToVector2() const;
 };
 
