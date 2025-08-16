@@ -17,8 +17,9 @@ struct Gradient;
 
 // G for global
 namespace G {
-    constexpr int MAP_WIDTH = 4 * 1028; // 2500
-    constexpr int MAP_HEIGHT = 4 * 1028; // 2500
+    constexpr int CHUNK_COUNT_SIDE = 4;
+    constexpr int MAP_WIDTH = 1028 * CHUNK_COUNT_SIDE;
+    constexpr int MAP_HEIGHT = 1028 * CHUNK_COUNT_SIDE;
     constexpr int SCREEN_WIDTH = 1366;
     constexpr int SCREEN_HEIGHT = 768;
 

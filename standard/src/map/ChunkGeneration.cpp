@@ -25,7 +25,7 @@ std::vector<std::vector<float> > ChunkGeneration::globalFalloff{};
 void ChunkGeneration::InitChunkGeneration(const int x, const int y) {
     chunkAmountX = x;
     chunkAmountY = y;
-    chunkSize = G::MAP_WIDTH / x;
+    chunkSize = G::MAP_WIDTH / G::CHUNK_COUNT_SIDE;
     worldWidth = chunkAmountX * chunkSize;
     worldHeight = chunkAmountY * chunkSize;
 }
@@ -140,7 +140,7 @@ std::vector<Chunk *> ChunkGeneration::GetVisibleChunks(const Camera2D &camera) {
 }
 
 void ChunkGeneration::DrawChunks(const std::vector<Chunk *> &chunks) {
-    for (auto *chunk: chunks) {
+    for (const auto *chunk: chunks) {
         Rectangle src = {0, 0, static_cast<float>(chunkSize), static_cast<float>(chunkSize)};
         Rectangle dest = {
             static_cast<float>(chunk->x * chunkSize), static_cast<float>(chunk->y * chunkSize),
