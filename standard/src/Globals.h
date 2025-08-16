@@ -6,8 +6,10 @@
 #define GLOBALS_H
 #include <climits>
 #include <vector>
+#include <cmath>
 #include "raylib.h"
 #include "player/Player.h"
+#include "map/ChunkGeneration.h"
 #include "loaders/Sounds.h"
 
 struct Gradient;
@@ -67,6 +69,12 @@ namespace G {
         );
     }
 
+    inline Vector2 GetChunkFromV(Vector2 pos) {
+        auto chunkSize = static_cast<float>(ChunkGeneration::chunkSize);
+        float cx = floor(pos.x / chunkSize);
+        float cy = floor(pos.y / chunkSize);
+        return { cx, cy };
+    }
 
     // randomness
     static unsigned long x = 123456789, y = 362436069, z = 521288629;
