@@ -19,14 +19,9 @@ class ChunkGeneration {
     public:
         static std::map<std::pair<int, int>, Chunk> chunkMap;
 
-        static int chunkSize;
-        static int chunkAmountX;
-        static int chunkAmountY;
-
-        static int worldWidth;
-        static int worldHeight;
-
-        static void InitChunkGeneration(int x, int y);
+        static constexpr int chunkSize = 1028;
+        static constexpr int chunkAmountX = 4;
+        static constexpr int chunkAmountY = 4;
 
         static void InitFalloff();
         static int GetChunkSize();

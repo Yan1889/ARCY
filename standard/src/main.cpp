@@ -53,7 +53,6 @@ int main() {
     SetTargetFPS(10000);
 
     initCamAndMap();
-    ChunkGeneration::InitChunkGeneration(16, 16);
     //ChunkGeneration::InitFalloff(); just testing without falloff
 
     // don't remove: triggering the chunk generation before placing the players

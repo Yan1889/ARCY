@@ -14,29 +14,11 @@
 
 using namespace Terrain;
 
-int ChunkGeneration::chunkSize = 1028;
-int ChunkGeneration::chunkAmountX = 0;
-int ChunkGeneration::chunkAmountY = 0;
-int ChunkGeneration::worldHeight = 0;
-int ChunkGeneration::worldWidth = 0;
 std::map<std::pair<int, int>, Chunk> ChunkGeneration::chunkMap{};
 std::vector<std::vector<float> > ChunkGeneration::globalFalloff{};
 
-void ChunkGeneration::InitChunkGeneration(const int x, const int y) {
-    chunkAmountX = x;
-    chunkAmountY = y;
-    //chunkSize = G::MAP_WIDTH / G::CHUNK_COUNT_SIDE;
-    chunkSize = 1028;
-    worldWidth = chunkAmountX * chunkSize;
-    worldHeight = chunkAmountY * chunkSize;
-}
-
 void ChunkGeneration::InitFalloff() {
-    globalFalloff = PerlinNoise::GenerateFalloffMap(worldWidth, worldHeight);
-}
-
-int ChunkGeneration::GetChunkSize() {
-    return chunkSize;
+    globalFalloff = PerlinNoise::GenerateFalloffMap(G::MAP_WIDTH, G::MAP_HEIGHT);
 }
 
 Chunk ChunkGeneration::GenerateChunk(int chunkX, int chunkY) {
