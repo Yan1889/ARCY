@@ -15,11 +15,10 @@ struct Chunk
     int x;
     int y;
     Texture2D texture;
-    Image image;
     bool generated = false;
 };
 
-    class ChunkGeneration {
+class ChunkGeneration {
     public:
         static std::map<std::pair<int, int>, Chunk> chunkMap;
 
@@ -30,7 +29,7 @@ struct Chunk
         static int worldWidth;
         static int worldHeight;
 
-        static void InitChunkGeneration(int x, int y, int size);
+        static void InitChunkGeneration(int x, int y);
 
         static void InitFalloff();
         static int GetChunkSize();

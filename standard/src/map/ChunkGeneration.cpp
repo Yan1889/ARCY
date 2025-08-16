@@ -8,6 +8,9 @@
 #include <cmath>
 #include <iostream>
 #include <ostream>
+#include <set>
+
+#include "../Globals.h"
 
 using namespace Terrain;
 
@@ -17,12 +20,12 @@ int ChunkGeneration::chunkAmountY = 0;
 int ChunkGeneration::worldHeight = 0;
 int ChunkGeneration::worldWidth = 0;
 std::map<std::pair<int, int>, Chunk> ChunkGeneration::chunkMap{};
-std::vector<std::vector<float>> ChunkGeneration::globalFalloff{};
+std::vector<std::vector<float> > ChunkGeneration::globalFalloff{};
 
-void ChunkGeneration::InitChunkGeneration(const int x, const int y, const int size) {
+void ChunkGeneration::InitChunkGeneration(const int x, const int y) {
     chunkAmountX = x;
     chunkAmountY = y;
-    chunkSize = size;
+    chunkSize = G::MAP_WIDTH / x;
     worldWidth = chunkAmountX * chunkSize;
     worldHeight = chunkAmountY * chunkSize;
 }
@@ -31,22 +34,23 @@ void ChunkGeneration::InitFalloff() {
     globalFalloff = PerlinNoise::GenerateFalloffMap(worldWidth, worldHeight);
 }
 
-int ChunkGeneration::GetChunkSize()
-{
+int ChunkGeneration::GetChunkSize() {
     return chunkSize;
 }
 
 Chunk ChunkGeneration::GenerateChunk(int chunkX, int chunkY) {
-    Chunk chunk{
-        .x = chunkX,
-        .y = chunkY,
-        .generated = true
-    };
+    // for testing only, safe to remove
+    static std::set<std::pair<int, int> > testSet{};
+    if (testSet.contains({chunkX, chunkY})) {
+        std::cerr << "[Error] Chunk already loaded!" << std::endl;
+    }
+    testSet.insert({chunkX, chunkY});
 
-    int worldOffsetX = chunkX * chunkSize;
-    int worldOffsetY = chunkY * chunkSize;
 
-    Image perlin = GenImagePerlinNoise(
+    const int worldOffsetX = chunkX * chunkSize;
+    const int worldOffsetY = chunkY * chunkSize;
+
+    Image perlinImage = GenImagePerlinNoise(
         chunkSize, chunkSize,
         worldOffsetX, worldOffsetY,
         6
@@ -55,19 +59,39 @@ Chunk ChunkGeneration::GenerateChunk(int chunkX, int chunkY) {
     std::vector<std::vector<float> > chunkFalloff(chunkSize, std::vector<float>(chunkSize));
     for (int y = 0; y < chunkSize; y++) {
         for (int x = 0; x < chunkSize; x++) {
-            int wx = worldOffsetX + x;
-            int wy = worldOffsetY + y;
+            const int wx = worldOffsetX + x;
+            const int wy = worldOffsetY + y;
             chunkFalloff[y][x] = globalFalloff[wy][wx];
         }
     }
 
-    PerlinNoise::ApplyFalloffToImage(&perlin, chunkFalloff);
-    PerlinNoise::proceedMap(&perlin);
+    PerlinNoise::ApplyFalloffToImage(&perlinImage, chunkFalloff);
+    PerlinNoise::proceedMap(&perlinImage);
 
-    chunk.texture = LoadTextureFromImage(perlin);
-    UnloadImage(perlin);
 
-    return chunk;
+    // pixels
+    const auto pixels = static_cast<Color *>(perlinImage.data);
+    for (int x = worldOffsetX; x < worldOffsetX + chunkSize; x++) {
+        for (int y = worldOffsetY; y < worldOffsetY + chunkSize; y++) {
+            const int lx = x % chunkSize;
+            const int ly = y % chunkSize;
+            Color color = pixels[ly * perlinImage.width + lx];
+
+            G::PixelAt(x, y)->Load(color);
+        }
+    }
+
+    const Texture2D perlinTexture = LoadTextureFromImage(perlinImage);
+    UnloadImage(perlinImage);
+
+    std::cout << "Generated Chunk (" << chunkX << " " << chunkY << ")" << std::endl;
+
+    return Chunk{
+        .x = chunkX,
+        .y = chunkY,
+        .texture = perlinTexture,
+        .generated = true,
+    };
 }
 
 std::vector<Chunk *> ChunkGeneration::GetVisibleChunks(const Camera2D &camera, float screenWidth, float screenHeight) {
@@ -98,36 +122,11 @@ std::vector<Chunk *> ChunkGeneration::GetVisibleChunks(const Camera2D &camera, f
     for (int y = minChunkY; y <= maxChunkY; y++) {
         for (int x = minChunkX; x <= maxChunkX; x++) {
             auto key = std::make_pair(x, y);
-            std::cout << chunkMap.size() << std::endl;
+            // std::cout << "Chunks loaded: " << chunkMap.size() << std::endl;
 
             auto it = chunkMap.find(key);
             if (it == chunkMap.end()) {
-                Chunk c{
-                    .x = x,
-                    .y = y,
-                    .generated = true,
-                };
-
-                const int worldOffsetX = x * chunkSize;
-                const int worldOffsetY = y * chunkSize;
-                Image perlin = GenImagePerlinNoise(chunkSize, chunkSize, worldOffsetX, worldOffsetY, 6);
-
-                std::vector<std::vector<float> > chunkFalloff(chunkSize, std::vector<float>(chunkSize));
-                for (int yy = 0; yy < chunkSize; yy++) {
-                    for (int xx = 0; xx < chunkSize; xx++) {
-                        int wx = worldOffsetX + xx;
-                        int wy = worldOffsetY + yy;
-                        chunkFalloff[yy][xx] = globalFalloff[wy][wx];
-                    }
-                }
-
-                PerlinNoise::ApplyFalloffToImage(&perlin, chunkFalloff);
-                PerlinNoise::proceedMap(&perlin);
-
-                c.texture = LoadTextureFromImage(perlin);
-                c.image = ImageCopy(perlin);
-                UnloadImage(perlin);
-
+                Chunk c = GenerateChunk(x, y);
                 it = chunkMap.insert({key, c}).first;
             }
 

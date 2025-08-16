@@ -71,7 +71,6 @@ void Player::ProcessAttackQueue(Attack &attack) {
 }
 
 void Player::ReFillAttackQueueFromScratch(Attack &attack) {
-    // std::cout << "Refill from scratch" << std::endl;
     UpdateAllDirtyBorder();
     attack.queue = {};
     attack.set.clear();

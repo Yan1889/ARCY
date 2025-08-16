@@ -53,8 +53,11 @@ int main() {
     SetTargetFPS(10000);
 
     initCamAndMap();
-    ChunkGeneration::InitChunkGeneration(4, 4, 1028);
+    ChunkGeneration::InitChunkGeneration(4, 4);
     ChunkGeneration::InitFalloff();
+
+    // don't remove: triggering the chunk generation before placing the players
+    ChunkGeneration::GetVisibleChunks(camera, GetScreenWidth(), GetScreenHeight());
     initPlayers();
 
     while (!WindowShouldClose()) {
@@ -62,6 +65,7 @@ int main() {
             frameLogic();
         }
         displayGame();
+
         mySounds.checkAtmosphere();
         MAIN_PLAYER._money.getMoney(100000); //only for testing purposes!
     }
@@ -154,7 +158,7 @@ void checkGameOver() {
 
 void initPlayers() {
     // main character
-    Pixel *mainCharacterSpawnPixel = Terrain::FindRandomPixelWithKind(Terrain::SNOW); // Default BEACH
+    Pixel *mainCharacterSpawnPixel = Terrain::FindRandomPixelWithKind(Terrain::BEACH);
     playerPos = mainCharacterSpawnPixel->ToVector2();
     players.emplace_back(
         mainCharacterSpawnPixel,
@@ -164,7 +168,7 @@ void initPlayers() {
     // bots
     for (int i = 0; i < botCount; i++) {
         players.emplace_back(
-            Terrain::FindRandomPixelWithKind(Terrain::SNOW), // Default BEACH
+            Terrain::FindRandomPixelWithKind(Terrain::BEACH),
             std::string("NPC ") + std::to_string(i)
         );
         players.back()._bot = true;
@@ -178,19 +182,6 @@ void initCamAndMap() {
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
 
-    /* terrain
-    perlin = GenImagePerlinNoise(
-        MAP_WIDTH, MAP_HEIGHT,
-        static_cast<int>(rand() * 10000.0f / RAND_MAX) * (MAP_WIDTH / 2),
-        static_cast<int>(rand() * 10000.0f / RAND_MAX) * (MAP_HEIGHT / 2),
-        6
-    );
-    std::vector<std::vector<float> > falloff = PerlinNoise::GenerateFalloffMap(MAP_WIDTH, MAP_HEIGHT);
-    PerlinNoise::ApplyFalloffToImage(&perlin, falloff); // finally use falloff
-    PerlinNoise::proceedMap(&perlin);
-    perlinTexture = LoadTextureFromImage(perlin);
-    */
-
     explosionImage = GenImageColor(MAP_WIDTH, MAP_HEIGHT, BLANK);
     explosionTexture = LoadTextureFromImage(explosionImage);
 
@@ -199,7 +190,7 @@ void initCamAndMap() {
     territoryMap = std::vector<Pixel>(MAP_WIDTH * MAP_HEIGHT);
     for (int y = 0; y < MAP_HEIGHT; y++) {
         for (int x = 0; x < MAP_WIDTH; x++) {
-            territoryMap[G::ToIdx(x, y)] = Pixel(x, y, Terrain::GetKindAt(x, y));
+            territoryMap[G::ToIdx(x, y)] = Pixel(x, y);
         }
     }
     for (Pixel &p: territoryMap) {

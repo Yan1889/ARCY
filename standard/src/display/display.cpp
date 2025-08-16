@@ -130,7 +130,7 @@ void displayPlayers() {
     auto viewRect = GetViewRectangle(camera);
 
     for (const Player &p: players) {
-        #pragma omp parallel for
+        // #pragma omp parallel for
         for (int i = 0; i < p._border_vec.size(); i++) {
             Pixel *pixel = p._border_vec[i];
             if (IsPixelVisible(pixel, viewRect)) DrawPixel(pixel->x, pixel->y, p._color);

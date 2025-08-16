@@ -10,7 +10,6 @@
 #include "raylib.h"
 #include "player/Player.h"
 #include "loaders/Sounds.h"
-#include "map/ChunkGeneration.h"
 
 struct Gradient;
 
@@ -51,7 +50,7 @@ namespace G {
     }
 
     inline Pixel *PixelAt(const int x, const int y) {
-        if (x < 0 || x > MAP_WIDTH || y < 0 || y > MAP_HEIGHT) {std::cout << "Return nullptr" << std::endl;return nullptr;}
+        if (x < 0 || x > MAP_WIDTH || y < 0 || y > MAP_HEIGHT) return nullptr;
         return &territoryMap[ToIdx(x, y)];
     }
 
@@ -63,7 +62,6 @@ namespace G {
     }
 
     inline Pixel *GetPixelOnMouse() {
-        std::cout << "GetPixelOnMouse" << std::endl;
         return PixelAt(
             static_cast<int>(GetScreenToWorld2D(GetMousePosition(), camera).x),
             static_cast<int>(GetScreenToWorld2D(GetMousePosition(), camera).y)
