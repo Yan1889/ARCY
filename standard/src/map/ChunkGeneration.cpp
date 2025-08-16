@@ -14,7 +14,7 @@
 
 using namespace Terrain;
 
-int ChunkGeneration::chunkSize = 1028; // I dunno if it is still so but when it is 0 the game crashes for some reason
+int ChunkGeneration::chunkSize = 1028;
 int ChunkGeneration::chunkAmountX = 0;
 int ChunkGeneration::chunkAmountY = 0;
 int ChunkGeneration::worldHeight = 0;
@@ -25,6 +25,7 @@ std::vector<std::vector<float> > ChunkGeneration::globalFalloff{};
 void ChunkGeneration::InitChunkGeneration(const int x, const int y) {
     chunkAmountX = x;
     chunkAmountY = y;
+    chunkSize = G::MAP_WIDTH / G::CHUNK_COUNT_SIDE;
     chunkSize = 1028;
     worldWidth = chunkAmountX * chunkSize;
     worldHeight = chunkAmountY * chunkSize;
