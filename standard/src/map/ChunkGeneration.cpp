@@ -11,16 +11,29 @@
 
 using namespace Terrain;
 
-ChunkGeneration::ChunkGeneration(int size, int x, int y) {
-    chunkSize = size;
+int ChunkGeneration::chunkSize = 1028;
+int ChunkGeneration::chunkAmountX = 0;
+int ChunkGeneration::chunkAmountY = 0;
+int ChunkGeneration::worldHeight = 0;
+int ChunkGeneration::worldWidth = 0;
+std::map<std::pair<int, int>, Chunk> ChunkGeneration::chunkMap{};
+std::vector<std::vector<float>> ChunkGeneration::globalFalloff{};
+
+void ChunkGeneration::InitChunkGeneration(const int x, const int y, const int size) {
     chunkAmountX = x;
     chunkAmountY = y;
+    chunkSize = size;
     worldWidth = chunkAmountX * chunkSize;
     worldHeight = chunkAmountY * chunkSize;
 }
 
 void ChunkGeneration::InitFalloff() {
     globalFalloff = PerlinNoise::GenerateFalloffMap(worldWidth, worldHeight);
+}
+
+int ChunkGeneration::GetChunkSize()
+{
+    return chunkSize;
 }
 
 Chunk ChunkGeneration::GenerateChunk(int chunkX, int chunkY) {
@@ -112,10 +125,10 @@ std::vector<Chunk *> ChunkGeneration::GetVisibleChunks(const Camera2D &camera, f
                 PerlinNoise::proceedMap(&perlin);
 
                 c.texture = LoadTextureFromImage(perlin);
+                c.image = ImageCopy(perlin);
                 UnloadImage(perlin);
 
                 it = chunkMap.insert({key, c}).first;
-                std::cout << "Generated chunk: " << x << "," << y << std::endl;
             }
 
             visibleChunks.push_back(&it->second);

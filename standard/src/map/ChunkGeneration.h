@@ -15,29 +15,31 @@ struct Chunk
     int x;
     int y;
     Texture2D texture;
+    Image image;
     bool generated = false;
 };
 
     class ChunkGeneration {
     public:
-        std::map<std::pair<int, int>, Chunk> chunkMap;
+        static std::map<std::pair<int, int>, Chunk> chunkMap;
 
-        int chunkSize;
-        int chunkAmountX;
-        int chunkAmountY;
+        static int chunkSize;
+        static int chunkAmountX;
+        static int chunkAmountY;
 
-        int worldWidth;
-        int worldHeight;
+        static int worldWidth;
+        static int worldHeight;
 
-        ChunkGeneration(int size, int x, int y);
+        static void InitChunkGeneration(int x, int y, int size);
 
-        void InitFalloff();
-        Chunk GenerateChunk(int chunkX, int chunkY);
-        std::vector<Chunk*> GetVisibleChunks(const Camera2D& camera, float screenWidth, float screenHeight);
-        void DrawChunks(const std::vector<Chunk*>& chunks);
-        Image GenerateChunkImage(int chunkX, int chunkY);
+        static void InitFalloff();
+        static int GetChunkSize();
+        static Chunk GenerateChunk(int chunkX, int chunkY);
+        static std::vector<Chunk*> GetVisibleChunks(const Camera2D& camera, float screenWidth, float screenHeight);
+        static void DrawChunks(const std::vector<Chunk*>& chunks);
+        static Image GenerateChunkImage(int chunkX, int chunkY);
 
-        std::vector<std::vector<float>> globalFalloff;
+        static std::vector<std::vector<float>> globalFalloff;
     };
 
 

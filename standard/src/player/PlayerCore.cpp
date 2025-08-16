@@ -15,7 +15,6 @@ void Player::Expand(const int target, const float percentage) {
     const int newPeopleLeaving = _troops * percentage;
     // target is self or not enough troops or odes not border
     if (target == _id || _troops - newPeopleLeaving < 30 || !Borders(target)) return;
-
     _troops -= newPeopleLeaving;
 
     auto &attack = _targetToAttackMap[target];

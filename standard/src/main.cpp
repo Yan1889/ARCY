@@ -53,15 +53,15 @@ int main() {
     SetTargetFPS(10000);
 
     initCamAndMap();
-    ChunkGeneration chunkGen(1028, 4, 4);
-    chunkGen.InitFalloff();
+    ChunkGeneration::InitChunkGeneration(4, 4, 1028);
+    ChunkGeneration::InitFalloff();
     initPlayers();
 
     while (!WindowShouldClose()) {
         if (!gameOver) {
             frameLogic();
         }
-        displayGame(chunkGen);
+        displayGame();
         mySounds.checkAtmosphere();
         MAIN_PLAYER._money.getMoney(100000); //only for testing purposes!
     }
@@ -126,7 +126,6 @@ void checkExpansionAndAttack() {
     // attack player if left-click
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !buildMenuShown) {
         const int playerIdClickd = GetPixelOnMouse() == nullptr ? -1 : GetPixelOnMouse()->playerId;
-
         MAIN_PLAYER.Expand(playerIdClickd, 0.5);
     }
 }

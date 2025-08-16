@@ -6,6 +6,7 @@
 #define GLOBALS_H
 #include <climits>
 #include <vector>
+#include <iostream>
 #include "raylib.h"
 #include "player/Player.h"
 #include "loaders/Sounds.h"
@@ -22,8 +23,6 @@ namespace G {
     constexpr int SCREEN_HEIGHT = 768;
 
     inline Camera2D camera{};
-    //inline Image perlin;
-    //inline Texture2D perlinTexture{};
 
     inline bool showLeaderboard = true;
     inline bool showControls = true;
@@ -33,7 +32,7 @@ namespace G {
     inline float maxDifficulty = 30;
 
     inline std::vector<Player> players;
-    inline Vector2 playerPos;
+    inline Vector2 playerPos{MAP_WIDTH / 2, MAP_HEIGHT / 2};
 
     inline bool gameOver{};
     inline int winnerId = -1;
@@ -52,7 +51,7 @@ namespace G {
     }
 
     inline Pixel *PixelAt(const int x, const int y) {
-        if (x < 0 || x > MAP_WIDTH || y < 0 || y > MAP_HEIGHT) return nullptr;
+        if (x < 0 || x > MAP_WIDTH || y < 0 || y > MAP_HEIGHT) {std::cout << "Return nullptr" << std::endl;return nullptr;}
         return &territoryMap[ToIdx(x, y)];
     }
 
@@ -64,6 +63,7 @@ namespace G {
     }
 
     inline Pixel *GetPixelOnMouse() {
+        std::cout << "GetPixelOnMouse" << std::endl;
         return PixelAt(
             static_cast<int>(GetScreenToWorld2D(GetMousePosition(), camera).x),
             static_cast<int>(GetScreenToWorld2D(GetMousePosition(), camera).y)

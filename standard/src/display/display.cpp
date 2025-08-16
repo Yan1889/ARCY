@@ -28,14 +28,14 @@ using namespace CameraClipping;
 constexpr float buildingRadius = 20;
 
 
-void displayGame(ChunkGeneration& chunkGen) {
-    auto visibleChunks = chunkGen.GetVisibleChunks(camera, GetScreenWidth(), GetScreenHeight());
+void displayGame() {
+    auto visibleChunks = ChunkGeneration::GetVisibleChunks(camera, GetScreenWidth(), GetScreenHeight());
 
     BeginDrawing();
     ClearBackground(Color{90, 90, 255, 255});
 
     BeginMode2D(camera);
-    chunkGen.DrawChunks(visibleChunks);
+    ChunkGeneration::DrawChunks(visibleChunks);
     displayBGTextures();
     displayPlayers();
     Bombs::RenderBomb();

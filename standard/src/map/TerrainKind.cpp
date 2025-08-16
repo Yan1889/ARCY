@@ -3,6 +3,7 @@
 //
 
 #include "../Globals.h"
+#include "../map/ChunkGeneration.h"
 #include "TerrainKind.h"
 
 #include <iostream>
@@ -29,14 +30,30 @@ Terrain::Kind Terrain::GetKindAt(Pixel *p) {
 
 
 Terrain::Kind Terrain::GetKindAt(const int x, const int y) {
-    /*const Color c = static_cast<const Color *>(G::perlin.data)[G::perlin.width * y + x];
+    const int chunkSize = ChunkGeneration::GetChunkSize();
+    int cx = x / chunkSize;
+    int cy = y / chunkSize;
+    auto it = ChunkGeneration::chunkMap.find({cx, cy});
+    if (it == ChunkGeneration::chunkMap.end())
+    {
+        return SNOW;
+    }
+
+    Chunk &chunk = it->second;
+    int lx = x % chunkSize;
+    int ly = y % chunkSize;
+
+    const Color* pixels = (const Color*)chunk.image.data;
+    Color c = pixels[ly * chunk.image.width + lx];
+
     for (int i = 0; i < mapParts.size(); i++) {
         const Color g = mapParts[i].color;
         if (c.r == g.r && c.g == g.g && c.b == g.b && c.a == g.a) {
             return static_cast<Kind>(i);
         }
     }
-    std::cerr << "[Warning] pixel does not match any color" << std::endl;*/
+    std::cerr << "[Warning] pixel does not match any color" << std::endl;
+
     return SNOW;
 }
 

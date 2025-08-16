@@ -35,16 +35,8 @@ void PerlinNoise::proceedMap(Image *image) {
         }
     }
 
-    const Image resultImage = {
-        .data = newPixels,
-        .width = width,
-        .height = height,
-        .mipmaps = 1,
-        .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8
-    };
-
     UnloadImage(*image);
-    *image = newImage;//resultImage;
+    *image = newImage;
 }
 
 float PerlinNoise::FalloffValue(float x, float y) // Falloff Function
