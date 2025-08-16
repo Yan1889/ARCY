@@ -56,7 +56,7 @@ Chunk ChunkGeneration::GenerateChunk(int chunkX, int chunkY) {
         worldOffsetX, worldOffsetY,
         6
     );
-
+    /*
     std::vector<std::vector<float> > chunkFalloff(chunkSize, std::vector<float>(chunkSize));
     for (int y = 0; y < chunkSize; y++) {
         for (int x = 0; x < chunkSize; x++) {
@@ -66,7 +66,7 @@ Chunk ChunkGeneration::GenerateChunk(int chunkX, int chunkY) {
         }
     }
 
-    PerlinNoise::ApplyFalloffToImage(&perlinImage, chunkFalloff);
+    PerlinNoise::ApplyFalloffToImage(&perlinImage, chunkFalloff); */
     PerlinNoise::proceedMap(&perlinImage);
 
 
