@@ -69,8 +69,6 @@ Chunk ChunkGeneration::GenerateChunk(int chunkX, int chunkY) {
     const Texture2D perlinTexture = LoadTextureFromImage(perlinImage);
     UnloadImage(perlinImage);
 
-    std::cout << "Generated Chunk (" << chunkX << " " << chunkY << ")" << std::endl;
-
     return Chunk{
         .x = chunkX,
         .y = chunkY,
