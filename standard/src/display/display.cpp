@@ -43,6 +43,7 @@ void displayGame() {
     displayCrossHair();
     DayNightCycle::Update();
     Bombs::RenderFlash();
+    if (!ChunkGeneration::useFalloff) displayWorldBorder();
 
     EndMode2D();
 
@@ -75,6 +76,25 @@ void displayControls() {
     DrawText("[1][2][3][4] Quick-building", GetScreenWidth() - 240, 380, 20, WHITE);
     DrawText("Press [E] to hide/show controls", GetScreenWidth() - 370, 420, 22, WHITE);
 }
+
+void displayWorldBorder()
+{
+    int offset = 10;
+    float borderOffset = ChunkGeneration::useFalloff ? 0 : (ChunkGeneration::chunkSize * 3);
+
+    float border = MAP_WIDTH - offset - borderOffset;
+
+    DrawRectangleV({0, 0}, {borderOffset, MAP_HEIGHT}, Fade(RED, 0.2)); // left area
+    DrawRectangleV({borderOffset, 0}, {MAP_WIDTH - borderOffset, borderOffset}, Fade(RED, 0.2)); // upper area
+    DrawRectangleV({borderOffset, border}, {MAP_WIDTH - borderOffset, borderOffset}, Fade(RED, 0.2)); // lower area
+    DrawRectangleV({border, borderOffset}, {borderOffset, abs(border - borderOffset)}, Fade(RED, 0.2)); // right area
+
+    DrawLineV({borderOffset, borderOffset}, {borderOffset, border}, Fade(RED, 0.5)); // left border
+    DrawLineV({borderOffset, borderOffset}, {border, borderOffset}, Fade(RED, 0.5)); // upper border
+    DrawLineV({borderOffset, border}, {border, border}, Fade(RED, 0.5)); // lower border
+    DrawLineV({border, borderOffset}, {border, border}, Fade(RED, 0.5)); // right border
+}
+
 
 void displayInfoTexts() {
     Rectangle backgroundRec = {

@@ -12,13 +12,14 @@
 #include "map/PerlinNoise.h"
 #include "Bombs.h"
 #include "display/display.h"
+#include "map/CameraClipping.h"
 #include  "map/ChunkGeneration.h"
 
 using namespace G;
 
 
 // ----- camera setting -----
-constexpr int moveSpeed = 50;
+constexpr int moveSpeed = 250; // Default 50
 constexpr int zoomSpeed = 5;
 constexpr float zoomMin = 0.25f;
 constexpr float zoomMax = 10.0f;
@@ -53,7 +54,7 @@ int main() {
     SetTargetFPS(10000);
 
     initCamAndMap();
-    //ChunkGeneration::InitFalloff(); just testing without falloff
+    if (ChunkGeneration::useFalloff) ChunkGeneration::InitFalloff();
 
     // don't remove: triggering the chunk generation before placing the players
     ChunkGeneration::GetVisibleChunks(camera);
@@ -110,11 +111,12 @@ void handleControls() {
     if (IsKeyPressed(KEY_FOUR) && buildMenuShown) MAIN_PLAYER.TryLaunchHydrogenBomb(GetPixelOnMouse());
 
     int offset = 10;
-    if (playerPos.x > MAP_WIDTH - offset) playerPos.x = MAP_WIDTH - offset;
-    else if (playerPos.x < 0) playerPos.x = 0;
+    int borderOffset = ChunkGeneration::useFalloff ? 0 : (ChunkGeneration::chunkSize * 3);
+    if (playerPos.x > MAP_WIDTH - offset - borderOffset) playerPos.x = MAP_WIDTH - offset - borderOffset;
+    else if (playerPos.x < 0 + borderOffset) playerPos.x = 0 + borderOffset;
 
-    if (playerPos.y > MAP_HEIGHT - offset) playerPos.y = MAP_HEIGHT - offset;
-    else if (playerPos.y < 0) playerPos.y = 0;
+    if (playerPos.y > MAP_HEIGHT - offset - borderOffset) playerPos.y = MAP_HEIGHT - offset - borderOffset;
+    else if (playerPos.y < 0 + borderOffset) playerPos.y = 0 + borderOffset;
 
     camera.target = playerPos;
 

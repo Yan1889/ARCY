@@ -27,6 +27,7 @@ inline Rectangle menuRect;
 void displayControls();
 void displayGame();
 void displayInfoTexts();
+void displayWorldBorder();
 void displayPlayers();
 void displayPlayersInfo();
 void displayTroopSlider();

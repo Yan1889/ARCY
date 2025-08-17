@@ -38,19 +38,21 @@ Chunk ChunkGeneration::GenerateChunk(int chunkX, int chunkY) {
         worldOffsetX, worldOffsetY,
         6
     );
-    /*
-    std::vector<std::vector<float> > chunkFalloff(chunkSize, std::vector<float>(chunkSize));
-    for (int y = 0; y < chunkSize; y++) {
-        for (int x = 0; x < chunkSize; x++) {
-            const int wx = worldOffsetX + x;
-            const int wy = worldOffsetY + y;
-            chunkFalloff[y][x] = globalFalloff[wy][wx];
+
+    if (useFalloff)
+    {
+        std::vector<std::vector<float> > chunkFalloff(chunkSize, std::vector<float>(chunkSize));
+        for (int y = 0; y < chunkSize; y++) {
+            for (int x = 0; x < chunkSize; x++) {
+                const int wx = worldOffsetX + x;
+                const int wy = worldOffsetY + y;
+                chunkFalloff[y][x] = globalFalloff[wy][wx];
+            }
         }
+
+        PerlinNoise::ApplyFalloffToImage(&perlinImage, chunkFalloff);
     }
-
-    PerlinNoise::ApplyFalloffToImage(&perlinImage, chunkFalloff); */
     PerlinNoise::proceedMap(&perlinImage);
-
 
     // pixels
     const auto pixels = static_cast<Color *>(perlinImage.data);
@@ -107,7 +109,6 @@ std::vector<Chunk *> ChunkGeneration::GetVisibleChunks(const Camera2D &camera) {
     for (int y = minChunkY; y <= maxChunkY; y++) {
         for (int x = minChunkX; x <= maxChunkX; x++) {
             auto key = std::make_pair(x, y);
-            // std::cout << "Chunks loaded: " << chunkMap.size() << std::endl;
 
             auto it = chunkMap.find(key);
             if (it == chunkMap.end()) {
