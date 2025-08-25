@@ -76,11 +76,11 @@ void Sounds::checkAtmosphere() {
     UpdateMusicStream(radiationSound);
     UpdateMusicStream(nightAmbienceSound);
 
-    Pixel *pixel = G::PixelAt(playerPos);
-    const Kind kind = GetKindAt(pixel);
+    const Pixel *p = G::PixelAt(playerPos);
+    const auto k_eq = [p](const Kind k) { return k == p->kind; };
 
     // Contaminated zone
-    if (pixel->contaminated) {
+    if (p->contaminated) {
         ResumeMusicStream(radiationSound);
         PauseMusicStream(oceanSound);
         PauseMusicStream(beachSound);
@@ -92,35 +92,35 @@ void Sounds::checkAtmosphere() {
     PauseMusicStream(radiationSound);
 
     // Ocean
-    if (kind == DEEP_WATER || kind == LOW_WATER
+    if (k_eq(DEEP_WATER) || k_eq(LOW_WATER)
         || playerPos.x < 0 || playerPos.x >= MAP_WIDTH || playerPos.y < 0 || playerPos.y >= MAP_HEIGHT)
         ResumeMusicStream(oceanSound);
     else PauseMusicStream(oceanSound);
 
     // Beach
-    if (!DayNightCycle::isNightTime && kind == BEACH)
+    if (!DayNightCycle::isNightTime && k_eq(BEACH))
         ResumeMusicStream(beachSound);
     else PauseMusicStream(beachSound);
 
     // Field
-    if (kind == OPEN_FIELD || kind == HILLS) {
+    if (k_eq(OPEN_FIELD) || k_eq(HILLS)) {
         if (!DayNightCycle::isNightTime) {
             ResumeMusicStream(fieldSound);
         } else PauseMusicStream(fieldSound);
     } else PauseMusicStream(fieldSound);
 
     // Forest
-    if ((kind == FORREST || kind == STONE) && !DayNightCycle::isNightTime) {
+    if ((k_eq(FORREST) || k_eq(STONE)) && !DayNightCycle::isNightTime) {
         ResumeMusicStream(forestSound);
     } else PauseMusicStream(forestSound);
 
     // Mountain
-    if (kind == MOUNTAIN || kind == SNOW)
+    if (k_eq(MOUNTAIN) || k_eq(SNOW))
         ResumeMusicStream(mountainSound);
     else PauseMusicStream(mountainSound);
 
     // Night Ambience
-    if ((kind == BEACH || kind == OPEN_FIELD || kind == HILLS || kind == FORREST) && DayNightCycle::isNightTime) {
+    if ((k_eq(BEACH) || k_eq(OPEN_FIELD) || k_eq(HILLS) || k_eq(FORREST)) && DayNightCycle::isNightTime) {
         ResumeMusicStream(nightAmbienceSound);
     } else PauseMusicStream(nightAmbienceSound);
 }

@@ -12,12 +12,14 @@
 #include "map/PerlinNoise.h"
 #include "Bombs.h"
 #include "display/display.h"
+#include "map/CameraClipping.h"
+#include  "map/ChunkGeneration.h"
 
 using namespace G;
 
 
 // ----- camera setting -----
-constexpr int moveSpeed = 50;
+constexpr int moveSpeed = 250; // Default 50
 constexpr int zoomSpeed = 5;
 constexpr float zoomMin = 0.25f;
 constexpr float zoomMax = 10.0f;
@@ -52,6 +54,10 @@ int main() {
     SetTargetFPS(10000);
 
     initCamAndMap();
+    if (ChunkGeneration::useFalloff) ChunkGeneration::InitFalloff();
+
+    // don't remove: triggering the chunk generation before placing the players
+    ChunkGeneration::GetVisibleChunks(camera);
     initPlayers();
 
     while (!WindowShouldClose()) {
@@ -59,6 +65,7 @@ int main() {
             frameLogic();
         }
         displayGame();
+
         mySounds.checkAtmosphere();
         MAIN_PLAYER._money.getMoney(100000); //only for testing purposes!
     }
@@ -104,11 +111,12 @@ void handleControls() {
     if (IsKeyPressed(KEY_FOUR) && buildMenuShown) MAIN_PLAYER.TryLaunchHydrogenBomb(GetPixelOnMouse());
 
     int offset = 10;
-    if (playerPos.x > MAP_WIDTH - offset) playerPos.x = MAP_WIDTH - offset;
-    else if (playerPos.x < 0) playerPos.x = 0;
+    int borderOffset = ChunkGeneration::useFalloff ? 0 : (ChunkGeneration::chunkSize * 3);
+    if (playerPos.x > MAP_WIDTH - offset - borderOffset) playerPos.x = MAP_WIDTH - offset - borderOffset;
+    else if (playerPos.x < 0 + borderOffset) playerPos.x = 0 + borderOffset;
 
-    if (playerPos.y > MAP_HEIGHT - offset) playerPos.y = MAP_HEIGHT - offset;
-    else if (playerPos.y < 0) playerPos.y = 0;
+    if (playerPos.y > MAP_HEIGHT - offset - borderOffset) playerPos.y = MAP_HEIGHT - offset - borderOffset;
+    else if (playerPos.y < 0 + borderOffset) playerPos.y = 0 + borderOffset;
 
     camera.target = playerPos;
 
@@ -123,7 +131,6 @@ void checkExpansionAndAttack() {
     // attack player if left-click
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !buildMenuShown) {
         const int playerIdClickd = GetPixelOnMouse() == nullptr ? -1 : GetPixelOnMouse()->playerId;
-
         MAIN_PLAYER.Expand(playerIdClickd, 0.5);
     }
 }
@@ -176,18 +183,6 @@ void initCamAndMap() {
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
 
-    // terrain
-    perlin = GenImagePerlinNoise(
-        MAP_WIDTH, MAP_HEIGHT,
-        static_cast<int>(rand() * 10000.0f / RAND_MAX) * (MAP_WIDTH / 2),
-        static_cast<int>(rand() * 10000.0f / RAND_MAX) * (MAP_HEIGHT / 2),
-        6
-    );
-    std::vector<std::vector<float> > falloff = PerlinNoise::GenerateFalloffMap(MAP_WIDTH, MAP_HEIGHT);
-    PerlinNoise::ApplyFalloffToImage(&perlin, falloff); // finally use falloff
-    PerlinNoise::proceedMap(&perlin);
-    perlinTexture = LoadTextureFromImage(perlin);
-
     explosionImage = GenImageColor(MAP_WIDTH, MAP_HEIGHT, BLANK);
     explosionTexture = LoadTextureFromImage(explosionImage);
 
@@ -196,7 +191,7 @@ void initCamAndMap() {
     territoryMap = std::vector<Pixel>(MAP_WIDTH * MAP_HEIGHT);
     for (int y = 0; y < MAP_HEIGHT; y++) {
         for (int x = 0; x < MAP_WIDTH; x++) {
-            territoryMap[G::ToIdx(x, y)] = Pixel(x, y, Terrain::GetKindAt(x, y));
+            territoryMap[G::ToIdx(x, y)] = Pixel(x, y);
         }
     }
     for (Pixel &p: territoryMap) {

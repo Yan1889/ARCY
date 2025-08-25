@@ -3,14 +3,14 @@ project(ARCY)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Release) # Debug
 
 # Detect if we're using Emscripten
-if("${CMAKE_CXX_COMPILER}" MATCHES "em\\+\\+")
+if ("${CMAKE_CXX_COMPILER}" MATCHES "em\\+\\+")
     set(BUILD_PLATFORM "Web")
-else()
+else ()
     set(BUILD_PLATFORM "Native")
-endif()
+endif ()
 
 set(RAYLIB_VERSION 5.5)
 
@@ -27,8 +27,8 @@ if (NOT raylib_FOUND)
     if (NOT raylib_POPULATED)
         set(FETCHCONTENT_QUIET NO)
         FetchContent_MakeAvailable(raylib)
-    endif()
-endif()
+    endif ()
+endif ()
 
 add_executable(ARCY
         src/main.cpp
@@ -60,25 +60,43 @@ add_executable(ARCY
         src/map/TerrainKind.h
         src/map/TerrainKind.cpp
         src/map/CameraClipping.h
+        src/map/ChunkGeneration.cpp
+        src/map/ChunkGeneration.h
 )
 
 file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
 
 set(CITY_IMAGE ${CMAKE_CURRENT_SOURCE_DIR}/src/images/city.png)
 
-target_link_libraries(ARCY PRIVATE raylib)
+target_link_libraries(ARCY PRIVATE raylib -fopenmp)
 
 # Native compiler flags for Release builds
-if(BUILD_PLATFORM STREQUAL "Native")
-    target_compile_options(ARCY PRIVATE
-            -O3
-            -Wall
-            -Wextra
-    )
-endif()
+if (BUILD_PLATFORM STREQUAL "Native")
+    if (CMAKE_BUILD_TYPE STREQUAL "Release")
+        target_compile_options(ARCY PRIVATE
+                -O3
+                -Wall
+                # -Wextra
+                -fopenmp
+        )
+
+        # add omp
+        find_package(OpenMP REQUIRED)
+        if (OpenMP_CXX_FOUND)
+            target_link_libraries(ARCY PRIVATE OpenMP::OpenMP_CXX)
+        endif ()
+    else ()
+        target_compile_options(ARCY PRIVATE
+                # -O3
+                -Wall
+                # -Wextra
+                # -fopenmp
+        )
+    endif ()
+endif ()
 
 # Web-specific options
-if(BUILD_PLATFORM STREQUAL "Web")
+if (BUILD_PLATFORM STREQUAL "Web")
     set_target_properties(ARCY PROPERTIES SUFFIX ".html")
 
     target_link_options(ARCY PRIVATE
@@ -90,7 +108,7 @@ if(BUILD_PLATFORM STREQUAL "Web")
             "-sASSERTIONS=1"
             "--preload-file src/images"
     )
-endif()
+endif ()
 
 # How to build a game on web
 

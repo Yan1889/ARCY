@@ -6,8 +6,10 @@
 #define GLOBALS_H
 #include <climits>
 #include <vector>
+#include <cmath>
 #include "raylib.h"
 #include "player/Player.h"
+#include "map/ChunkGeneration.h"
 #include "loaders/Sounds.h"
 
 struct Gradient;
@@ -15,14 +17,12 @@ struct Gradient;
 
 // G for global
 namespace G {
-    constexpr int MAP_WIDTH = 2500;
-    constexpr int MAP_HEIGHT = 2500;
+    constexpr int MAP_WIDTH = ChunkGeneration::chunkAmountX * ChunkGeneration::chunkSize;
+    constexpr int MAP_HEIGHT = ChunkGeneration::chunkAmountY * ChunkGeneration::chunkSize;
     constexpr int SCREEN_WIDTH = 1366;
     constexpr int SCREEN_HEIGHT = 768;
 
     inline Camera2D camera{};
-    inline Image perlin;
-    inline Texture2D perlinTexture{};
 
     inline bool showLeaderboard = true;
     inline bool showControls = true;
@@ -32,7 +32,7 @@ namespace G {
     inline float maxDifficulty = 30;
 
     inline std::vector<Player> players;
-    inline Vector2 playerPos;
+    inline Vector2 playerPos{MAP_WIDTH / 2, MAP_HEIGHT / 2};
 
     inline bool gameOver{};
     inline int winnerId = -1;
@@ -69,6 +69,12 @@ namespace G {
         );
     }
 
+    inline Vector2 GetChunkFromV(Vector2 pos) {
+        auto chunkSize = static_cast<float>(ChunkGeneration::chunkSize);
+        float cx = floor(pos.x / chunkSize);
+        float cy = floor(pos.y / chunkSize);
+        return { cx, cy };
+    }
 
     // randomness
     static unsigned long x = 123456789, y = 362436069, z = 521288629;

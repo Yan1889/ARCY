@@ -101,8 +101,8 @@ public:
 
     bool CanLaunchAtomBomb(Pixel* pixel) const;
     bool CanLaunchHydrogenBomb(Pixel* pixel) const;
-    void TryLaunchAtomBomb(Pixel *targetPixel);
-    void TryLaunchHydrogenBomb(Pixel *targetPixel);
+    void TryLaunchAtomBomb(Pixel *target);
+    void TryLaunchHydrogenBomb(Pixel *target);
 };
 
 

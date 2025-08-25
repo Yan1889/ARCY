@@ -3,6 +3,7 @@
 //
 
 #include "../Globals.h"
+#include "../map/ChunkGeneration.h"
 #include "TerrainKind.h"
 
 #include <iostream>
@@ -23,20 +24,15 @@ float Terrain::GetInvasionProbability(const Kind kind) {
     return mapParts[kind].invasionProbability;
 }
 
-Terrain::Kind Terrain::GetKindAt(Pixel *p) {
-    return GetKindAt(p->x, p->y);
-}
 
-
-Terrain::Kind Terrain::GetKindAt(const int x, const int y) {
-    const Color c = static_cast<const Color *>(G::perlin.data)[G::perlin.width * y + x];
+Terrain::Kind Terrain::GetKindFromColor(const Color &c) {
     for (int i = 0; i < mapParts.size(); i++) {
         const Color g = mapParts[i].color;
         if (c.r == g.r && c.g == g.g && c.b == g.b && c.a == g.a) {
             return static_cast<Kind>(i);
         }
     }
-    std::cerr << "[Warning] pixel does not match any color" << std::endl;
+    std::cerr << "[Error] color does not match to any layer" << std::endl;
     return SNOW;
 }
 
@@ -44,8 +40,10 @@ Pixel *Terrain::FindRandomPixelWithKind(const Kind kind) {
     while (true) {
         const int x = rand() % G::MAP_WIDTH;
         const int y = rand() % G::MAP_HEIGHT;
-        if (GetKindAt(x, y) == kind) {
-            return G::PixelAt(x, y);
+        Pixel *p = G::PixelAt(x, y);
+
+        if (p->loaded && p->kind == kind) {
+            return p;
         }
     }
 }

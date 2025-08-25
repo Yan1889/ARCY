@@ -15,7 +15,6 @@ void Player::Expand(const int target, const float percentage) {
     const int newPeopleLeaving = _troops * percentage;
     // target is self or not enough troops or odes not border
     if (target == _id || _troops - newPeopleLeaving < 30 || !Borders(target)) return;
-
     _troops -= newPeopleLeaving;
 
     auto &attack = _targetToAttackMap[target];
@@ -44,7 +43,7 @@ void Player::ProcessAttackQueue(Attack &attack) {
         attack.troops--;
 
         // randomly don't get the pixel even though lost troops for it
-        if (!newP->acceptRandomly()) {
+        if (!newP->AcceptRandomly()) {
             // add the pixel to the queue in the back
             attack.set.insert(newP);
             attack.queue.push(newP);
@@ -72,7 +71,6 @@ void Player::ProcessAttackQueue(Attack &attack) {
 }
 
 void Player::ReFillAttackQueueFromScratch(Attack &attack) {
-    // std::cout << "Refill from scratch" << std::endl;
     UpdateAllDirtyBorder();
     attack.queue = {};
     attack.set.clear();

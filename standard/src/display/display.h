@@ -9,6 +9,7 @@
 #define MAIN_PLAYER_COLOR G::players[0]._color
 #include <string>
 
+#include "../map/ChunkGeneration.h"
 #include "raylib.h"
 
 enum MenuOption {
@@ -26,6 +27,7 @@ inline Rectangle menuRect;
 void displayControls();
 void displayGame();
 void displayInfoTexts();
+void displayWorldBorder();
 void displayPlayers();
 void displayPlayersInfo();
 void displayTroopSlider();

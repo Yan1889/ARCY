@@ -14,7 +14,7 @@ using namespace G;
 using namespace Terrain;
 
 Player::Player(Pixel *startPos, const std::string &name): _id(static_cast<int>(players.size())),
-                                                                              _name(name) {
+                                                          _name(name) {
     do {
         _color = Color{
             static_cast<unsigned char>(GetRandomValue(0, 255)), // Red
@@ -51,7 +51,7 @@ void Player::Update() {
             ++it;
         }
     }*/
-    for (auto& pair: _targetToAttackMap) {
+    for (auto &pair: _targetToAttackMap) {
         if (pair.second.troops > 0) {
             ProcessAttackQueue(pair.second);
         }
@@ -151,32 +151,30 @@ bool Player::CanBuildSilo(Pixel *pos) const {
     return _money.moneyBalance > cost && pos->playerId == _id;
 }
 
-bool Player::CanLaunchAtomBomb(Pixel* pixel) const {
+bool Player::CanLaunchAtomBomb(Pixel *pixel) const {
     if (!pixel) return false;
-    const Kind k = GetKindAt(pixel);
+    const Kind k = pixel->kind;
     return !_silos.empty() && Bombs::atomBombCost < _money.moneyBalance && k != LOW_WATER && k != DEEP_WATER;
 }
 
-bool Player::CanLaunchHydrogenBomb(Pixel* pixel) const {
+bool Player::CanLaunchHydrogenBomb(Pixel *pixel) const {
     if (!pixel) return false;
-    const Kind k = GetKindAt(pixel);
+    const Kind k = pixel->kind;
     return !_silos.empty() && Bombs::hydrogenBombCost < _money.moneyBalance && k != LOW_WATER && k != DEEP_WATER;
 }
 
 
-void Player::TryLaunchAtomBomb(Pixel *targetPixel) {
-    if (!CanLaunchAtomBomb(targetPixel) ||
-        GetKindAt(targetPixel->x, targetPixel->y) == DEEP_WATER ||
-        GetKindAt(targetPixel->x, targetPixel->y) == LOW_WATER) return;
+void Player::TryLaunchAtomBomb(Pixel *target) {
+    if (!CanLaunchAtomBomb(target) || target->kind == DEEP_WATER || target->kind == LOW_WATER) return;
 
     const int cost = Bombs::atomBombCost;
 
     _money.spendMoney(cost);
     mySounds.Play(mySounds.misslePool);
 
-    Pixel *startPixel = GetNearestSiloFromPixel(targetPixel);
+    Pixel *startPixel = GetNearestSiloFromPixel(target);
     Bombs::allBombs.push_back(SingleBomb{
-        .targetPos = targetPixel->ToVector2(),
+        .targetPos = target->ToVector2(),
         .originPos = startPixel->ToVector2(),
         .pos = startPixel->ToVector2(),
         .radius = 50.f,
@@ -185,19 +183,17 @@ void Player::TryLaunchAtomBomb(Pixel *targetPixel) {
     });
 }
 
-void Player::TryLaunchHydrogenBomb(Pixel *targetPixel) {
-    if (!CanLaunchHydrogenBomb(targetPixel) ||
-        GetKindAt(targetPixel->x, targetPixel->y) == DEEP_WATER ||
-        GetKindAt(targetPixel->x, targetPixel->y) == LOW_WATER) return;
+void Player::TryLaunchHydrogenBomb(Pixel *target) {
+    if (!CanLaunchHydrogenBomb(target) || target->kind == DEEP_WATER || target->kind == LOW_WATER) return;
 
     const int cost = Bombs::hydrogenBombCost;
 
     _money.spendMoney(cost);
     mySounds.Play(mySounds.misslePool);
 
-    Pixel *startPixel = GetNearestSiloFromPixel(targetPixel);
+    Pixel *startPixel = GetNearestSiloFromPixel(target);
     Bombs::allBombs.push_back(SingleBomb{
-        .targetPos = targetPixel->ToVector2(),
+        .targetPos = target->ToVector2(),
         .originPos = startPixel->ToVector2(),
         .pos = startPixel->ToVector2(),
         .radius = 350.f,
@@ -205,7 +201,6 @@ void Player::TryLaunchHydrogenBomb(Pixel *targetPixel) {
         .speed = 10.0
     });
 }
-
 
 
 Pixel *Player::GetNearestSiloFromPixel(Pixel *target) const {
