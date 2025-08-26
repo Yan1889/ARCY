@@ -12,8 +12,6 @@
 
 #include "../Globals.h"
 
-using namespace Terrain;
-
 std::map<std::pair<int, int>, Chunk> ChunkGeneration::chunkMap{};
 std::vector<std::vector<float> > ChunkGeneration::globalFalloff{};
 

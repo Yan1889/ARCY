@@ -25,13 +25,12 @@ class ChunkGeneration {
         static constexpr int chunkAmountY = useFalloff ? 4 : 10; // Default 4 : 10
 
         static void InitFalloff();
-        static int GetChunkSize();
         static Chunk GenerateChunk(int chunkX, int chunkY);
         static std::vector<Chunk*> GetVisibleChunks(const Camera2D& camera);
         static void DrawChunks(const std::vector<Chunk*>& chunks);
 
         static std::vector<std::vector<float>> globalFalloff;
-    };
+};
 
 
 
