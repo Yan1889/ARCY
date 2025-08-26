@@ -25,7 +25,7 @@
 using namespace CameraClipping;
 using namespace Buildings;
 
-constexpr float buildingRadius = 20;
+constexpr float buildingRadius = 30;
 
 
 void displayGame() {
@@ -158,7 +158,7 @@ void displayPlayers() {
     // display every building for each player
     for (const Player &p: players) {
         for (const Building &b: p._buildings) {
-            Texture2D &t = TextureCollection::GetBuildingTexture(b.type);
+            Texture2D &t = GetBuildingTexture(b.type);
             Rectangle rect = {
                 b.pos->x - buildingRadius,
                 b.pos->y - buildingRadius,
@@ -369,11 +369,10 @@ void displayAndHandleBuildMenu() {
 }
 
 void drawBuildingDrag(const BUILDING_TYPE type) {
-    const Texture2D &t = TextureCollection::GetBuildingTexture(type);
+    const Texture2D &t = GetBuildingTexture(type);
     const float scale = 2 * buildingRadius / t.width;
 
     Pixel *mPixel = G::GetPixelOnMouse();
-    const Vector2 pos = GetMousePosition();
 
     const Color color = MAIN_PLAYER.CanBuildType(type, mPixel) ? Fade(GREEN, 0.5) : Fade(RED, 0.5);
 

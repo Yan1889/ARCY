@@ -52,7 +52,8 @@ add_executable(ARCY
         src/loaders/SoundPool.h
         src/display/display.cpp
         src/display/display.h
-        src/Building.h
+        src/map/Buildings.cpp
+        src/map/Buildings.h
         src/display/DayNightCycle.cpp
         src/display/DayNightCycle.h
         src/display/raygui.h

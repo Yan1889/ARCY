@@ -23,6 +23,7 @@ namespace G {
     constexpr int SCREEN_HEIGHT = 768;
 
     inline Camera2D camera{};
+    inline float maxZoomForDetailedBuildings = 3.f;
 
     inline bool showLeaderboard = true;
     inline bool showControls = true;

@@ -11,7 +11,7 @@
 
 #include "raylib.h"
 
-#include "../Building.h"
+#include "../map/Buildings.h"
 
 using namespace Buildings;
 

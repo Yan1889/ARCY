@@ -13,7 +13,7 @@
 #include "Money.h"
 #include "raylib.h"
 #include "../map/Pixel.h"
-#include "../Building.h"
+#include "../map/Buildings.h"
 
 using namespace Buildings;
 

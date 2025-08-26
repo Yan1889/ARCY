@@ -4,7 +4,8 @@
 
 #ifndef BUILDING_H
 #define BUILDING_H
-#include <iostream>
+
+#include "../loaders/TextureCollection.h"
 
 struct Pixel;
 
@@ -23,14 +24,9 @@ namespace Buildings {
     inline int cityCost = 10'000;
     inline int siloCost = 1'000'000;
 
-    inline int GetCost(const BUILDING_TYPE type) {
-        switch (type) {
-            case CITY: return cityCost;
-            case SILO: return siloCost;
-            case UNKNOWN: std::cout << "[Error]" << std::endl;
-        }
-        return -1;
-    }
+    int GetCost(BUILDING_TYPE type);
+
+    Texture2D &GetBuildingTexture(BUILDING_TYPE t);
 }
 
 #endif //BUILDING_H
