@@ -39,18 +39,6 @@ Player::Player(Pixel *startPos, const std::string &name): _id(static_cast<int>(p
 
 void Player::Update() {
     // expand
-    /*
-    for (auto it = _targetToAttackMap.begin(); it != _targetToAttackMap.end();) {
-        ProcessAttackQueue(it->second);
-        if (it->second.troops <= 0) {
-            it = _targetToAttackMap.erase(it);
-        } else if (it->second.set.empty()) {
-            _troops += it->second.troops;
-            it = _targetToAttackMap.erase(it);
-        } else {
-            ++it;
-        }
-    }*/
     for (auto &pair: _targetToAttackMap) {
         if (pair.second.troops > 0) {
             ProcessAttackQueue(pair.second);
@@ -70,7 +58,7 @@ void Player::Update() {
 void Player::UpdatePopulationMaxValues() {
     _maxTotalPopulation = 200; // min maxPopulation 200 (you are cooked if < 200)
     _maxTotalPopulation += _pixelCount; // +1 for each pixel
-    _maxTotalPopulation += 1000 * _cities.size(); // +1000 for each city
+    _maxTotalPopulation += 1000 * GetBuildingsOfType(CITY).size(); // +1000 for each city
 
     _maxTroops = _maxTotalPopulation * _troopPercentage;
     _maxWorkers = _maxTotalPopulation * (1 - _troopPercentage);
@@ -117,57 +105,40 @@ void Player::RemovePixelFromCenter(Pixel *newP) {
     _centerPixel_y = _allPixelsSummed_y / _pixelCount;
 }
 
-bool Player::TryAddCity(Pixel *pos) {
-    if (!CanBuildCity(pos)) return false;
+bool Player::TryAddBuilding(BUILDING_TYPE t, Pixel *pos) {
+    if (!CanBuildType(t, pos)) return false;
 
-    const int cost = cityCost * (_cities.size() + 1);
+    const int cost = GetCost(t) * (GetBuildingsOfType(t).size() + 1);
     _money.spendMoney(cost);
-    _cities.emplace_back(pos);
+    _buildings.emplace_back(pos, t);
 
     if (_id == 0) mySounds.Play(mySounds.cityBuildPool);
     return true;
 }
 
-bool Player::TryAddSilo(Pixel *pos) {
-    if (!CanBuildSilo(pos)) return false;
-
-    const int cost = siloCost * (_silos.size() + 1);
-    _money.spendMoney(cost);
-    _silos.emplace_back(pos);
-
-    if (_id == 0) mySounds.Play(mySounds.cityBuildPool);
-    return true;
-}
-
-bool Player::CanBuildCity(Pixel *pos) const {
+bool Player::CanBuildType(BUILDING_TYPE t, Pixel *pos) {
     if (!pos) return false;
-    const int cost = cityCost * (_cities.size() + 1);
+    const int cost = GetCost(t) * (GetBuildingsOfType(t).size() + 1);
     return _money.moneyBalance > cost && pos->playerId == _id;
 }
 
-bool Player::CanBuildSilo(Pixel *pos) const {
-    if (!pos) return false;
-    const int cost = siloCost * (_silos.size() + 1);
-    return _money.moneyBalance > cost && pos->playerId == _id;
-}
-
-bool Player::CanLaunchAtomBomb(Pixel *pixel) const {
+bool Player::CanLaunchBomb(Pixel *pixel, const int cost) {
     if (!pixel) return false;
-    const Kind k = pixel->kind;
-    return !_silos.empty() && Bombs::atomBombCost < _money.moneyBalance && k != LOW_WATER && k != DEEP_WATER;
-}
+    if (_money.moneyBalance < cost) return false;
+    if (GetBuildingsOfType(SILO).empty()) return false;
 
-bool Player::CanLaunchHydrogenBomb(Pixel *pixel) const {
-    if (!pixel) return false;
     const Kind k = pixel->kind;
-    return !_silos.empty() && Bombs::hydrogenBombCost < _money.moneyBalance && k != LOW_WATER && k != DEEP_WATER;
+    return k != LOW_WATER && k != DEEP_WATER;
 }
 
 
-void Player::TryLaunchAtomBomb(Pixel *target) {
-    if (!CanLaunchAtomBomb(target) || target->kind == DEEP_WATER || target->kind == LOW_WATER) return;
+void Player::TryLaunchBomb(Pixel *target, const bool isAtom) {
+    const int cost = isAtom? Bombs::ATOM_COST: Bombs::H_COST;
+    const int radius = isAtom? Bombs::ATOM_RADIUS: Bombs::H_RADIUS;
+    const int speed = isAtom? Bombs::ATOM_SPEED: Bombs::H_SPEED;
 
-    const int cost = Bombs::atomBombCost;
+    if (!CanLaunchBomb(target, cost)) return;
+    if (target->kind == DEEP_WATER || target->kind == LOW_WATER) return;
 
     _money.spendMoney(cost);
     mySounds.Play(mySounds.misslePool);
@@ -177,46 +148,38 @@ void Player::TryLaunchAtomBomb(Pixel *target) {
         .targetPos = target->ToVector2(),
         .originPos = startPixel->ToVector2(),
         .pos = startPixel->ToVector2(),
-        .radius = 50.f,
-        .type = ATOM,
-        .speed = 15.0
+        .radius = radius,
+        .isAtom = isAtom,
+        .speed = speed,
     });
 }
 
-void Player::TryLaunchHydrogenBomb(Pixel *target) {
-    if (!CanLaunchHydrogenBomb(target) || target->kind == DEEP_WATER || target->kind == LOW_WATER) return;
+Pixel *Player::GetNearestSiloFromPixel(Pixel *target) {
+    const std::vector<Building *> silos = GetBuildingsOfType(SILO);
 
-    const int cost = Bombs::hydrogenBombCost;
-
-    _money.spendMoney(cost);
-    mySounds.Play(mySounds.misslePool);
-
-    Pixel *startPixel = GetNearestSiloFromPixel(target);
-    Bombs::allBombs.push_back(SingleBomb{
-        .targetPos = target->ToVector2(),
-        .originPos = startPixel->ToVector2(),
-        .pos = startPixel->ToVector2(),
-        .radius = 350.f,
-        .type = HYDROGEN,
-        .speed = 10.0
-    });
-}
-
-
-Pixel *Player::GetNearestSiloFromPixel(Pixel *target) const {
-    if (_silos.empty()) return nullptr;
+    if (silos.empty()) return nullptr;
 
     Pixel *bestP = nullptr;
-    float bestDistSquared = MAP_WIDTH * MAP_WIDTH + MAP_HEIGHT * MAP_HEIGHT;
+    int bestDistSquared = MAP_WIDTH * MAP_WIDTH + MAP_HEIGHT * MAP_HEIGHT;
 
-    for (Pixel *c: _silos) {
-        const float dx = target->x - c->x;
-        const float dy = target->y - c->y;
-        const float distSquared = dx * dx + dy * dy;
+    for (Building *s: silos) {
+        const int dx = target->x - s->pos->x;
+        const int dy = target->y - s->pos->y;
+        const int distSquared = dx * dx + dy * dy;
         if (distSquared < bestDistSquared) {
             bestDistSquared = distSquared;
-            bestP = c;
+            bestP = s->pos;
         }
     }
     return bestP;
+}
+
+std::vector<Building *> Player::GetBuildingsOfType(const BUILDING_TYPE t) {
+    std::vector<Building *> result;
+    for (Building& b: _buildings) {
+        if (b.type == t) {
+            result.push_back(&b);
+        }
+    }
+    return result;
 }

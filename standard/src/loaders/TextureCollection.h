@@ -5,7 +5,9 @@
 #ifndef TEXTURECOLLECTION_H
 #define TEXTURECOLLECTION_H
 #include "raylib.h"
+#include "../Building.h"
 
+using namespace Buildings;
 
 namespace  TextureCollection {
     inline Texture2D city;
@@ -19,6 +21,8 @@ namespace  TextureCollection {
     inline Texture2D flash;
 
     inline Texture2D mapIcon;
+
+    Texture2D &GetBuildingTexture(BUILDING_TYPE t);
 
     void LoadAll();
     void UnloadAll();

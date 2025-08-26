@@ -23,7 +23,7 @@
 #include "../map/CameraClipping.h"
 
 using namespace CameraClipping;
-
+using namespace Buildings;
 
 constexpr float buildingRadius = 20;
 
@@ -77,8 +77,7 @@ void displayControls() {
     DrawText("Press [E] to hide/show controls", GetScreenWidth() - 370, 420, 22, WHITE);
 }
 
-void displayWorldBorder()
-{
+void displayWorldBorder() {
     int offset = 10;
     float borderOffset = ChunkGeneration::useFalloff ? 0 : (ChunkGeneration::chunkSize * 3);
 
@@ -150,48 +149,28 @@ void displayPlayers() {
     auto viewRect = GetViewRectangle(camera);
 
     for (const Player &p: players) {
-        // #pragma omp parallel for
         for (int i = 0; i < p._border_vec.size(); i++) {
             Pixel *pixel = p._border_vec[i];
             if (IsPixelVisible(pixel, viewRect)) DrawPixel(pixel->x, pixel->y, p._color);
         }
     }
 
-    // display every city for each player
+    // display every building for each player
     for (const Player &p: players) {
-        for (const Pixel *c: p._cities) {
-            Rectangle cityRect = {
-                c->x - buildingRadius,
-                c->y - buildingRadius,
+        for (const Building &b: p._buildings) {
+            Texture2D &t = TextureCollection::GetBuildingTexture(b.type);
+            Rectangle rect = {
+                b.pos->x - buildingRadius,
+                b.pos->y - buildingRadius,
                 2 * buildingRadius,
                 2 * buildingRadius,
             };
-            if (CheckCollisionCameraRec(viewRect, cityRect)) {
+            if (CheckCollisionCameraRec(viewRect, rect)) {
                 DrawTextureEx(
-                    TextureCollection::city,
-                    Vector2{c->x - buildingRadius, c->y - buildingRadius},
+                    t,
+                    Vector2{b.pos->x - buildingRadius, b.pos->y - buildingRadius},
                     0,
-                    2 * buildingRadius / TextureCollection::city.width,
-                    p._color
-                );
-            }
-        }
-    }
-    // display every silo for each player
-    for (const Player &p: players) {
-        for (const Pixel *s: p._silos) {
-            Rectangle siloRect = {
-                s->x - buildingRadius,
-                s->y - buildingRadius,
-                2 * buildingRadius,
-                2 * buildingRadius,
-            };
-            if (CheckCollisionCameraRec(viewRect, siloRect)) {
-                DrawTextureEx(
-                    TextureCollection::silo,
-                    Vector2(s->x - buildingRadius, s->y - buildingRadius),
-                    0,
-                    2 * buildingRadius / TextureCollection::silo.width,
+                    2 * buildingRadius / t.width,
                     p._color
                 );
             }
@@ -325,19 +304,19 @@ void displayAndHandleBuildMenu() {
     };
     DrawRectangleRec(cityButtonRect, GRAY);
     DrawText("Build city", cityButtonRect.x + 20, cityButtonRect.y + 10, 30, WHITE);
-    const std::string cityCostStr = "$" + formatNumber(players[0].cityCost * (players[0]._cities.size() + 1));
+    const std::string cityCostStr = "$" + formatNumber(cityCost * (players[0].GetBuildingsOfType(CITY).size() + 1));
     DrawText(cityCostStr.c_str(), cityButtonRect.x + 75, cityButtonRect.y + 40, 15, WHITE);
     DrawRectangleRec(siloButtonRect, RED);
     DrawText("Build silo", siloButtonRect.x + 20, siloButtonRect.y + 10, 30, WHITE);
-    const std::string siloCostStr = "$" + formatNumber(players[0].siloCost * (players[0]._silos.size() + 1));
+    const std::string siloCostStr = "$" + formatNumber(siloCost * (players[0].GetBuildingsOfType(SILO).size() + 1));
     DrawText(siloCostStr.c_str(), siloButtonRect.x + 75, siloButtonRect.y + 40, 15, WHITE);
     DrawRectangleRec(atomButtonRect, LIME);
     DrawText("Atom bomb", atomButtonRect.x + 20, atomButtonRect.y + 10, 30, WHITE);
-    const std::string atomBombCostStr = "$" + formatNumber(Bombs::atomBombCost);
+    const std::string atomBombCostStr = "$" + formatNumber(Bombs::ATOM_COST);
     DrawText(atomBombCostStr.c_str(), atomButtonRect.x + 75, atomButtonRect.y + 40, 15, WHITE);
     DrawRectangleRec(hydrogenButtonRect, DARKBLUE);
     DrawText("H-Bomb", hydrogenButtonRect.x + 20, hydrogenButtonRect.y + 10, 30, WHITE);
-    const std::string hydrogenBombCostStr = "$" + formatNumber(Bombs::hydrogenBombCost);
+    const std::string hydrogenBombCostStr = "$" + formatNumber(Bombs::H_COST);
     DrawText(hydrogenBombCostStr.c_str(), hydrogenButtonRect.x + 75, hydrogenButtonRect.y + 40, 15, WHITE);
 
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
@@ -351,61 +330,83 @@ void displayAndHandleBuildMenu() {
             currentMenuOption = MENU_OPTION_HYDROGEN_BOMB;
         }
     }
-    if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && currentMenuOption != MENU_OPTION_NONE) {
+    if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
         Pixel *mPixel = GetPixelOnMouse();
         switch (currentMenuOption) {
+            case MENU_OPTION_NONE: break;
             case MENU_OPTION_CITY:
-                MAIN_PLAYER.TryAddCity(mPixel);
+                MAIN_PLAYER.TryAddBuilding(CITY, mPixel);
                 break;
             case MENU_OPTION_SILO:
-                MAIN_PLAYER.TryAddSilo(mPixel);
+                MAIN_PLAYER.TryAddBuilding(SILO, mPixel);
                 break;
             case MENU_OPTION_ATOM_BOMB:
-                MAIN_PLAYER.TryLaunchAtomBomb(mPixel);
+                MAIN_PLAYER.TryLaunchBomb(mPixel, true);
                 break;
             case MENU_OPTION_HYDROGEN_BOMB:
-                MAIN_PLAYER.TryLaunchHydrogenBomb(mPixel);
+                MAIN_PLAYER.TryLaunchBomb(mPixel, false);
                 break;
         }
         currentMenuOption = MENU_OPTION_NONE;
     }
 
-    if (currentMenuOption != MENU_OPTION_NONE) {
-        // displaying the dragged object
-        const Texture2D *t = nullptr;
-        Color color{};
-        float yOffset = 0.f;
-        Pixel *mPixel = GetPixelOnMouse();
-        switch (currentMenuOption) {
-            case MENU_OPTION_CITY:
-                t = &TextureCollection::city;
-                color = MAIN_PLAYER.CanBuildCity(mPixel) ? Fade(GREEN, 0.5) : Fade(RED, 0.5);
-                break;
-            case MENU_OPTION_SILO:
-                t = &TextureCollection::silo;
-                color = MAIN_PLAYER.CanBuildSilo(mPixel) ? Fade(GREEN, 0.5) : Fade(RED, 0.5);
-                break;
-            case MENU_OPTION_ATOM_BOMB:
-                t = &TextureCollection::mapIcon;
-                yOffset = -t->height / 2.f * 2 * buildingRadius / t->width;
-                color = MAIN_PLAYER.CanLaunchAtomBomb(mPixel) ? GREEN : RED;
-                DrawCircleV(GetMousePosition(), camera.zoom * 50, Fade(color, 0.5));
-                break;
-            case MENU_OPTION_HYDROGEN_BOMB:
-                t = &TextureCollection::mapIcon;
-                color = MAIN_PLAYER.CanLaunchHydrogenBomb(mPixel) ? GREEN : RED;
-                yOffset = -t->height / 2.f * 2 * buildingRadius / t->width;
-                DrawCircleV(GetMousePosition(), camera.zoom * 350, Fade(color, 0.5));
-                break;
-        }
-        DrawTextureEx(
-            *t,
-            Vector2{GetMousePosition().x - buildingRadius, GetMousePosition().y - buildingRadius + yOffset},
-            0,
-            2 * buildingRadius / t->width,
-            color
-        );
+    // displaying the dragged object
+    switch (currentMenuOption) {
+        case MENU_OPTION_NONE: break;
+        case MENU_OPTION_CITY:
+            drawBuildingDrag(CITY);
+            break;
+        case MENU_OPTION_SILO:
+            drawBuildingDrag(SILO);
+            break;
+        case MENU_OPTION_ATOM_BOMB:
+            drawBombDrag(true);
+            break;
+        case MENU_OPTION_HYDROGEN_BOMB:
+            drawBombDrag(false);
+            break;
     }
+}
+
+void drawBuildingDrag(const BUILDING_TYPE type) {
+    const Texture2D &t = TextureCollection::GetBuildingTexture(type);
+    const float scale = 2 * buildingRadius / t.width;
+
+    Pixel *mPixel = G::GetPixelOnMouse();
+    const Vector2 pos = GetMousePosition();
+
+    const Color color = MAIN_PLAYER.CanBuildType(type, mPixel) ? Fade(GREEN, 0.5) : Fade(RED, 0.5);
+
+    DrawTextureEx(
+        t,
+        Vector2{GetMousePosition().x - buildingRadius, GetMousePosition().y - buildingRadius},
+        0,
+        scale,
+        color
+    );
+}
+
+void drawBombDrag(const bool isAtom) {
+    const Texture2D &t = TextureCollection::mapIcon;
+    const float offsetY = -t.height / t.width * buildingRadius;
+    const float radius = isAtom? Bombs::ATOM_RADIUS: Bombs::H_RADIUS;
+
+    Pixel *mPixel = G::GetPixelOnMouse();
+    const Vector2 pos = GetMousePosition();
+
+    const Color color = MAIN_PLAYER.CanLaunchBomb(mPixel, isAtom)? GREEN: RED;
+
+    // transparent 'aim circle'
+    DrawCircleV(GetMousePosition(), camera.zoom * radius, Fade(color, 0.5));
+
+    // 'google maps icon'
+    DrawTextureEx(
+            t,
+            Vector2{pos.x - buildingRadius, pos.y - buildingRadius + offsetY},
+            0,
+            2 * buildingRadius / t.width,
+            color
+    );
 }
 
 void displayTroopSlider() {

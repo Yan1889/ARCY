@@ -9,8 +9,11 @@
 #define MAIN_PLAYER_COLOR G::players[0]._color
 #include <string>
 
-#include "../map/ChunkGeneration.h"
 #include "raylib.h"
+
+#include "../Building.h"
+
+using namespace Buildings;
 
 enum MenuOption {
     MENU_OPTION_CITY,
@@ -37,6 +40,9 @@ void displayCrossHair();
 void displayAndHandleBuildMenu();
 void displayGameOver();
 void initDisplay();
+
+void drawBombDrag(bool isAtom);
+void drawBuildingDrag(BUILDING_TYPE type);
 
 std::string formatNumber(int number);
 

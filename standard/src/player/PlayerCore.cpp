@@ -96,18 +96,7 @@ void Player::GetOwnershipOfPixel(Pixel *newP) {
 
     if (newP->playerId >= 0) {
         const std::vector<Building> collectedBuildings = players[newP->playerId].LoseOwnershipOfPixel(newP, false);
-        for (const Building building: collectedBuildings) {
-            switch (building.type) {
-                case CITY:
-                    _cities.push_back(building.pos);
-                    break;
-                case SILO:
-                    _silos.push_back(building.pos);
-                    break;
-                case UNKNOWN:
-                    std::cerr << "Unknown Building" << std::endl;
-            }
-        }
+        _buildings.insert(_buildings.end(), collectedBuildings.begin(), collectedBuildings.end());
     } else if (newP->playerId == -2) {
         // reclaim contaminated pixel
         newP->contaminated = false;
@@ -142,22 +131,12 @@ std::vector<Building> Player::LoseOwnershipOfPixel(Pixel *pixel, const bool upda
     }
 
     std::vector<Building> buildingsLost{};
-    for (auto iter = _cities.begin(); iter != _cities.end();) {
-        const Pixel *c = *iter;
-        if (c == pixel) {
-            iter = _cities.erase(iter);
-            buildingsLost.push_back(Building{pixel, CITY});
+    for (auto it = _buildings.begin(); it != _buildings.end();) {
+        if (it->pos == pixel) {
+            it = _buildings.erase(it);
+            buildingsLost.emplace_back(pixel, CITY);
         } else {
-            ++iter;
-        }
-    }
-    for (auto iter = _silos.begin(); iter != _silos.end();) {
-        const Pixel *s = *iter;
-        if (s == pixel) {
-            iter = _silos.erase(iter);
-            buildingsLost.push_back(Building{pixel, SILO});
-        } else {
-            ++iter;
+            ++it;
         }
     }
     return buildingsLost;

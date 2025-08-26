@@ -20,8 +20,6 @@ std::vector<SingleBomb> Bombs::allBombs = {};
 std::vector<RadiationZone> Bombs::allZones = {};
 std::vector<VisualEffectAfterDetonation> Bombs::allEffects = {};
 
-int Bombs::atomBombCost = 100'000;
-int Bombs::hydrogenBombCost = 1'000'000;
 
 bool SingleBomb::operator==(const SingleBomb &other) const {
     return pos.x == other.pos.x && pos.y == other.pos.y;
@@ -92,8 +90,8 @@ void Bombs::Update() {
 
 void Bombs::RenderBomb() {
     for (SingleBomb &b: allBombs) {
-        Texture2D& t = b.type == ATOM? TextureCollection::atomBomb : TextureCollection::hydrogenBomb;
-        const float scale = b.type == ATOM? 0.2 : 0.5;
+        Texture2D& t = b.isAtom? TextureCollection::atomBomb : TextureCollection::hydrogenBomb;
+        const float scale = b.isAtom? 0.2 : 0.5;
 
         if (CheckCollisionCameraCircle(b.pos, t.height / 2, GetViewRectangle(camera))) continue;
 
@@ -237,7 +235,7 @@ void Bombs::checkSound(SingleBomb &bomb) {
     int b = playerPos.x - bomb.targetPos.x;
     int c = sqrt(a * a + b * b);
 
-    if (bomb.radius == 50) {
+    if (bomb.isAtom) {
         if (c >= 1000) {
             mySounds.Play(mySounds.distantExplosionPool);
         } else if (c >= 500) {

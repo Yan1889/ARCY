@@ -12,18 +12,14 @@
 
 using namespace G;
 
-enum BombType {
-    ATOM,
-    HYDROGEN
-};
 
 struct SingleBomb {
     Vector2 targetPos{};
     Vector2 originPos{};
     Vector2 pos{};
-    float radius{};
-    BombType type;
-    float speed{};
+    int radius{};
+    bool isAtom;
+    int speed{};
 
     float time{};
     bool operator==(const SingleBomb& other) const;
@@ -54,11 +50,14 @@ public:
     static void Update();
     static void RenderBomb();
     static void RenderFlash();
-    static int atomBombCost;
-    static int hydrogenBombCost;
-};
 
-extern Bombs activeBomb;
+    static constexpr int ATOM_COST = 100'000;
+    static constexpr int H_COST = 1'000'000;
+    static constexpr int ATOM_RADIUS = 50;
+    static constexpr int H_RADIUS = 350;
+    static constexpr int ATOM_SPEED = 15;
+    static constexpr int H_SPEED = 10;
+};
 
 
 

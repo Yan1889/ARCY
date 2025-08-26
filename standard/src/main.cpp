@@ -105,10 +105,12 @@ void handleControls() {
     if (IsKeyPressed(KEY_E)) showControls = !showControls;
 
     // Building shortcuts
-    if (IsKeyPressed(KEY_ONE) && buildMenuShown) MAIN_PLAYER.TryAddCity(GetPixelOnMouse());
-    if (IsKeyPressed(KEY_TWO) && buildMenuShown) MAIN_PLAYER.TryAddSilo(GetPixelOnMouse());
-    if (IsKeyPressed(KEY_THREE) && buildMenuShown) MAIN_PLAYER.TryLaunchAtomBomb(GetPixelOnMouse());
-    if (IsKeyPressed(KEY_FOUR) && buildMenuShown) MAIN_PLAYER.TryLaunchHydrogenBomb(GetPixelOnMouse());
+    if (buildMenuShown) {
+        if (IsKeyPressed(KEY_ONE)) MAIN_PLAYER.TryAddBuilding(CITY, GetPixelOnMouse());
+        if (IsKeyPressed(KEY_TWO)) MAIN_PLAYER.TryAddBuilding(SILO, GetPixelOnMouse());
+        if (IsKeyPressed(KEY_THREE)) MAIN_PLAYER.TryLaunchBomb(GetPixelOnMouse(), true);
+        if (IsKeyPressed(KEY_FOUR)) MAIN_PLAYER.TryLaunchBomb(GetPixelOnMouse(), false);
+    }
 
     int offset = 10;
     int borderOffset = ChunkGeneration::useFalloff ? 0 : (ChunkGeneration::chunkSize * 3);

@@ -15,6 +15,7 @@
 #include "../map/Pixel.h"
 #include "../Building.h"
 
+using namespace Buildings;
 
 struct Attack {
     int targetPlayerId;
@@ -42,10 +43,7 @@ public:
     float _troopPercentage = 0.80f;
 
     // buildings
-    std::vector<Pixel *> _cities{};
-    std::vector<Pixel *> _silos{};
-    int cityCost = 10'000;
-    int siloCost = 1'000'000;
+    std::vector<Building> _buildings{};
 
     // money
     float _cooldownTime = 1.0f;
@@ -93,16 +91,13 @@ public:
     void IncreaseMoney();
     void RemovePixelFromCenter(Pixel* newP);
     void AddPixelToCenter(Pixel* newP);
-    bool TryAddCity(Pixel* pos);
-    bool TryAddSilo(Pixel* pos);
-    bool CanBuildCity(Pixel* pos) const;
-    bool CanBuildSilo(Pixel* pos) const;
-    Pixel* GetNearestSiloFromPixel(Pixel* point) const;
+    bool TryAddBuilding(BUILDING_TYPE t, Pixel* pos);
+    bool CanBuildType(BUILDING_TYPE t, Pixel *pos);
+    std::vector<Building *> GetBuildingsOfType(BUILDING_TYPE t);
+    Pixel* GetNearestSiloFromPixel(Pixel* point);
 
-    bool CanLaunchAtomBomb(Pixel* pixel) const;
-    bool CanLaunchHydrogenBomb(Pixel* pixel) const;
-    void TryLaunchAtomBomb(Pixel *target);
-    void TryLaunchHydrogenBomb(Pixel *target);
+    bool CanLaunchBomb(Pixel* pixel, int cost);
+    void TryLaunchBomb(Pixel *target, bool isAtom);
 };
 
 

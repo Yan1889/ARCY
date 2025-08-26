@@ -4,6 +4,26 @@
 
 #include "TextureCollection.h"
 
+#include <iostream>
+#include <ostream>
+
+using namespace Buildings;
+
+Texture2D &TextureCollection::GetBuildingTexture(const BUILDING_TYPE t) {
+    switch (t) {
+        case CITY:
+            return city;
+        case SILO:
+            return silo;
+        case UNKNOWN:
+            std::cerr << "[Error] cannot get unknown type" << std::endl;
+    }
+
+    // to not get compiler warnings
+    return city;
+}
+
+
 void TextureCollection::LoadAll() {
     // Normal: "assets/images/..." Web: "..."
     city = LoadTexture("assets/images/city.png");

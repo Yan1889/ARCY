@@ -21,7 +21,7 @@ void Player::BotLogic() {
 void Player::BotLogic_Bombing() {
     Pixel *target = G::GetRandPixel();
     if (target->playerId >= 0) {
-        TryLaunchAtomBomb(target);
+        TryLaunchBomb(target, true);
     }
 }
 
@@ -29,11 +29,11 @@ void Player::BotLogic_Building() {
     Pixel *randomPixel = G::GetRandPixel();
     // add a random city with 1% chance
     if (rand() < RAND_MAX / 100) {
-        TryAddCity(randomPixel);
+        TryAddBuilding(CITY, randomPixel);
     }
     // add a random silo with 1% chance
     if (rand() < RAND_MAX / 100) {
-        TryAddSilo(randomPixel);
+        TryAddBuilding(SILO, randomPixel);
     }
 }
 
