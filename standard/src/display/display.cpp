@@ -152,6 +152,7 @@ void displayPlayers() {
     for (const Player &p: players) {
         for (const Building &b: p._buildings) {
             Texture2D &t = GetBuildingTexture(b.type);
+            const bool zoomedIn = G::maxZoomForDetailedBuildings < G::camera.zoom;
             Rectangle rect = {
                 b.pos->x - buildingRadius,
                 b.pos->y - buildingRadius,
@@ -164,7 +165,7 @@ void displayPlayers() {
                     Vector2{b.pos->x - buildingRadius, b.pos->y - buildingRadius},
                     0,
                     2 * buildingRadius / t.width,
-                    p._color
+                    zoomedIn ? WHITE : p._color
                 );
             }
         }
@@ -457,4 +458,5 @@ void initDisplay() {
         GetScreenHeight() * 0.1f
     };
 }
+
 
