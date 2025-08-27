@@ -96,7 +96,9 @@ void Player::GetOwnershipOfPixel(Pixel *newP) {
 
     if (newP->playerId >= 0) {
         const std::vector<Building> collectedBuildings = players[newP->playerId].LoseOwnershipOfPixel(newP, false);
-        _buildings.insert(_buildings.end(), collectedBuildings.begin(), collectedBuildings.end());
+        for (auto& b: collectedBuildings) {
+            AddBuilding(b);
+        }
     } else if (newP->playerId == -2) {
         // reclaim contaminated pixel
         newP->contaminated = false;

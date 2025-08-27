@@ -42,7 +42,7 @@ public:
     int _workers{};
     float _troopPercentage = 0.80f;
 
-    // buildings
+    // buildings (sorted by y coordinate)
     std::vector<Building> _buildings{};
 
     // money
@@ -90,6 +90,7 @@ public:
     void GrowPopulation();
     void IncreaseMoney();
     void RemovePixelFromCenter(Pixel* newP);
+    void AddBuilding(Building b);
     void AddPixelToCenter(Pixel* newP);
     bool TryAddBuilding(BUILDING_TYPE t, Pixel* pos);
     bool CanBuildType(BUILDING_TYPE t, Pixel *pos);

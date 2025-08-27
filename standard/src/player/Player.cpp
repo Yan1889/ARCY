@@ -110,7 +110,10 @@ bool Player::TryAddBuilding(BUILDING_TYPE t, Pixel *pos) {
 
     const int cost = GetCost(t) * (GetBuildingsOfType(t).size() + 1);
     _money.spendMoney(cost);
-    _buildings.emplace_back(pos, t);
+    AddBuilding(Building{
+        .pos = pos,
+        .type = t
+    });
 
     if (_id == 0) mySounds.Play(mySounds.cityBuildPool);
     return true;
@@ -172,6 +175,17 @@ Pixel *Player::GetNearestSiloFromPixel(Pixel *target) {
         }
     }
     return bestP;
+}
+
+void Player::AddBuilding(Building b) {
+    for (auto it = _buildings.begin(); it != _buildings.end(); ++it) {
+        if (it->pos->y > b.pos->y) {
+            // insert building before that
+            _buildings.insert(it, b);
+            return;
+        }
+    }
+    _buildings.push_back(b);
 }
 
 std::vector<Building *> Player::GetBuildingsOfType(const BUILDING_TYPE t) {
