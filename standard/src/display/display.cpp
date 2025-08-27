@@ -148,6 +148,21 @@ void displayInfoTexts() {
 void displayPlayers() {
     auto viewRect = GetViewRectangle(camera);
 
+
+    for (const Player &p: players) {
+        for (int i = 0; i < p._border_vec.size(); i++) {
+            Pixel *pixel = p._border_vec[i];
+            if (IsPixelVisible(pixel, viewRect)) DrawPixel(pixel->x, pixel->y, p._color);
+        }
+    }
+
+    // territory texture
+    if (territoryTextureDirty) {
+        UpdateTexture(territoryTexture, territoryImage.data);
+        territoryTextureDirty = false;
+    }
+    DrawTexture(territoryTexture, 0, 0, Fade(WHITE, 0.5));
+
     // display every building for each player
     for (const Player &p: players) {
         for (const Building &b: p._buildings) {
@@ -170,20 +185,6 @@ void displayPlayers() {
             }
         }
     }
-
-    for (const Player &p: players) {
-        for (int i = 0; i < p._border_vec.size(); i++) {
-            Pixel *pixel = p._border_vec[i];
-            if (IsPixelVisible(pixel, viewRect)) DrawPixel(pixel->x, pixel->y, p._color);
-        }
-    }
-
-    // territory texture
-    if (territoryTextureDirty) {
-        UpdateTexture(territoryTexture, territoryImage.data);
-        territoryTextureDirty = false;
-    }
-    DrawTexture(territoryTexture, 0, 0, Fade(WHITE, 0.5));
 }
 
 void displayPlayersInfo() {
