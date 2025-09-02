@@ -54,6 +54,7 @@ int main() {
     SetTargetFPS(10000);
 
     initCamAndMap();
+    ChunkGeneration::InitThread();
     if (ChunkGeneration::useFalloff) ChunkGeneration::InitFalloff();
 
     // don't remove: triggering the chunk generation before placing the players
@@ -72,6 +73,7 @@ int main() {
 
     // clean up everything
     TextureCollection::UnloadAll();
+    ChunkGeneration::ShutDownThread();
     UnloadImage(territoryImage);
 
     CloseWindow();

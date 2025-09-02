@@ -19,15 +19,21 @@ void ChunkGeneration::InitFalloff() {
     globalFalloff = PerlinNoise::GenerateFalloffMap(G::MAP_WIDTH, G::MAP_HEIGHT);
 }
 
-Chunk ChunkGeneration::GenerateChunk(int chunkX, int chunkY) {
-    // for testing only, safe to remove
-    static std::set<std::pair<int, int> > testSet{};
-    if (testSet.contains({chunkX, chunkY})) {
-        std::cerr << "[Error] Chunk already loaded!" << std::endl;
+void ChunkGeneration::ProcessFinishedChunks() {
+    std::lock_guard<std::mutex> lock(finishedMutex);
+
+    while (!finishedQueue.empty()) {
+        PendingChunk pc = finishedQueue.front();
+        finishedQueue.pop();
+
+        Texture2D tex = LoadTextureFromImage(pc.image);
+        UnloadImage(pc.image);
+
+        chunkMap[{pc.x, pc.y}] = Chunk{ pc.x, pc.y, tex };
     }
-    testSet.insert({chunkX, chunkY});
+}
 
-
+Image ChunkGeneration::GenerateChunkImage(int chunkX, int chunkY) {
     const int worldOffsetX = chunkX * chunkSize;
     const int worldOffsetY = chunkY * chunkSize;
 
@@ -37,9 +43,8 @@ Chunk ChunkGeneration::GenerateChunk(int chunkX, int chunkY) {
         6
     );
 
-    if (useFalloff)
-    {
-        std::vector<std::vector<float> > chunkFalloff(chunkSize, std::vector<float>(chunkSize));
+    if (useFalloff) {
+        std::vector<std::vector<float>> chunkFalloff(chunkSize, std::vector<float>(chunkSize));
         for (int y = 0; y < chunkSize; y++) {
             for (int x = 0; x < chunkSize; x++) {
                 const int wx = worldOffsetX + x;
@@ -47,9 +52,9 @@ Chunk ChunkGeneration::GenerateChunk(int chunkX, int chunkY) {
                 chunkFalloff[y][x] = globalFalloff[wy][wx];
             }
         }
-
         PerlinNoise::ApplyFalloffToImage(&perlinImage, chunkFalloff);
     }
+
     PerlinNoise::proceedMap(&perlinImage);
 
     // pixels
@@ -64,14 +69,7 @@ Chunk ChunkGeneration::GenerateChunk(int chunkX, int chunkY) {
         }
     }
 
-    const Texture2D perlinTexture = LoadTextureFromImage(perlinImage);
-    UnloadImage(perlinImage);
-
-    return Chunk{
-        .x = chunkX,
-        .y = chunkY,
-        .texture = perlinTexture,
-    };
+    return perlinImage;
 }
 
 std::vector<Chunk *> ChunkGeneration::GetVisibleChunks(const Camera2D &camera) {
@@ -106,13 +104,22 @@ std::vector<Chunk *> ChunkGeneration::GetVisibleChunks(const Camera2D &camera) {
         for (int x = minChunkX; x <= maxChunkX; x++) {
             auto key = std::make_pair(x, y);
 
-            auto it = chunkMap.find(key);
-            if (it == chunkMap.end()) {
-                Chunk c = GenerateChunk(x, y);
-                it = chunkMap.insert({key, c}).first;
+            {
+                std::lock_guard<std::mutex> lock(mapMutex);
+                auto it = chunkMap.find(key);
+                if (it != chunkMap.end()) {
+                    visibleChunks.push_back(&it->second);
+                    continue;
+                }
             }
 
-            visibleChunks.push_back(&it->second);
+            {
+                std::lock_guard<std::mutex> lock(jobMutex);
+                if (jobsSet.insert(key).second) {
+                    jobQueue.push(key);
+                    jobCv.notify_one();
+                }
+            }
         }
     }
 
