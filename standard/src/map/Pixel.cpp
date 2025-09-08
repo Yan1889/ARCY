@@ -17,7 +17,7 @@ void Pixel::Load(const Color &color) {
         loaded = true;
         this->kind = Terrain::GetKindFromColor(color);
     } else {
-        std::cerr << "already loaded pixel\n";
+        //std::cerr << "already loaded pixel\n"; GET OUT!!!
     }
 }
 
