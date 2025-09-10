@@ -42,7 +42,7 @@ void Bombs::Update() {
             Explode(b);
             allEffects.push_back({
                 .pos = b.pos,
-                .radius = b.radius,
+                .radius = static_cast<float>(b.radius),
             });
             allZones.push_back(RadiationZone{
                 .centerPos = PixelAt(b.pos),
