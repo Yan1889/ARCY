@@ -1,6 +1,5 @@
 # build folders
 cmake-build-debug/
-build*/
 _deps/
 CMakeFiles/
 
