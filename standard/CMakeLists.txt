@@ -65,49 +65,41 @@ add_executable(ARCY
         src/map/ChunkGeneration.h
 )
 
+# copy assets next to the build output
 file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
 
 set(CITY_IMAGE ${CMAKE_CURRENT_SOURCE_DIR}/src/images/city.png)
 
 target_link_libraries(ARCY PRIVATE raylib -fopenmp)
 
-# Native compiler flags for Release builds
+# Native compiler flags
 if (BUILD_PLATFORM STREQUAL "Native")
     if (CMAKE_BUILD_TYPE STREQUAL "Release")
-        target_compile_options(ARCY PRIVATE
-                -O3
-                -Wall
-                # -Wextra
-                -fopenmp
-        )
+        target_compile_options(ARCY PRIVATE -O3 -Wall -fopenmp)
 
-        # add omp
         find_package(OpenMP REQUIRED)
         if (OpenMP_CXX_FOUND)
             target_link_libraries(ARCY PRIVATE OpenMP::OpenMP_CXX)
         endif ()
     else ()
-        target_compile_options(ARCY PRIVATE
-                # -O3
-                -Wall
-                # -Wextra
-                # -fopenmp
-        )
+        target_compile_options(ARCY PRIVATE -Wall)
     endif ()
 endif ()
 
-# Web-specific options
+# -------- Web-specific options --------
 if (BUILD_PLATFORM STREQUAL "Web")
     set_target_properties(ARCY PROPERTIES SUFFIX ".html")
 
     target_link_options(ARCY PRIVATE
-            "-sUSE_GLFW=3"
-            "-sASYNCIFY"
-            "-sFULL_ES2=1"
-            "-sFORCE_FILESYSTEM=1"
-            "-sALLOW_MEMORY_GROWTH=1"
-            "-sASSERTIONS=1"
-            "--preload-file src/images"
+            -sUSE_GLFW=3
+            -sUSE_WEBGL2=1
+            -sASYNCIFY
+            -sFULL_ES2=1
+            -sFORCE_FILESYSTEM=1
+            -sALLOW_MEMORY_GROWTH=1
+            -sASSERTIONS=1
+            -sSAFE_HEAP=1
+            --preload-file assets@/assets
     )
 endif ()
 
@@ -127,6 +119,14 @@ endif ()
 #     emmake cmake --build build_web
 # 8. Done you have a lot of stuff but you only need the .html, .js and .wasm files
 # 9. Make a index.html and write the same stuff like in this project
+
+
+# Note from Yan:
+# First time: 'emcmake cmake -B build_web -G Ninja -DCMAKE_BUILD_TYPE=Release -DPLATFORM=Web'
+# Then every time:
+# 1. 'cmake --build build_web --clean-first'
+# 2. 'python3 -m http.server --directory build_web' and click on "ARCY.html" in the Browser
+
 
 # Backup of old CMAKE
 

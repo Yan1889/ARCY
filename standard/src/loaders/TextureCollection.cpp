@@ -6,7 +6,6 @@
 
 
 void TextureCollection::LoadAll() {
-    // Normal: "assets/images/..." Web: "..."
     city = LoadTexture("assets/images/city.png");
     silo = LoadTexture("assets/images/icbm.png");
     cityZoomed = LoadTexture("assets/images/city_zoomed.png");
