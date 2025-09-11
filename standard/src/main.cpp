@@ -1,5 +1,4 @@
 #include <cmath>
-#include <iostream>
 #include <cstring>
 #include <thread>
 #include <vector>
@@ -115,7 +114,7 @@ void handleControls() {
     }
 
     int offset = 10;
-    int borderOffset = ChunkGeneration::useFalloff ? 0 : (ChunkGeneration::chunkSize * 3);
+    int borderOffset = ChunkGeneration::useFalloff ? 0 : (ChunkGeneration::chunkSize * 30);
     if (playerPos.x > MAP_WIDTH - offset - borderOffset) playerPos.x = MAP_WIDTH - offset - borderOffset;
     else if (playerPos.x < 0 + borderOffset) playerPos.x = 0 + borderOffset;
 

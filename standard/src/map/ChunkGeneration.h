@@ -29,10 +29,10 @@ class ChunkGeneration {
     public:
         static std::map<std::pair<int, int>, Chunk> chunkMap;
 
-        static constexpr int chunkSize = 1028;
+        static constexpr int chunkSize = 100; // Default 1028
         static constexpr bool useFalloff = true;
-        static constexpr int chunkAmountX = useFalloff ? 4 : 10; // Default 4 : 10
-        static constexpr int chunkAmountY = useFalloff ? 4 : 10; // Default 4 : 10
+        static constexpr int chunkAmountX = useFalloff ? 50 : 75; // Default 4 : 10
+        static constexpr int chunkAmountY = useFalloff ? 50 : 75; // Default 4 : 10
 
         static void InitThread() {
             running = true;

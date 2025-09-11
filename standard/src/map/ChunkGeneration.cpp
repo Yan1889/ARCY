@@ -6,7 +6,6 @@
 #include "ChunkGeneration.h"
 
 #include <cmath>
-#include <iostream>
 #include <ostream>
 #include <set>
 
@@ -40,7 +39,7 @@ Image ChunkGeneration::GenerateChunkImage(int chunkX, int chunkY) {
     Image perlinImage = GenImagePerlinNoise(
         chunkSize, chunkSize,
         worldOffsetX, worldOffsetY,
-        6
+        1 // Default 6
     );
 
     if (useFalloff) {

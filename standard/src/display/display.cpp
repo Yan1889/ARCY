@@ -9,7 +9,6 @@
 
 #include "../loaders/TextureCollection.h"
 #include <format>
-#include <iostream>
 #include <ostream>
 #include <string>
 
@@ -31,7 +30,6 @@ constexpr float buildingRadius = 30;
 void displayGame() {
     ChunkGeneration::ProcessFinishedChunks();
     const std::vector<Chunk *> visibleChunks = ChunkGeneration::GetVisibleChunks(camera);
-    std::cout << ChunkGeneration::chunkMap.size() << std::endl;
 
     BeginDrawing();
     ClearBackground(Color{90, 90, 255, 255});
@@ -81,7 +79,7 @@ void displayControls() {
 
 void displayWorldBorder() {
     int offset = 10;
-    float borderOffset = ChunkGeneration::useFalloff ? 0 : (ChunkGeneration::chunkSize * 3);
+    float borderOffset = ChunkGeneration::useFalloff ? 0 : (ChunkGeneration::chunkSize * 30);
 
     float border = MAP_WIDTH - offset - borderOffset;
 
