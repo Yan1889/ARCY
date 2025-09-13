@@ -97,9 +97,20 @@ if (BUILD_PLATFORM STREQUAL "Web")
             -sFULL_ES2=1
             -sFORCE_FILESYSTEM=1
             -sALLOW_MEMORY_GROWTH=1
-            -sASSERTIONS=1
             -sSAFE_HEAP=1
             --preload-file assets@/assets
+
+            # debug stuff
+            -g4
+            -sASSERTIONS=2
+            -sSTACK_SIZE=1mb
+            -sDISABLE_EXCEPTION_CATCHING=0
+            -fexceptions
+
+            # thread stuff
+            -pthread
+            -sUSE_PTHREADS=1
+            -sPTHREAD_POOL_SIZE=4
     )
 endif ()
 
