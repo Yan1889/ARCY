@@ -8,7 +8,6 @@
 #include "player/Player.h"
 #include "Globals.h"
 #include "loaders/Sounds.h"
-#include "map/PerlinNoise.h"
 #include "Bombs.h"
 #include "display/display.h"
 #include "map/CameraClipping.h"
@@ -25,6 +24,8 @@ constexpr float zoomMax = 10.0f;
 
 constexpr int botCount = 20;
 constexpr int botSpawnRadius = 500;
+
+void mainLoop();
 
 void initCamAndMap();
 
@@ -53,7 +54,7 @@ int main() {
     SetTargetFPS(10000);
 
     initCamAndMap();
-    ChunkGeneration::InitThread();
+    // ChunkGeneration::InitThread();
     if (ChunkGeneration::useFalloff) ChunkGeneration::InitFalloff();
 
     // don't remove: triggering the chunk generation before placing the players
@@ -72,7 +73,7 @@ int main() {
 
     // clean up everything
     TextureCollection::UnloadAll();
-    ChunkGeneration::ShutDownThread();
+    // ChunkGeneration::ShutDownThread();
     UnloadImage(territoryImage);
 
     CloseWindow();

@@ -94,23 +94,22 @@ if (BUILD_PLATFORM STREQUAL "Web")
             -sUSE_GLFW=3
             -sUSE_WEBGL2=1
             -sASYNCIFY
-            -sFULL_ES2=1
+            # -sFULL_ES2=1 <----- ts was the problem!
             -sFORCE_FILESYSTEM=1
             -sALLOW_MEMORY_GROWTH=1
             -sSAFE_HEAP=1
             --preload-file assets@/assets
+            "-sEXPORTED_RUNTIME_METHODS=[\"HEAPF32\",\"HEAPU8\",\"cwrap\",\"ccall\"]"
 
             # debug stuff
             -g4
+            -gsource-map
             -sASSERTIONS=2
             -sSTACK_SIZE=1mb
             -sDISABLE_EXCEPTION_CATCHING=0
             -fexceptions
-
-            # thread stuff
-            -pthread
-            -sUSE_PTHREADS=1
-            -sPTHREAD_POOL_SIZE=4
+            -sGL_DEBUG=1
+            -g
     )
 endif ()
 

@@ -104,7 +104,7 @@ std::vector<Chunk *> ChunkGeneration::GetVisibleChunks(const Camera2D &camera) {
             auto key = std::make_pair(x, y);
 
             {
-                std::lock_guard<std::mutex> lock(mapMutex);
+                // std::lock_guard<std::mutex> lock(mapMutex);
                 auto it = chunkMap.find(key);
                 if (it != chunkMap.end()) {
                     visibleChunks.push_back(&it->second);
@@ -113,11 +113,18 @@ std::vector<Chunk *> ChunkGeneration::GetVisibleChunks(const Camera2D &camera) {
             }
 
             {
-                std::lock_guard<std::mutex> lock(jobMutex);
+                /* std::lock_guard<std::mutex> lock(jobMutex);
                 if (jobsSet.insert(key).second) {
                     jobQueue.push(key);
                     jobCv.notify_one();
-                }
+                } */
+
+                Image image = GenerateChunkImage(x, y);
+                Texture2D tex = LoadTextureFromImage(image);
+                UnloadImage(image);
+
+                chunkMap[{x, y}] = Chunk{ x, y, tex };
+                visibleChunks.push_back(&chunkMap[{x, y}]);
             }
         }
     }

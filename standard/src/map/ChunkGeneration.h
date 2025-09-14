@@ -34,6 +34,7 @@ class ChunkGeneration {
         static constexpr int chunkAmountX = useFalloff ? 50 : 75; // Default 4 : 10
         static constexpr int chunkAmountY = useFalloff ? 50 : 75; // Default 4 : 10
 
+    /*
         static void InitThread() {
             running = true;
             temuWorker = std::thread(WorkerLoop);
@@ -46,7 +47,7 @@ class ChunkGeneration {
             jobCv.notify_all();
             if (temuWorker.joinable()) temuWorker.join();
         }
-
+*/
         static void InitFalloff();
         static std::vector<Chunk*> GetVisibleChunks(const Camera2D& camera);
         static void DrawChunks(const std::vector<Chunk*>& chunks);
@@ -67,6 +68,7 @@ class ChunkGeneration {
         static void ProcessFinishedChunks();
         static Image GenerateChunkImage(int chunkX, int chunkY);
 
+    /*
         static void WorkerLoop() {
             while (true) {
                 std::pair<int,int> job;
@@ -89,6 +91,7 @@ class ChunkGeneration {
                 }
         }
     }
+    */
 };
 
 
