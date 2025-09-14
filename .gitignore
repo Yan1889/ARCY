@@ -1,10 +1,5 @@
 # build folders
 build*/
-cmake-build-debug/
-_deps/
-CMakeFiles/
 
 # profiling
 *perf
-
-*.sh
