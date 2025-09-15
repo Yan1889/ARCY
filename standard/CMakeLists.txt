@@ -3,7 +3,7 @@ project(ARCY)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_BUILD_TYPE Release) # Debug
+set(CMAKE_BUILD_TYPE Release) # <-------------------------------------------------------------- Important Release vs. Debug
 
 # Detect if we're using Emscripten
 if ("${CMAKE_CXX_COMPILER}" MATCHES "em\\+\\+")
@@ -90,27 +90,39 @@ endif ()
 if (BUILD_PLATFORM STREQUAL "Web")
     set_target_properties(ARCY PROPERTIES SUFFIX ".html")
 
-    target_link_options(ARCY PRIVATE
-            -sUSE_GLFW=3
-            -sUSE_WEBGL2=1
-            -sASYNCIFY
-            # -sFULL_ES2=1 <----- ts was the problem!
-            -sFORCE_FILESYSTEM=1
-            -sALLOW_MEMORY_GROWTH=1
-            -sSAFE_HEAP=1
-            --preload-file assets@/assets
-            "-sEXPORTED_RUNTIME_METHODS=[\"HEAPF32\",\"HEAPU8\",\"cwrap\",\"ccall\"]"
+    if (CMAKE_BUILD_TYPE STREQUAL "Release")
+        target_link_options(ARCY PRIVATE
+                -sUSE_GLFW=3
+                -sUSE_WEBGL2=1
+                -sASYNCIFY
+                -sFORCE_FILESYSTEM=1
+                -sALLOW_MEMORY_GROWTH=1
+                --preload-file assets@/assets
+                "-sEXPORTED_RUNTIME_METHODS=[\"HEAPF32\",\"HEAPU8\",\"cwrap\",\"ccall\"]"
+                -O3
+        )
+    else ()
+        target_link_options(ARCY PRIVATE
+                -sUSE_GLFW=3
+                -sUSE_WEBGL2=1
+                -sASYNCIFY
+                -sFORCE_FILESYSTEM=1
+                -sALLOW_MEMORY_GROWTH=1
+                -sSAFE_HEAP=1
+                --preload-file assets@/assets
+                "-sEXPORTED_RUNTIME_METHODS=[\"HEAPF32\",\"HEAPU8\",\"cwrap\",\"ccall\"]"
 
-            # debug stuff
-            -g4
-            -gsource-map
-            -sASSERTIONS=2
-            -sSTACK_SIZE=1mb
-            -sDISABLE_EXCEPTION_CATCHING=0
-            -fexceptions
-            -sGL_DEBUG=1
-            -g
-    )
+                # debug stuff
+                -gsource-map
+                -sASSERTIONS=2
+                -sSTACK_SIZE=1mb
+                -sDISABLE_EXCEPTION_CATCHING=0
+                -fexceptions
+                -sGL_DEBUG=1
+                -g
+                # -sFULL_ES2=1 <----- ts was the problem!
+        )
+    endif ()
 endif ()
 
 # How to build a game on web
