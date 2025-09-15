@@ -91,6 +91,7 @@ if (BUILD_PLATFORM STREQUAL "Web")
     set_target_properties(ARCY PROPERTIES SUFFIX ".html")
 
     if (CMAKE_BUILD_TYPE STREQUAL "Release")
+        message("Web build for Release")
         target_link_options(ARCY PRIVATE
                 -sUSE_GLFW=3
                 -sUSE_WEBGL2=1
@@ -100,8 +101,10 @@ if (BUILD_PLATFORM STREQUAL "Web")
                 --preload-file assets@/assets
                 "-sEXPORTED_RUNTIME_METHODS=[\"HEAPF32\",\"HEAPU8\",\"cwrap\",\"ccall\"]"
                 -O3
+                -flto
         )
     else ()
+        message("Web build for Debug")
         target_link_options(ARCY PRIVATE
                 -sUSE_GLFW=3
                 -sUSE_WEBGL2=1
